@@ -2,125 +2,121 @@
 
 declare(strict_types=1);
 
+$mapOffers = $mapOffers ?? [];
+$coverageLabel = $coverageLabel ?? 'Tu zona';
+
 ?>
-<section class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4">
-    <div class="max-w-6xl mx-auto grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
+<div class="flex flex-col h-screen max-h-[980px] bg-gray-50 overflow-hidden border-b border-gray-200 shadow-2xl">
+    <header class="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 shrink-0 flex justify-between items-center shadow-md z-20">
         <div>
-            <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
-                🗺️ OpenStreetMap en vivo
-            </span>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Encontrá ofertas activas cerca tuyo y abrí cada detalle desde el mapa.</h1>
-            <p class="text-lg text-red-100 mb-8 max-w-2xl">Los marcadores usan las mismas ofertas activas que ves en inicio, ofertas y negocios. Al pasar el mouse aparece la miniatura y al hacer clic se abre un panel completo con CTA directo a WhatsApp.</p>
-            <div class="flex flex-wrap gap-4">
-                <div class="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 min-w-40">
-                    <p class="text-sm text-red-100">Marcadores activos</p>
-                    <p class="text-3xl font-black"><?= count($mapOffers) ?></p>
-                </div>
-                <div class="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 min-w-40">
-                    <p class="text-sm text-red-100">Cobertura visible</p>
-                    <p class="text-3xl font-black"><?= htmlspecialchars($coverageLabel, ENT_QUOTES, 'UTF-8') ?></p>
-                </div>
-            </div>
+            <h1 class="font-black text-xl tracking-tight">OFERTAS CERCA</h1>
+            <p class="text-xs text-red-100 opacity-80"><?= count($mapOffers) ?> marcadores en <?= htmlspecialchars($coverageLabel, ENT_QUOTES, 'UTF-8') ?></p>
         </div>
-        <div class="bg-white text-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 class="text-xl font-bold mb-4">Interacciones disponibles</h2>
-            <ul class="space-y-4">
-                <li class="flex gap-3">
-                    <i data-lucide="mouse-pointer-click" class="text-red-500 w-5 h-5 mt-0.5"></i>
-                    <span>Click en marcador para abrir el detalle completo de la oferta.</span>
-                </li>
-                <li class="flex gap-3">
-                    <i data-lucide="image" class="text-blue-500 w-5 h-5 mt-0.5"></i>
-                    <span>Tooltip con miniatura, negocio y promoción para comparar rápido.</span>
-                </li>
-                <li class="flex gap-3">
-                    <i data-lucide="message-circle-more" class="text-green-500 w-5 h-5 mt-0.5"></i>
-                    <span>Acceso a WhatsApp desde el detalle del marcador.</span>
-                </li>
-            </ul>
+        <div class="flex gap-2">
+            <button type="button" id="map-center-user" class="hidden p-2 bg-white/20 rounded-full backdrop-blur-md hover:bg-white/30 transition" aria-label="Centrar en tu ubicación">
+                <i data-lucide="locate-fixed" class="w-5 h-5"></i>
+            </button>
+            <button type="button" id="map-use-my-location" class="p-2 bg-white/20 rounded-full backdrop-blur-md hover:bg-white/30 transition" aria-label="Usar mi ubicación">
+                <i data-lucide="navigation" class="w-5 h-5"></i>
+            </button>
         </div>
-    </div>
-</section>
+    </header>
 
-<section class="max-w-6xl mx-auto px-4 py-16">
-    <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <article class="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100">
-            <div class="p-6 md:p-8 border-b border-gray-100 space-y-5">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2">📍 Ofertas activas en el mapa</h2>
-                    <p class="text-gray-600">Desplazate, acercate y tocá cada punto para ver información completa del comercio y su promoción.</p>
+    <main class="flex-1 relative overflow-hidden p-3 md:p-4">
+        <div class="h-full grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
+            <article class="relative bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+                <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 bg-white/90 backdrop-blur-md relative z-30">
+                    <div class="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+                        <label for="map-location-search" class="sr-only">Buscar ubicación</label>
+                        <input
+                            id="map-location-search"
+                            type="search"
+                            placeholder="Buscar ubicación (ej: Palermo, CABA)"
+                            class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-300"
+                        >
+                        <button
+                            type="button"
+                            id="map-location-search-button"
+                            class="rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2.5 text-sm transition"
+                        >
+                            Buscar ubicación
+                        </button>
+                        <a href="/ofertas" class="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2.5 text-sm transition text-center">
+                            Ver grilla
+                        </a>
+                    </div>
+                    <p id="map-location-feedback" class="min-h-5 mt-2 text-xs text-gray-500"></p>
                 </div>
-                <div class="grid gap-3 md:grid-cols-[1fr_auto_auto]">
-                    <label for="map-location-search" class="sr-only">Buscar ubicación</label>
-                    <input
-                        id="map-location-search"
-                        type="search"
-                        placeholder="Buscar ubicación (ej: Palermo, CABA)"
-                        class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-300"
-                    >
-                    <button
-                        type="button"
-                        id="map-location-search-button"
-                        class="rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-3 text-sm transition"
-                    >
-                        Buscar ubicación
-                    </button>
-                    <button
-                        type="button"
-                        id="map-use-my-location"
-                        class="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-3 text-sm transition"
-                    >
-                        Usar mi ubicación
-                    </button>
-                </div>
-                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                    <button
-                        type="button"
-                        id="map-center-user"
-                        class="hidden inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 font-semibold hover:bg-red-100 transition"
-                    >
-                        <i data-lucide="locate-fixed" class="w-4 h-4"></i>
-                        Centrar en tu ubicación
-                    </button>
-                    <p id="map-location-feedback" class="min-h-6"></p>
-                </div>
-            </div>
-            <div id="offers-map" class="h-[28rem] w-full bg-gray-200"></div>
-        </article>
 
-        <aside class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 md:p-8">
-            <div class="flex items-center justify-between gap-3 mb-6">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.22em] text-red-500 font-semibold mb-2">Resumen rápido</p>
-                    <h2 class="text-2xl font-bold text-gray-900">Negocios visibles</h2>
+                <div class="relative h-[55vh] md:h-[70vh]">
+                    <div id="offers-map" class="absolute inset-0 bg-gray-200"></div>
+
+                    <div class="hidden md:block absolute bottom-5 left-5 max-w-sm bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-white/20 z-20">
+                        <div class="flex gap-3 items-center">
+                            <div class="bg-red-100 p-2 rounded-xl text-red-600">
+                                <i data-lucide="mouse-pointer-click" class="w-5 h-5"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700">Tocá los marcadores para ver detalles y contactar por WhatsApp.</p>
+                        </div>
+                    </div>
                 </div>
-                <a href="/ofertas" class="text-sm font-semibold text-red-600 hover:text-red-700 transition">Ver grilla</a>
-            </div>
-            <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-1" id="map-offers-list">
-                <?php foreach ($mapOffers as $offer) : ?>
-                    <button
-                        type="button"
-                        data-map-offer-trigger="<?= (int) $offer['id'] ?>"
-                        data-offer-lat="<?= htmlspecialchars((string) $offer['lat'], ENT_QUOTES, 'UTF-8') ?>"
-                        data-offer-lon="<?= htmlspecialchars((string) $offer['lon'], ENT_QUOTES, 'UTF-8') ?>"
-                        class="w-full text-left border border-gray-100 rounded-2xl p-4 hover:border-red-200 hover:bg-red-50/40 transition"
-                    >
-                        <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2"><?= htmlspecialchars($offer['category'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <h3 class="font-bold text-gray-900 mb-1"><?= htmlspecialchars($offer['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                        <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
-                            <p class="text-red-600 font-semibold"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <span data-offer-distance-badge class="hidden text-xs font-semibold rounded-full bg-red-50 text-red-700 px-2.5 py-1 whitespace-nowrap"></span>
+            </article>
+
+            <aside class="w-full bg-white border border-gray-200 rounded-3xl shadow-xl flex flex-col overflow-hidden">
+                <div class="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3"></div>
+
+                <div class="px-5 py-4 flex items-center justify-between border-b border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800">Negocios Activos</h2>
+                    <span class="text-xs font-bold text-red-600 uppercase tracking-widest"><?= count($mapOffers) ?> visibles</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto px-4 pb-6 pt-4 space-y-3 custom-scrollbar" id="map-offers-list">
+                    <?php if (empty($mapOffers)): ?>
+                        <div class="py-10 text-center">
+                            <i data-lucide="map-pin-off" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+                            <p class="text-gray-500">No hay ofertas en esta zona</p>
                         </div>
-                        <div class="space-y-2 text-sm text-gray-500">
-                            <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i><?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><?= htmlspecialchars($offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
-                        </div>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-        </aside>
-    </div>
-</section>
+                    <?php endif; ?>
+
+                    <?php foreach ($mapOffers as $offer) : ?>
+                        <button
+                            type="button"
+                            data-map-offer-trigger="<?= (int) $offer['id'] ?>"
+                            data-offer-lat="<?= htmlspecialchars((string) $offer['lat'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-offer-lon="<?= htmlspecialchars((string) $offer['lon'], ENT_QUOTES, 'UTF-8') ?>"
+                            class="group w-full text-left bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:border-red-500 hover:shadow-md transition-all duration-300"
+                        >
+                            <div class="flex justify-between items-start mb-2 gap-2">
+                                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-tighter"><?= htmlspecialchars($offer['category'], ENT_QUOTES, 'UTF-8') ?></span>
+                                <div class="flex items-center gap-1.5">
+                                    <span data-offer-distance-badge class="hidden text-[10px] font-semibold rounded-full bg-red-50 text-red-700 px-2 py-0.5 whitespace-nowrap"></span>
+                                    <span class="bg-red-50 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold italic">¡OFERTA!</span>
+                                </div>
+                            </div>
+                            <h3 class="font-extrabold text-gray-900 group-hover:text-red-700 transition-colors uppercase leading-tight mb-1"><?= htmlspecialchars($offer['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
+                            <p class="text-red-600 font-bold text-lg leading-snug mb-3"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></p>
+
+                            <div class="space-y-2 text-xs text-gray-500 pt-2 border-t border-gray-50">
+                                <p class="flex items-center gap-1.5">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i>
+                                    <span class="truncate"><?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </p>
+                                <p class="flex items-center gap-1.5">
+                                    <i data-lucide="clock-3" class="w-3.5 h-3.5 text-yellow-500"></i>
+                                    <span><?= htmlspecialchars($offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </p>
+                                <p class="flex items-center gap-1.5 text-orange-600 font-semibold" data-map-countdown data-expiration="<?= htmlspecialchars($offer['expires_at'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <i data-lucide="timer-reset" class="w-3.5 h-3.5"></i>
+                                    <span>Restan --:--:--</span>
+                                </p>
+                            </div>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
 
 <div id="map-offer-modal" class="hidden fixed inset-0 z-[60] bg-gray-950/70 backdrop-blur-sm px-4 py-6 md:p-8">
     <div class="max-w-2xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl">
@@ -163,3 +159,24 @@ declare(strict_types=1);
         </div>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+        #map-offers-list {
+            max-height: 45vh;
+        }
+    }
+</style>
