@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $isPublicRoute = in_array($currentRoute ?? '', ['inicio', 'ofertas', 'negocios', 'mapa'], true);
+$isAdminRoute = ($currentRoute ?? '') === 'admin';
 $pageDataJson = isset($pageData)
     ? json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
     : null;
@@ -37,17 +38,17 @@ $flash = $flash ?? [];
         .leaflet-popup-content-wrapper { border-radius: 1rem; }
         .leaflet-container { font-family: inherit; }
         <?php if (!$isPublicRoute) : ?>
-        body { background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #01030b 100%); }
+        body { background: <?= $isAdminRoute ? "'radial-gradient(circle at top, #fff5f5 0%, #ffffff 65%, #ffe4e6 100%)'" : "'radial-gradient(circle at top, #0f172a 0%, #020617 55%, #01030b 100%)'" ?>; }
         .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(18px); border: 1px solid rgba(148, 163, 184, 0.18); }
         .neon-ring { box-shadow: 0 0 24px rgba(59, 130, 246, 0.18); }
         .chip { border: 1px solid rgba(96, 165, 250, 0.25); background: rgba(30, 41, 59, 0.7); }
         <?php endif; ?>
     </style>
 </head>
-<body class="<?= $isPublicRoute ? 'min-h-screen bg-gray-50 font-sans text-gray-800' : 'text-slate-100 min-h-screen' ?>">
+<body class="<?= $isPublicRoute ? 'min-h-screen bg-gray-50 font-sans text-gray-800' : ($isAdminRoute ? 'min-h-screen text-gray-800' : 'text-slate-100 min-h-screen') ?>">
     <?php include __DIR__ . '/partials/header.php'; ?>
 
-    <main class="<?= $isPublicRoute ? 'pb-28 md:pb-16' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10' ?>">
+    <main class="<?= $isPublicRoute ? 'pb-28 md:pb-16' : ($isAdminRoute ? 'max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-28' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10') ?>">
         <?php if (($flash['success'] ?? null) !== null || ($flash['error'] ?? null) !== null) : ?>
             <section class="<?= $isPublicRoute ? 'max-w-6xl mx-auto px-4 pt-6' : 'mb-6' ?>">
                 <?php if (($flash['success'] ?? null) !== null) : ?>

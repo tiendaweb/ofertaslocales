@@ -53,15 +53,15 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
         </div>
     </nav>
 <?php else : ?>
-    <header class="border-b border-white/10 bg-slate-950/70 backdrop-blur sticky top-0 z-20">
+    <header class="sticky top-0 z-20 border-b <?= $isAdminRoute ? 'border-red-100 bg-white/95' : 'border-white/10 bg-slate-950/70' ?> backdrop-blur">
         <div class="max-w-6xl mx-auto px-4 py-4 md:px-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div class="flex items-center gap-3">
-                <div class="h-11 w-11 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center neon-ring">
-                    <i data-lucide="sparkles" class="w-5 h-5 text-blue-300"></i>
+                <div class="h-11 w-11 rounded-2xl <?= $isAdminRoute ? 'bg-red-50 border border-red-200' : 'bg-blue-500/15 border border-blue-400/20 neon-ring' ?> flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-5 h-5 <?= $isAdminRoute ? 'text-red-500' : 'text-blue-300' ?>"></i>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-[0.32em] text-blue-300">OfertasCerca</p>
-                    <h1 class="text-lg md:text-xl font-semibold text-white">
+                    <p class="text-xs uppercase tracking-[0.32em] <?= $isAdminRoute ? 'text-red-500' : 'text-blue-300' ?>">OfertasCerca</p>
+                    <h1 class="text-lg md:text-xl font-semibold <?= $isAdminRoute ? 'text-gray-900' : 'text-white' ?>">
                         <?= $currentUser !== null && ($currentUser['role'] ?? '') === 'admin'
                             ? 'Centro de control administrativo'
                             : 'Directorio público y panel privado en Slim 4' ?>
@@ -94,19 +94,19 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
                     </nav>
                 <?php endif; ?>
                 <?php if ($currentUser !== null) : ?>
-                    <div class="flex items-center gap-3 text-sm text-slate-300">
+                    <div class="flex items-center gap-3 text-sm <?= $isAdminRoute ? 'text-gray-600' : 'text-slate-300' ?>">
                         <?php if ($isImpersonating) : ?>
                             <form action="/impersonation/stop" method="post">
-                                <button type="submit" class="rounded-full border border-amber-400/30 bg-amber-500/20 px-4 py-2 text-amber-200 hover:bg-amber-500/30 transition">
+                                <button type="submit" class="rounded-full border <?= $isAdminRoute ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100' : 'border-amber-400/30 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30' ?> px-4 py-2 transition">
                                     Volver a admin
                                 </button>
                             </form>
                         <?php endif; ?>
                         <span>
-                            Sesión: <strong class="text-white"><?= htmlspecialchars((string) ($currentUser['business_name'] ?? $currentUser['email']), ENT_QUOTES, 'UTF-8') ?></strong>
+                            Sesión: <strong class="<?= $isAdminRoute ? 'text-gray-900' : 'text-white' ?>"><?= htmlspecialchars((string) ($currentUser['business_name'] ?? $currentUser['email']), ENT_QUOTES, 'UTF-8') ?></strong>
                         </span>
                         <form action="/logout" method="post">
-                            <button type="submit" class="rounded-full border border-white/10 px-4 py-2 text-slate-200 hover:bg-slate-800 transition">
+                            <button type="submit" class="rounded-full border px-4 py-2 transition <?= $isAdminRoute ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-white/10 text-slate-200 hover:bg-slate-800' ?>">
                                 Cerrar sesión
                             </button>
                         </form>

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $isPublicRoute = in_array($currentRoute ?? '', ['inicio', 'ofertas', 'negocios', 'mapa'], true);
+$isAdminRoute = ($currentRoute ?? '') === 'admin';
 ?>
 <?php if ($isPublicRoute) : ?>
     <footer class="bg-gray-950 text-gray-400 py-12 text-center border-t border-gray-800">
@@ -33,8 +34,8 @@ $isPublicRoute = in_array($currentRoute ?? '', ['inicio', 'ofertas', 'negocios',
         <i data-lucide="message-circle" class="w-7 h-7"></i>
     </a>
 <?php else : ?>
-    <footer class="border-t border-white/10 mt-10">
-        <div class="max-w-6xl mx-auto px-4 py-6 md:px-6 text-sm text-slate-400 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <footer class="mt-10 border-t <?= $isAdminRoute ? 'border-red-100 bg-white/70' : 'border-white/10' ?>">
+        <div class="max-w-6xl mx-auto px-4 py-6 md:px-6 text-sm flex flex-col gap-2 md:flex-row md:items-center md:justify-between <?= $isAdminRoute ? 'text-gray-600' : 'text-slate-400' ?>">
             <p>Base pública y privada inicial para OfertasCerca. Todo el contenido visible está en español.</p>
             <p>© <?= htmlspecialchars((string) $currentYear, ENT_QUOTES, 'UTF-8') ?> · Slim 4 + SQLite + Tailwind CSS</p>
         </div>
