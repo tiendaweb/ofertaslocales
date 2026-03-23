@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ofertas Cerca | Ahorra hoy</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Ocultar scrollbar para el filtro de categorías manteniendo la funcionalidad */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 font-sans text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-2 text-red-600 font-bold text-xl tracking-tight">
+      <i data-lucide="map-pin" class="w-6 h-6"></i>
+      <span>OfertasCerca</span>
+    </div>
+    <a href="#publicar" class="hidden sm:inline-flex bg-red-50 text-red-600 px-4 py-2 rounded-full font-semibold text-sm hover:bg-red-100 transition">
+      Publicar Gratis
+    </a>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4 text-center">
+    <div class="max-w-3xl mx-auto">
+      <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
+        📍 Descubrí tu zona
+      </span>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
+        Ofertas cerca tuyo que te hacen <span class="text-yellow-300">ahorrar HOY</span>
+      </h1>
+      <p class="text-lg md:text-xl text-red-100 mb-8 max-w-2xl mx-auto font-light">
+        Encontrá descuentos reales, contactá directo al vendedor por WhatsApp y asegurá tu precio antes de que el reloj llegue a cero.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="#ofertas" class="bg-yellow-400 text-yellow-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow-lg flex items-center justify-center gap-2">
+          <i data-lucide="search" class="w-5 h-5"></i>
+          Ver descuentos ahora
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Section -->
+  <div class="max-w-6xl mx-auto px-4 -mt-10 relative z-10">
+    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 flex flex-col md:flex-row justify-around gap-6 text-center border border-gray-100">
+      <div class="flex flex-col items-center">
+        <div class="bg-red-50 p-3 rounded-full text-red-500 mb-3">
+          <i data-lucide="tag" class="w-7 h-7"></i>
+        </div>
+        <div class="text-3xl font-black text-gray-800">+50</div>
+        <div class="text-sm text-gray-500 font-medium">Ofertas activas hoy</div>
+      </div>
+      <div class="hidden md:block w-px bg-gray-100"></div>
+      <div class="flex flex-col items-center">
+        <div class="bg-green-50 p-3 rounded-full text-green-500 mb-3">
+          <i data-lucide="message-circle" class="w-7 h-7"></i>
+        </div>
+        <div class="text-3xl font-black text-gray-800">+200</div>
+        <div class="text-sm text-gray-500 font-medium">Consultas en 24hs</div>
+      </div>
+      <div class="hidden md:block w-px bg-gray-100"></div>
+      <div class="flex flex-col items-center">
+        <div class="bg-blue-50 p-3 rounded-full text-blue-500 mb-3">
+          <i data-lucide="store" class="w-7 h-7"></i>
+        </div>
+        <div class="text-3xl font-black text-gray-800">+30</div>
+        <div class="text-sm text-gray-500 font-medium">Negocios asociados</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 py-16">
+    
+    <!-- How it Works -->
+    <section class="mb-16 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold mb-8">¿Cómo funciona?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-gray-900 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+          <h3 class="font-bold text-lg mb-2">Buscás</h3>
+          <p class="text-gray-600 text-sm">Explorá el mapa o la lista de ofertas disponibles cerca de tu ubicación actual.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+          <h3 class="font-bold text-lg mb-2">Elegís</h3>
+          <p class="text-gray-600 text-sm">Apurate, las ofertas tienen un tiempo límite de 24 horas y desaparecen.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+          <h3 class="font-bold text-lg mb-2">Contactás</h3>
+          <p class="text-gray-600 text-sm">A un clic de distancia, escribile directo al dueño del negocio por WhatsApp.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Offers Section -->
+    <section id="ofertas" class="mb-16">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <h2 class="text-2xl md:text-3xl font-bold flex items-center gap-2">
+          <i data-lucide="zap" class="text-yellow-500 w-6 h-6"></i> 
+          Ofertas de Hoy
+        </h2>
+        
+        <!-- Category Filter -->
+        <div id="category-filters" class="flex overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar gap-2">
+          <!-- Categorías generadas por JS -->
+        </div>
+      </div>
+
+      <!-- Offers Grid -->
+      <div id="offers-container">
+        <!-- Ofertas generadas por JS -->
+      </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="mb-16">
+      <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100">
+        <div class="p-6 md:p-8 md:w-2/3">
+          <h2 class="text-2xl md:text-3xl font-bold mb-2">📍 Ofertas activas en el mapa</h2>
+          <p class="text-gray-600 mb-6">Encontrá los negocios que están listos para atenderte ahora mismo a pocas cuadras de tu ubicación.</p>
+        </div>
+        <div class="h-80 w-full bg-gray-200">
+          <iframe 
+            title="Mapa de ofertas"
+            src="https://www.google.com/maps?q=-34.636,-58.536&z=14&output=embed" 
+            class="w-full h-full border-0" 
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Section -->
+    <section id="publicar" class="mb-10">
+      <div class="bg-gray-900 text-white rounded-3xl overflow-hidden shadow-2xl relative">
+        <!-- Background decoration -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-red-600/20 blur-3xl pointer-events-none"></div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+          <div class="p-8 md:p-12 flex flex-col justify-center">
+            <div class="inline-block bg-red-600/20 text-red-400 font-semibold px-3 py-1 rounded-full text-sm w-max mb-6">
+              Para Comerciantes
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+              Conseguí más clientes <span class="text-yellow-400">hoy mismo</span>
+            </h2>
+            <p class="text-gray-300 text-lg mb-8">
+              Publicá tu oferta GRATIS. Llega a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.
+            </p>
+            
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5"></i>
+                <span class="text-gray-200">Publicación 100% gratuita por tiempo limitado.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5"></i>
+                <span class="text-gray-200">Contacto directo sin intermediarios ni comisiones.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5"></i>
+                <span class="text-gray-200">Se elimina sola en 24hs (genera urgencia real).</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Form Box -->
+          <div class="bg-white text-gray-800 p-6 md:p-8 m-4 md:m-8 rounded-2xl">
+            <h3 class="text-xl font-bold mb-6">Crear nueva oferta</h3>
+            
+            <form id="offerForm" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del negocio</label>
+                  <input 
+                    required
+                    type="text" 
+                    id="inputBusiness"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" 
+                    placeholder="Ej: Ferretería Juan" 
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                  <select 
+                    id="inputCategory"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
+                  >
+                    <!-- Opciones generadas por JS -->
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
+                  <span>¿Qué ofreces? (La oferta estrella)</span>
+                  <span id="charCount" class="text-xs text-gray-500">0/40</span>
+                </label>
+                <input 
+                  required
+                  type="text" 
+                  id="inputOffer"
+                  maxlength="40"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-red-600 font-medium" 
+                  placeholder="Ej: 2x1 en Pinturas Alba hoy" 
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Barrio/Ciudad)</label>
+                  <input 
+                    required
+                    type="text" 
+                    id="inputLocation"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" 
+                    placeholder="Ej: Ciudadela" 
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Número de WhatsApp</label>
+                  <input 
+                    required
+                    type="tel" 
+                    id="inputWhatsapp"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" 
+                    placeholder="54911..." 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto atractiva (Atrae 3x más clicks)</label>
+                
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative cursor-pointer">
+                  <input 
+                    type="file" 
+                    id="inputImage"
+                    accept="image/*" 
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                  />
+                  
+                  <div id="imagePreviewContainer" class="hidden h-32 w-full rounded-lg overflow-hidden">
+                    <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover" />
+                  </div>
+                  
+                  <div id="imagePlaceholder" class="flex flex-col items-center justify-center py-4">
+                    <i data-lucide="camera" class="text-gray-400 mb-2 w-8 h-8"></i>
+                    <span class="text-sm font-medium text-gray-600">Toca para subir foto</span>
+                    <span class="text-xs text-gray-400 mt-1">PNG, JPG hasta 5MB</span>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                id="submitBtn"
+                class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md flex justify-center items-center gap-2 mt-4"
+              >
+                <div id="submitSpinner" class="hidden animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <span id="submitText">🔥 Publicar mi oferta gratis por 24hs</span>
+              </button>
+              <p class="text-center text-xs text-gray-500 mt-3">
+                Al publicar aceptas nuestros términos y condiciones.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-950 text-gray-400 py-12 text-center border-t border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-2 text-white font-bold text-xl">
+        <i data-lucide="map-pin" class="text-red-500 w-6 h-6"></i>
+        <span>OfertasCerca</span>
+      </div>
+      <div class="text-sm">
+        <p>© 2026 Ofertas Cerca | Generador de clientes locales</p>
+        <p class="mt-1">Hecho con ❤️ para potenciar negocios de barrio.</p>
+      </div>
+      <div class="flex gap-4">
+        <a href="#" class="hover:text-white transition">Términos</a>
+        <a href="#" class="hover:text-white transition">Privacidad</a>
+        <a href="#" class="hover:text-white transition">Soporte</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp -->
+  <a 
+    href="https://wa.me/5491112345678?text=Hola,%20tengo%20una%20consulta%20sobre%20OfertasCerca" 
+    target="_blank"
+    rel="noreferrer"
+    class="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center"
+    aria-label="Contactar soporte"
+  >
+    <i data-lucide="message-circle" class="w-7 h-7"></i>
+  </a>
+
+  <!-- LOGICA Y DATOS EN JAVASCRIPT -->
+  <script>
+    // --- DATA JSON ESCALABLE ---
+    let offers = [
+      {
+        id: 1,
+        business: "Ferretería López",
+        category: "Ferretería",
+        offer: "20% OFF en herramientas manuales",
+        timeLeft: 86400, // 24 horas en segundos
+        image: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        whatsapp: "5491112345678",
+        tag: "🔥 MÁS VENDIDO",
+        location: "Ciudadela, Centro"
+      },
+      {
+        id: 2,
+        business: "Panadería Central",
+        category: "Alimentos",
+        offer: "2x1 en Medialunas de manteca",
+        timeLeft: 14400, // 4 horas
+        image: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        whatsapp: "5491112345678",
+        tag: "⏳ ÚLTIMAS HORAS",
+        location: "Ramos Mejía"
+      },
+      {
+        id: 3,
+        business: "Pizzería Don Carlos",
+        category: "Gastronomía",
+        offer: "Muzzarella gigante + Bebida 30% OFF",
+        timeLeft: 43200, // 12 horas
+        image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        whatsapp: "5491112345678",
+        tag: "🍕 IDEAL CENA",
+        location: "Caseros"
+      },
+      {
+        id: 4,
+        business: "Peluquería Style",
+        category: "Estética",
+        offer: "Corte + Lavado con 40% de descuento",
+        timeLeft: 72000, 
+        image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        whatsapp: "5491112345678",
+        tag: "✂️ NUEVO",
+        location: "Haedo"
+      }
+    ];
+
+    const categories = ["Todas", "Gastronomía", "Alimentos", "Ferretería", "Estética", "Servicios"];
+    let activeCategory = "Todas";
+    let currentPreviewBase64 = null;
+
+    // Inicializar iconos de Lucide
+    lucide.createIcons();
+
+    // Renderizar Filtros
+    function renderCategories() {
+      const container = document.getElementById('category-filters');
+      container.innerHTML = categories.map(cat => `
+        <button 
+          onclick="setCategory('${cat}')"
+          class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeCategory === cat 
+              ? 'bg-gray-900 text-white' 
+              : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
+
+      // Llenar el select del formulario
+      const select = document.getElementById('inputCategory');
+      if (select.children.length === 0) {
+        select.innerHTML = categories
+          .filter(c => c !== "Todas")
+          .map(cat => `<option value="${cat}">${cat}</option>`)
+          .join('');
+      }
+    }
+
+    // Cambiar Categoría
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderCategories(); // Actualizar estilos visuales de botones
+      renderOffers(); // Re-renderizar tarjetas
+    }
+
+    // Formatear tiempo
+    function formatTime(seconds) {
+      if (seconds <= 0) return "Finalizado";
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // Renderizar Tarjetas de Ofertas
+    function renderOffers() {
+      const container = document.getElementById('offers-container');
+      const filteredOffers = activeCategory === "Todas" 
+        ? offers 
+        : offers.filter(o => o.category === activeCategory);
+
+      if (filteredOffers.length > 0) {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            ${filteredOffers.map(item => `
+              <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+                <div class="relative h-48 overflow-hidden bg-gray-200">
+                  <img src="${item.image}" alt="${item.business}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                  <div class="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
+                    ${item.tag}
+                  </div>
+                  <div class="absolute top-3 right-3 bg-white/90 backdrop-blur text-gray-800 text-xs font-medium px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
+                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location}
+                  </div>
+                </div>
+                
+                <div class="p-5 flex-grow flex flex-col">
+                  <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">${item.category}</div>
+                  <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-1">${item.business}</h3>
+                  <p class="text-red-600 font-bold text-xl mb-4 leading-tight">${item.offer}</p>
+                  
+                  <div class="mt-auto">
+                    <div class="flex items-center gap-2 mb-4 bg-red-50 p-2.5 rounded-lg border border-red-100">
+                      <i data-lucide="clock" class="text-red-500 w-[18px] h-[18px]"></i>
+                      <span class="text-sm font-medium text-gray-700">Termina en:</span>
+                      <span id="time-${item.id}" class="text-red-600 font-bold ml-auto tabular-nums">
+                        ${formatTime(item.timeLeft)}
+                      </span>
+                    </div>
+                    
+                    <a 
+                      href="https://wa.me/${item.whatsapp}?text=Hola! Vi su oferta de '${item.offer}' en OfertasCerca. Sigue disponible?"
+                      target="_blank" 
+                      class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm"
+                    >
+                      <i data-lucide="message-circle" class="w-5 h-5"></i>
+                      Quiero esta oferta
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+            <i data-lucide="store" class="w-12 h-12 mx-auto text-gray-300 mb-4"></i>
+            <h3 class="text-lg font-bold text-gray-700">No hay ofertas en esta categoría</h3>
+            <p class="text-gray-500 mt-2">Prueba seleccionando otra categoría o publica la primera oferta.</p>
+            <button onclick="setCategory('Todas')" class="mt-4 text-red-600 font-medium hover:underline">
+              Ver todas las ofertas
+            </button>
+          </div>
+        `;
+      }
+      
+      // Reinicializar iconos para los nuevos elementos del DOM
+      lucide.createIcons();
+    }
+
+    // Timer Global
+    setInterval(() => {
+      offers = offers.map(offer => ({
+        ...offer,
+        timeLeft: offer.timeLeft > 0 ? offer.timeLeft - 1 : 0
+      }));
+      
+      // Actualizamos directo el DOM para mayor performance sin redibujar toda la grilla
+      offers.forEach(offer => {
+        const timeEl = document.getElementById(`time-${offer.id}`);
+        if (timeEl) {
+          timeEl.innerText = formatTime(offer.timeLeft);
+        }
+      });
+    }, 1000);
+
+    // --- LÓGICA DEL FORMULARIO ---
+    
+    // Conteo de caracteres
+    const inputOffer = document.getElementById('inputOffer');
+    const charCount = document.getElementById('charCount');
+    
+    inputOffer.addEventListener('input', (e) => {
+      charCount.innerText = `${e.target.value.length}/40`;
+    });
+
+    // Vista previa de la imagen
+    const inputImage = document.getElementById('inputImage');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePlaceholder = document.getElementById('imagePlaceholder');
+
+    inputImage.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          currentPreviewBase64 = event.target.result;
+          imagePreview.src = currentPreviewBase64;
+          imagePreviewContainer.classList.remove('hidden');
+          imagePlaceholder.classList.add('hidden');
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Enviar el formulario
+    const offerForm = document.getElementById('offerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+
+    offerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Estado de carga visual
+      submitBtn.disabled = true;
+      submitSpinner.classList.remove('hidden');
+      submitText.classList.add('hidden');
+
+      // Simulamos latencia de red de 1 seg
+      setTimeout(() => {
+        const newOffer = {
+          id: Date.now(),
+          business: document.getElementById('inputBusiness').value,
+          category: document.getElementById('inputCategory').value,
+          offer: document.getElementById('inputOffer').value,
+          timeLeft: 86400, // 24hs
+          image: currentPreviewBase64 || "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+          whatsapp: document.getElementById('inputWhatsapp').value,
+          tag: "✨ RECIÉN PUBLICADO",
+          location: document.getElementById('inputLocation').value
+        };
+
+        // Agregar al inicio del array
+        offers.unshift(newOffer);
+        
+        // Resetear Formulario
+        offerForm.reset();
+        charCount.innerText = "0/40";
+        currentPreviewBase64 = null;
+        imagePreviewContainer.classList.add('hidden');
+        imagePlaceholder.classList.remove('hidden');
+        
+        // Restaurar botón
+        submitBtn.disabled = false;
+        submitSpinner.classList.add('hidden');
+        submitText.classList.remove('hidden');
+
+        // Renderizar nuevamente (si no estamos en la categoría correcta, lo forzamos a 'Todas')
+        setCategory("Todas");
+
+        // Subir scroll para ver la oferta
+        window.scrollTo({ top: document.getElementById('ofertas').offsetTop - 100, behavior: 'smooth' });
+        
+      }, 1000);
+    });
+
+    // Iniciar renderizado al cargar la página
+    renderCategories();
+    renderOffers();
+
+  </script>
+</body>
+</html>
