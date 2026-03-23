@@ -12,8 +12,10 @@
     const locationSearchButton = document.getElementById('map-location-search-button');
     const useMyLocationButton = document.getElementById('map-use-my-location');
     const centerUserButton = document.getElementById('map-center-user');
+    const clearSearchButton = document.getElementById('map-clear-search');
     const locationFeedback = document.getElementById('map-location-feedback');
     const mapOffersList = document.getElementById('map-offers-list');
+    const offerTriggers = Array.from(document.querySelectorAll('[data-map-offer-trigger]'));
 
     const formatRemainingTime = (expiresAt) => {
         const expirationDate = new Date(expiresAt);
@@ -58,6 +60,20 @@
         return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     };
 
+    const feedbackMessages = {
+        searchPending: 'Buscando ubicación...',
+        searchEmpty: 'Escribí una ubicación para iniciar la búsqueda.',
+        searchSuccess: 'Ubicación encontrada. Distancias actualizadas.',
+        searchError: 'No pudimos completar la búsqueda. Probá con otra referencia.',
+        gpsPending: 'Detectando tu ubicación...',
+        gpsSuccess: 'Ubicación detectada. Distancias actualizadas.',
+        gpsUnsupported: 'Tu navegador no permite geolocalización.',
+        gpsPermissionDenied: 'No diste permiso de ubicación. Revisá la configuración del navegador.',
+        gpsUnavailable: 'No pudimos acceder a tu ubicación. Intentá nuevamente.',
+        gpsTimeout: 'La detección demoró demasiado. Volvé a intentarlo.',
+        resetDone: 'Vista restablecida. Mostramos las ofertas según el orden inicial.',
+    };
+
     const setFeedback = (message, isError = false) => {
         if (!locationFeedback) {
             return;
@@ -66,6 +82,11 @@
         locationFeedback.textContent = message;
         locationFeedback.classList.toggle('text-red-600', isError);
         locationFeedback.classList.toggle('text-emerald-600', !isError);
+    };
+
+    const setFeedbackByKey = (key, isError = false, suffix = '') => {
+        const baseMessage = feedbackMessages[key] || feedbackMessages.searchError;
+        setFeedback(`${baseMessage}${suffix}`, isError);
     };
 
     const defaultCoordinates = pageData.defaultCenter || [-34.636, -58.536];
@@ -91,6 +112,8 @@
     let activeOffer = null;
     let userLocation = null;
     let userLocationMarker = null;
+    let isSearchingLocation = false;
+    let isLocatingUser = false;
     const markersByOfferId = new Map();
     const bounds = [];
 
@@ -150,10 +173,18 @@
         document.body.classList.remove('overflow-hidden');
     };
 
-    const updateOffersDistanceUI = () => {
-        const triggers = Array.from(document.querySelectorAll('[data-map-offer-trigger]'));
+    const reorderOffersList = (compareFn) => {
+        if (!mapOffersList) {
+            return;
+        }
 
-        triggers.forEach((trigger) => {
+        offerTriggers
+            .sort(compareFn)
+            .forEach((trigger) => mapOffersList.appendChild(trigger));
+    };
+
+    const updateOffersDistanceUI = () => {
+        offerTriggers.forEach((trigger) => {
             const badge = trigger.querySelector('[data-offer-distance-badge]');
             const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
             const entry = markersByOfferId.get(offerId);
@@ -179,13 +210,63 @@
             badge.classList.remove('hidden');
         });
 
-        if (!mapOffersList) {
+        reorderOffersList((left, right) => {
+            if (!userLocation) {
+                return Number(left.dataset.originalOrder) - Number(right.dataset.originalOrder);
+            }
+
+            return Number(left.dataset.distanceSort) - Number(right.dataset.distanceSort);
+        });
+    };
+
+    const setButtonBusyState = (button, isBusy) => {
+        if (!button) {
             return;
         }
 
-        triggers
-            .sort((left, right) => Number(left.dataset.distanceSort) - Number(right.dataset.distanceSort))
-            .forEach((trigger) => mapOffersList.appendChild(trigger));
+        const label = button.querySelector('[data-button-label]');
+        const defaultLabel = label?.getAttribute('data-label-default') ?? label?.textContent ?? '';
+        const busyLabel = label?.getAttribute('data-label-busy') ?? defaultLabel;
+
+        button.classList.toggle('opacity-70', isBusy);
+        button.classList.toggle('cursor-not-allowed', isBusy);
+        button.classList.toggle('ring-2', isBusy);
+        button.classList.toggle('ring-red-200', isBusy);
+
+        if (label) {
+            label.textContent = isBusy ? busyLabel : defaultLabel;
+        }
+    };
+
+    const updateActionStates = () => {
+        const hasPendingOperation = isSearchingLocation || isLocatingUser;
+        const canCenter = Boolean(userLocation) && !hasPendingOperation;
+
+        if (locationSearchButton) {
+            locationSearchButton.disabled = hasPendingOperation;
+            setButtonBusyState(locationSearchButton, isSearchingLocation);
+        }
+
+        if (useMyLocationButton) {
+            useMyLocationButton.disabled = hasPendingOperation;
+            setButtonBusyState(useMyLocationButton, isLocatingUser);
+        }
+
+        if (locationSearchInput) {
+            locationSearchInput.disabled = hasPendingOperation;
+        }
+
+        if (centerUserButton) {
+            centerUserButton.disabled = !canCenter;
+            centerUserButton.classList.toggle('opacity-60', !canCenter);
+            centerUserButton.classList.toggle('cursor-not-allowed', !canCenter);
+        }
+
+        if (clearSearchButton) {
+            clearSearchButton.disabled = hasPendingOperation;
+            clearSearchButton.classList.toggle('opacity-60', hasPendingOperation);
+            clearSearchButton.classList.toggle('cursor-not-allowed', hasPendingOperation);
+        }
     };
 
     const placeUserLocationMarker = (lat, lon) => {
@@ -208,8 +289,9 @@
         userLocation = { lat, lon };
         placeUserLocationMarker(lat, lon);
         updateOffersDistanceUI();
-        setFeedback(`Ubicación detectada por ${sourceLabel}. Distancias actualizadas.`);
+        setFeedbackByKey(sourceLabel === 'GPS del navegador' ? 'gpsSuccess' : 'searchSuccess');
         map.setView([lat, lon], 14, { animate: true });
+        updateActionStates();
     };
 
     const geocodeLocation = async (query) => {
@@ -253,23 +335,23 @@
         const query = locationSearchInput.value.trim();
 
         if (query === '') {
-            setFeedback('Escribí una ubicación para iniciar la búsqueda.', true);
+            setFeedbackByKey('searchEmpty', true);
 
             return;
         }
 
-        locationSearchButton?.setAttribute('disabled', 'disabled');
-        locationSearchButton?.classList.add('opacity-70', 'cursor-not-allowed');
-        setFeedback('Buscando ubicación...');
+        isSearchingLocation = true;
+        updateActionStates();
+        setFeedbackByKey('searchPending');
 
         try {
             const result = await geocodeLocation(query);
             setUserLocation(result.lat, result.lon, `búsqueda (${result.label})`);
         } catch (error) {
-            setFeedback(error instanceof Error ? error.message : 'No pudimos buscar esa ubicación.', true);
+            setFeedback(error instanceof Error ? error.message : feedbackMessages.searchError, true);
         } finally {
-            locationSearchButton?.removeAttribute('disabled');
-            locationSearchButton?.classList.remove('opacity-70', 'cursor-not-allowed');
+            isSearchingLocation = false;
+            updateActionStates();
         }
     };
 
@@ -306,7 +388,8 @@
         map.fitBounds(bounds, { padding: [32, 32] });
     }
 
-    document.querySelectorAll('[data-map-offer-trigger]').forEach((trigger) => {
+    offerTriggers.forEach((trigger, index) => {
+        trigger.dataset.originalOrder = index.toString();
         trigger.addEventListener('click', () => {
             const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
             const markerEntry = markersByOfferId.get(offerId);
@@ -331,19 +414,33 @@
 
     useMyLocationButton?.addEventListener('click', () => {
         if (!navigator.geolocation) {
-            setFeedback('Tu navegador no permite geolocalización.', true);
+            setFeedbackByKey('gpsUnsupported', true);
 
             return;
         }
 
-        setFeedback('Detectando tu ubicación...');
+        isLocatingUser = true;
+        updateActionStates();
+        setFeedbackByKey('gpsPending');
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
                 setUserLocation(latitude, longitude, 'GPS del navegador');
+                isLocatingUser = false;
+                updateActionStates();
             },
-            () => {
-                setFeedback('No pudimos acceder a tu ubicación. Revisá permisos del navegador.', true);
+            (error) => {
+                const permissionDenied = error.code === error.PERMISSION_DENIED;
+                const timeoutReached = error.code === error.TIMEOUT;
+                const feedbackKey = permissionDenied
+                    ? 'gpsPermissionDenied'
+                    : timeoutReached
+                        ? 'gpsTimeout'
+                        : 'gpsUnavailable';
+
+                setFeedbackByKey(feedbackKey, true);
+                isLocatingUser = false;
+                updateActionStates();
             },
             {
                 enableHighAccuracy: true,
@@ -360,6 +457,25 @@
 
         map.setView([userLocation.lat, userLocation.lon], 15, { animate: true });
         userLocationMarker?.openTooltip();
+    });
+
+    clearSearchButton?.addEventListener('click', () => {
+        if (locationSearchInput) {
+            locationSearchInput.value = '';
+        }
+
+        userLocation = null;
+
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+            userLocationMarker = null;
+        }
+
+        centerUserButton?.classList.add('hidden');
+        updateOffersDistanceUI();
+        map.setView(defaultCoordinates, 13, { animate: true });
+        setFeedbackByKey('resetDone');
+        updateActionStates();
     });
 
     closeButton?.addEventListener('click', closeModal);
@@ -379,6 +495,7 @@
     };
 
     refreshSidebarCountdowns();
+    updateActionStates();
     map.invalidateSize();
     window.setTimeout(() => map.invalidateSize(), 200);
     window.addEventListener('resize', () => map.invalidateSize());
