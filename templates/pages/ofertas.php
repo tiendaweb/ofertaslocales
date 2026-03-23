@@ -21,7 +21,7 @@ $totalOffers = isset($totalOffers) ? (int) $totalOffers : (isset($pageData['offe
 
     <div id="offers-container"></div>
 </section>
-<section class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4">
+-<!-- <section class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4">
     <div class="max-w-6xl mx-auto grid gap-8 lg:grid-cols-[1.15fr_0.85fr] items-center">
         <div>
             <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
@@ -71,6 +71,6 @@ $totalOffers = isset($totalOffers) ? (int) $totalOffers : (isset($pageData['offe
             <?php endif; ?>
         </div>
     </div>
-</section>
+</section> -->
 
 
