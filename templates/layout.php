@@ -1,28 +1,101 @@
 <?php
 
 declare(strict_types=1);
+
+$isPublicRoute = in_array($currentRoute ?? '', ['inicio', 'ofertas', 'negocios', 'mapa'], true);
+$pageDataJson = isset($pageData)
+    ? json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
+    : null;
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'OfertasCerca', ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($pageTitle ?? 'Ofertas Cerca | Ahorra hoy', ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <?php if (($currentRoute ?? '') === 'mapa') : ?>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        >
+    <?php endif; ?>
     <style>
-        body { background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #01030b 100%); }
-        .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(18px); border: 1px solid rgba(148, 163, 184, 0.18); }
-        .neon-ring { box-shadow: 0 0 24px rgba(59, 130, 246, 0.18); }
-        .chip { border: 1px solid rgba(96, 165, 250, 0.25); background: rgba(30, 41, 59, 0.7); }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 1rem;
+        }
+
+        .leaflet-container {
+            font-family: inherit;
+        }
+
+        <?php if (!$isPublicRoute) : ?>
+        body {
+            background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #01030b 100%);
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .neon-ring {
+            box-shadow: 0 0 24px rgba(59, 130, 246, 0.18);
+        }
+
+        .chip {
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            background: rgba(30, 41, 59, 0.7);
+        }
+        <?php endif; ?>
     </style>
 </head>
-<body class="text-slate-100 min-h-screen">
+<body class="<?= $isPublicRoute ? 'min-h-screen bg-gray-50 font-sans text-gray-800' : 'text-slate-100 min-h-screen' ?>">
     <?php include __DIR__ . '/partials/header.php'; ?>
-    <main class="max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10">
+
+    <main class="<?= $isPublicRoute ? 'pb-28 md:pb-16' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10' ?>">
         <?php include $contentTemplate; ?>
     </main>
+
     <?php include __DIR__ . '/partials/footer.php'; ?>
+
+    <?php if ($isPublicRoute) : ?>
+        <?php include __DIR__ . '/partials/footer-nav.php'; ?>
+    <?php endif; ?>
+
+    <?php if ($pageDataJson !== false && $pageDataJson !== null) : ?>
+        <script id="page-data" type="application/json"><?= $pageDataJson ?></script>
+    <?php endif; ?>
+
+    <?php if (($currentRoute ?? '') === 'mapa') : ?>
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+    <?php endif; ?>
+
+    <?php if ($isPublicRoute) : ?>
+        <script src="/assets/js/public-pages.js"></script>
+    <?php endif; ?>
+
+    <?php if (($currentRoute ?? '') === 'mapa') : ?>
+        <script src="/assets/js/map-page.js"></script>
+    <?php endif; ?>
+
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) {
