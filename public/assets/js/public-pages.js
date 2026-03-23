@@ -204,7 +204,7 @@
 
     const setupHomeMapPreview = () => {
         const previewContainer = document.getElementById('home-map-preview');
-        const mapOffers = Array.isArray(pageData.mapOffers) ? pageData.mapOffers.slice(0, 3) : [];
+        const mapOffers = Array.isArray(pageData.mapOffers) ? pageData.mapOffers.slice(0, 8) : [];
 
         if (!previewContainer) {
             return;
@@ -228,25 +228,70 @@
             return;
         }
 
-        previewContainer.innerHTML = `
-            <div class="h-full bg-gradient-to-br from-slate-100 via-white to-red-50 p-6 grid content-center gap-4 md:grid-cols-3">
-                ${mapOffers.map((offer) => `
-                    <article class="bg-white/90 border border-white shadow-md rounded-2xl p-4 text-left">
-                        <div class="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-red-500 font-semibold mb-3">
-                            <i data-lucide="map-pin" class="w-4 h-4"></i>
-                            Punto activo
-                        </div>
-                        <h3 class="font-bold text-gray-900 mb-1">${offer.business_name}</h3>
-                        <p class="text-red-600 font-semibold mb-2">${offer.title}</p>
-                        <p class="text-sm text-gray-500">${offer.location}</p>
-                    </article>
-                `).join('')}
-            </div>
-        `;
+        if (!window.L) {
+            previewContainer.innerHTML = `
+                <div class="h-full bg-gradient-to-br from-slate-100 via-white to-red-50 p-6 grid content-center gap-4 md:grid-cols-3">
+                    ${mapOffers.slice(0, 3).map((offer) => `
+                        <article class="bg-white/90 border border-white shadow-md rounded-2xl p-4 text-left">
+                            <div class="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-red-500 font-semibold mb-3">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                Punto activo
+                            </div>
+                            <h3 class="font-bold text-gray-900 mb-1">${offer.business_name}</h3>
+                            <p class="text-red-600 font-semibold mb-2">${offer.title}</p>
+                            <p class="text-sm text-gray-500">${offer.location}</p>
+                        </article>
+                    `).join('')}
+                </div>
+            `;
 
-        if (window.lucide) {
-            window.lucide.createIcons();
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+
+            return;
         }
+
+        previewContainer.innerHTML = '';
+
+        const validOffers = mapOffers.filter((offer) => Number.isFinite(Number(offer.lat)) && Number.isFinite(Number(offer.lon)));
+        if (validOffers.length === 0) {
+            return;
+        }
+
+        const first = validOffers[0];
+        const map = window.L.map(previewContainer, {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            attributionControl: true,
+        }).setView([Number(first.lat), Number(first.lon)], 12);
+
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        const bounds = [];
+        validOffers.forEach((offer) => {
+            const lat = Number(offer.lat);
+            const lon = Number(offer.lon);
+            const marker = window.L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`
+                <div class="w-48">
+                    <img src="${offer.image_url}" alt="${offer.title}" class="w-full h-20 object-cover rounded-lg mb-2">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">${offer.category}</p>
+                    <p class="font-semibold text-gray-900">${offer.business_name}</p>
+                    <p class="text-red-600 font-semibold text-sm">${offer.title}</p>
+                    <a class="text-xs text-blue-600 font-semibold" href="/mapa">Abrir mapa completo</a>
+                </div>
+            `);
+            bounds.push([lat, lon]);
+        });
+
+        if (bounds.length > 1) {
+            map.fitBounds(bounds, { padding: [24, 24] });
+        }
+
+        window.setTimeout(() => map.invalidateSize(), 120);
     };
 
     const updateCountdowns = () => {

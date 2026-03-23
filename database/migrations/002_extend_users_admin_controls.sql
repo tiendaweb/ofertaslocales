@@ -3,7 +3,9 @@ ALTER TABLE users ADD COLUMN is_suspended INTEGER NOT NULL DEFAULT 0 CHECK (is_s
 ALTER TABLE users ADD COLUMN suspended_at TEXT;
 ALTER TABLE users ADD COLUMN suspended_reason TEXT;
 ALTER TABLE users ADD COLUMN suspended_by INTEGER;
-ALTER TABLE users ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP;
+-- SQLite no permite agregar columnas con default no constante (ej. CURRENT_TIMESTAMP)
+-- mediante ALTER TABLE ADD COLUMN. Se agrega nullable y luego se normaliza con UPDATE.
+ALTER TABLE users ADD COLUMN updated_at TEXT;
 ALTER TABLE users ADD COLUMN last_login_at TEXT;
 
 UPDATE users
