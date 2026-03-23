@@ -8,6 +8,13 @@
         return;
     }
 
+    const locationSearchInput = document.getElementById('map-location-search');
+    const locationSearchButton = document.getElementById('map-location-search-button');
+    const useMyLocationButton = document.getElementById('map-use-my-location');
+    const centerUserButton = document.getElementById('map-center-user');
+    const locationFeedback = document.getElementById('map-location-feedback');
+    const mapOffersList = document.getElementById('map-offers-list');
+
     const formatRemainingTime = (expiresAt) => {
         const expirationDate = new Date(expiresAt);
         const diffInSeconds = Math.max(0, Math.floor((expirationDate.getTime() - Date.now()) / 1000));
@@ -25,6 +32,40 @@
             .join(':');
 
         return days > 0 ? `${days}d ${time}` : time;
+    };
+
+    const formatDistance = (kilometers) => {
+        if (!Number.isFinite(kilometers)) {
+            return '';
+        }
+
+        if (kilometers < 1) {
+            return `${Math.round(kilometers * 1000)} m`;
+        }
+
+        return `${kilometers.toFixed(1)} km`;
+    };
+
+    const haversineDistanceKm = (origin, destination) => {
+        const radius = 6371;
+        const deltaLat = (destination.lat - origin.lat) * (Math.PI / 180);
+        const deltaLon = (destination.lon - origin.lon) * (Math.PI / 180);
+        const lat1 = origin.lat * (Math.PI / 180);
+        const lat2 = destination.lat * (Math.PI / 180);
+        const a = Math.sin(deltaLat / 2) ** 2
+            + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
+
+        return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    };
+
+    const setFeedback = (message, isError = false) => {
+        if (!locationFeedback) {
+            return;
+        }
+
+        locationFeedback.textContent = message;
+        locationFeedback.classList.toggle('text-red-600', isError);
+        locationFeedback.classList.toggle('text-emerald-600', !isError);
     };
 
     const defaultCoordinates = pageData.defaultCenter || [-34.636, -58.536];
@@ -48,6 +89,8 @@
     const modalWhatsapp = document.getElementById('map-modal-whatsapp');
 
     let activeOffer = null;
+    let userLocation = null;
+    let userLocationMarker = null;
     const markersByOfferId = new Map();
     const bounds = [];
 
@@ -91,12 +134,141 @@
         }
     };
 
-    offers.forEach((offer) => {
-        if (typeof offer.lat !== 'number' || typeof offer.lon !== 'number') {
+    const updateOffersDistanceUI = () => {
+        const triggers = Array.from(document.querySelectorAll('[data-map-offer-trigger]'));
+
+        triggers.forEach((trigger) => {
+            const badge = trigger.querySelector('[data-offer-distance-badge]');
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            const entry = markersByOfferId.get(offerId);
+
+            if (!badge || !entry || !userLocation) {
+                if (badge) {
+                    badge.classList.add('hidden');
+                }
+
+                trigger.dataset.distanceSort = Number.POSITIVE_INFINITY.toString();
+
+                return;
+            }
+
+            const distanceKm = haversineDistanceKm(userLocation, {
+                lat: entry.offer.lat,
+                lon: entry.offer.lon,
+            });
+
+            entry.distanceKm = distanceKm;
+            trigger.dataset.distanceSort = distanceKm.toString();
+            badge.textContent = formatDistance(distanceKm);
+            badge.classList.remove('hidden');
+        });
+
+        if (!mapOffersList) {
             return;
         }
 
-        const marker = window.L.marker([offer.lat, offer.lon]).addTo(map);
+        triggers
+            .sort((left, right) => Number(left.dataset.distanceSort) - Number(right.dataset.distanceSort))
+            .forEach((trigger) => mapOffersList.appendChild(trigger));
+    };
+
+    const placeUserLocationMarker = (lat, lon) => {
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+        }
+
+        userLocationMarker = window.L.marker([lat, lon], {
+            title: 'Tu ubicación',
+            riseOnHover: true,
+        }).addTo(map);
+        userLocationMarker.bindTooltip('Tu ubicación', {
+            direction: 'top',
+            offset: [0, -10],
+        });
+        centerUserButton?.classList.remove('hidden');
+    };
+
+    const setUserLocation = (lat, lon, sourceLabel) => {
+        userLocation = { lat, lon };
+        placeUserLocationMarker(lat, lon);
+        updateOffersDistanceUI();
+        setFeedback(`Ubicación detectada por ${sourceLabel}. Distancias actualizadas.`);
+        map.setView([lat, lon], 14, { animate: true });
+    };
+
+    const geocodeLocation = async (query) => {
+        const endpoint = new URL('https://nominatim.openstreetmap.org/search');
+        endpoint.searchParams.set('q', query);
+        endpoint.searchParams.set('format', 'jsonv2');
+        endpoint.searchParams.set('limit', '1');
+        endpoint.searchParams.set('addressdetails', '1');
+        endpoint.searchParams.set('accept-language', 'es');
+
+        const response = await fetch(endpoint.toString(), {
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('No fue posible geocodificar la dirección.');
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            throw new Error('No encontramos esa ubicación. Probá con otra referencia.');
+        }
+
+        const result = data[0];
+
+        return {
+            lat: Number(result.lat),
+            lon: Number(result.lon),
+            label: result.display_name || query,
+        };
+    };
+
+    const handleSearchLocation = async () => {
+        if (!locationSearchInput) {
+            return;
+        }
+
+        const query = locationSearchInput.value.trim();
+
+        if (query === '') {
+            setFeedback('Escribí una ubicación para iniciar la búsqueda.', true);
+
+            return;
+        }
+
+        locationSearchButton?.setAttribute('disabled', 'disabled');
+        locationSearchButton?.classList.add('opacity-70', 'cursor-not-allowed');
+        setFeedback('Buscando ubicación...');
+
+        try {
+            const result = await geocodeLocation(query);
+            setUserLocation(result.lat, result.lon, `búsqueda (${result.label})`);
+        } catch (error) {
+            setFeedback(error instanceof Error ? error.message : 'No pudimos buscar esa ubicación.', true);
+        } finally {
+            locationSearchButton?.removeAttribute('disabled');
+            locationSearchButton?.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+    };
+
+    offers.forEach((offer) => {
+        const lat = Number(offer.lat);
+        const lon = Number(offer.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            return;
+        }
+
+        offer.lat = lat;
+        offer.lon = lon;
+
+        const marker = window.L.marker([lat, lon]).addTo(map);
         marker.bindTooltip(`
             <div class="w-48">
                 <img src="${offer.image_url}" alt="${offer.title}" class="w-full h-24 object-cover rounded-xl mb-2">
@@ -110,8 +282,8 @@
             opacity: 0.98,
         });
         marker.on('click', () => openModal(offer));
-        markersByOfferId.set(offer.id, { marker, offer });
-        bounds.push([offer.lat, offer.lon]);
+        markersByOfferId.set(offer.id, { marker, offer, distanceKm: Number.POSITIVE_INFINITY });
+        bounds.push([lat, lon]);
     });
 
     if (bounds.length > 0) {
@@ -131,6 +303,47 @@
             markerEntry.marker.openTooltip();
             openModal(markerEntry.offer);
         });
+    });
+
+    locationSearchButton?.addEventListener('click', handleSearchLocation);
+    locationSearchInput?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            void handleSearchLocation();
+        }
+    });
+
+    useMyLocationButton?.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            setFeedback('Tu navegador no permite geolocalización.', true);
+
+            return;
+        }
+
+        setFeedback('Detectando tu ubicación...');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setUserLocation(latitude, longitude, 'GPS del navegador');
+            },
+            () => {
+                setFeedback('No pudimos acceder a tu ubicación. Revisá permisos del navegador.', true);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 12000,
+                maximumAge: 0,
+            }
+        );
+    });
+
+    centerUserButton?.addEventListener('click', () => {
+        if (!userLocation) {
+            return;
+        }
+
+        map.setView([userLocation.lat, userLocation.lon], 15, { animate: true });
+        userLocationMarker?.openTooltip();
     });
 
     closeButton?.addEventListener('click', closeModal);
