@@ -12,21 +12,13 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
             <h1 class="font-black text-xl tracking-tight">OFERTAS CERCA</h1>
             <p class="text-xs text-red-100 opacity-80"><?= count($mapOffers) ?> marcadores en <?= htmlspecialchars($coverageLabel, ENT_QUOTES, 'UTF-8') ?></p>
         </div>
-        <div class="flex gap-2">
-            <button type="button" id="map-center-user" class="hidden p-2 bg-white/20 rounded-full backdrop-blur-md hover:bg-white/30 transition" aria-label="Centrar en tu ubicación">
-                <i data-lucide="locate-fixed" class="w-5 h-5"></i>
-            </button>
-            <button type="button" id="map-use-my-location" class="p-2 bg-white/20 rounded-full backdrop-blur-md hover:bg-white/30 transition" aria-label="Usar mi ubicación">
-                <i data-lucide="navigation" class="w-5 h-5"></i>
-            </button>
-        </div>
     </header>
 
     <main class="flex-1 relative overflow-hidden p-3 md:p-4">
         <div class="h-full grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
             <article class="relative bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
                 <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 bg-white/90 backdrop-blur-md relative z-30">
-                    <div class="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+                    <div class="grid gap-2 md:grid-cols-[1fr_auto]">
                         <label for="map-location-search" class="sr-only">Buscar ubicación</label>
                         <input
                             id="map-location-search"
@@ -34,16 +26,44 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
                             placeholder="Buscar ubicación (ej: Palermo, CABA)"
                             class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-300"
                         >
-                        <button
-                            type="button"
-                            id="map-location-search-button"
-                            class="rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2.5 text-sm transition"
-                        >
-                            Buscar ubicación
-                        </button>
-                        <a href="/ofertas" class="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-2.5 text-sm transition text-center">
-                            Ver grilla
-                        </a>
+                        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                            <button
+                                type="button"
+                                id="map-location-search-button"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 sm:text-sm"
+                            >
+                                <i data-lucide="search" class="h-4 w-4"></i>
+                                <span data-button-label data-label-default="Buscar" data-label-busy="Buscando...">Buscar</span>
+                            </button>
+                            <button
+                                type="button"
+                                id="map-use-my-location"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 sm:text-sm"
+                            >
+                                <i data-lucide="navigation" class="h-4 w-4"></i>
+                                <span data-button-label data-label-default="Mi ubicación" data-label-busy="Ubicando...">Mi ubicación</span>
+                            </button>
+                            <button
+                                type="button"
+                                id="map-center-user"
+                                class="hidden inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 sm:text-sm"
+                            >
+                                <i data-lucide="locate-fixed" class="h-4 w-4"></i>
+                                <span>Centrar</span>
+                            </button>
+                            <button
+                                type="button"
+                                id="map-clear-search"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 sm:text-sm"
+                            >
+                                <i data-lucide="eraser" class="h-4 w-4"></i>
+                                <span>Limpiar</span>
+                            </button>
+                            <a href="/ofertas" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 sm:text-sm">
+                                <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                                <span>Ver ofertas</span>
+                            </a>
+                        </div>
                     </div>
                     <p id="map-location-feedback" class="min-h-5 mt-2 text-xs text-gray-500"></p>
                 </div>
