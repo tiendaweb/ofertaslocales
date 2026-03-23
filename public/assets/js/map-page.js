@@ -102,6 +102,19 @@
         modalCountdown.textContent = `Restan ${formatRemainingTime(activeOffer.expires_at)}`;
     };
 
+    const refreshSidebarCountdowns = () => {
+        document.querySelectorAll('[data-map-countdown]').forEach((countdownNode) => {
+            const expiration = countdownNode.getAttribute('data-expiration');
+            const label = countdownNode.querySelector('span');
+
+            if (!expiration || !label) {
+                return;
+            }
+
+            label.textContent = `Restan ${formatRemainingTime(expiration)}`;
+        });
+    };
+
     const openModal = (offer) => {
         if (!modal) {
             return;
@@ -357,5 +370,15 @@
             closeModal();
         }
     });
-    window.setInterval(refreshModalCountdown, 1000);
+    const refreshAllCountdowns = () => {
+        refreshModalCountdown();
+        refreshSidebarCountdowns();
+    };
+
+    refreshSidebarCountdowns();
+    map.invalidateSize();
+    window.setTimeout(() => map.invalidateSize(), 200);
+    window.addEventListener('resize', () => map.invalidateSize());
+
+    window.setInterval(refreshAllCountdowns, 1000);
 })();
