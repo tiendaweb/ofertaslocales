@@ -16,5 +16,13 @@ interface OfferRepository
 
     public function updateStatus(int $offerId, string $status): void;
 
+    public function updateForUser(int $offerId, int $userId, array $data): bool;
+
+    public function updateStatusForUser(int $offerId, int $userId, string $status): bool;
+
+    public function duplicateForUser(int $offerId, int $userId): ?int;
+
+    public function softDeleteForUser(int $offerId, int $userId): bool;
+
     public function expireOffers(): int;
 }

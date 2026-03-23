@@ -2,132 +2,111 @@
 
 declare(strict_types=1);
 
-$formErrors = is_array($flash['form_errors'] ?? null) ? $flash['form_errors'] : [];
-$old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
+$statusLabels = [
+    'active' => 'Activa',
+    'pending' => 'Pendiente',
+    'rejected' => 'Rechazada',
+    'expired' => 'Vencida',
+];
+
+$kpis = [
+    'active' => 0,
+    'pending' => 0,
+    'expired' => 0,
+];
+
+foreach ($offers as $offer) {
+    $status = (string) ($offer['status'] ?? '');
+    if (array_key_exists($status, $kpis)) {
+        $kpis[$status]++;
+    }
+}
 ?>
-<section class="grid gap-6 lg:grid-cols-[1fr_1.05fr]">
+
+<section class="space-y-6">
     <article class="rounded-3xl border border-red-100 bg-white p-6 shadow-sm md:p-8">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.25em] text-red-500 mb-3">Mi panel</p>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">Publicar una oferta</h2>
-            <p class="text-gray-600">Completa el formulario y publica en minutos. El flujo está pensado para que sea simple, claro y rápido.</p>
-        </div>
-
-        <?php
-        $publishPolicy = is_array($publishPolicy ?? null) ? $publishPolicy : [];
-        $canPublish = (bool) ($publishPolicy['can_publish'] ?? true);
-        $policyHeadline = (string) ($publishPolicy['headline'] ?? 'Configuración de publicación activa');
-        $policyDescription = (string) ($publishPolicy['description'] ?? 'Revisá la configuración antes de publicar.');
-        ?>
-        <div class="mt-6 rounded-2xl border px-4 py-3 text-sm <?= $canPublish ? 'border-red-100 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-800' ?>">
-            <p class="font-semibold"><?= htmlspecialchars($policyHeadline, ENT_QUOTES, 'UTF-8') ?></p>
-            <p class="mt-1"><?= htmlspecialchars($policyDescription, ENT_QUOTES, 'UTF-8') ?></p>
-            <p class="mt-2 text-xs uppercase tracking-[0.15em]">
-                Modo comercial:
-                <strong><?= ($approvalMode ?? 'manual') === 'auto' ? 'Aprobación automática' : 'Revisión manual' ?></strong>
-                <?php if (($currentUser['role'] ?? 'business') === 'user') : ?>
-                    · Modo usuario:
-                    <strong><?= match ($defaultUserPublishMode ?? 'review') {
-                        'direct' => 'Inmediato',
-                        'profile_required' => 'Perfil completo',
-                        default => 'Bajo revisión',
-                    } ?></strong>
-                <?php endif; ?>
-            </p>
-        </div>
-
-        <?php if (($formErrors['coordinates'] ?? null) !== null || ($formErrors['image'] ?? null) !== null) : ?>
-            <div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                <?= htmlspecialchars((string) ($formErrors['coordinates'] ?? $formErrors['image']), ENT_QUOTES, 'UTF-8') ?>
+        <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="mb-2 text-sm font-semibold uppercase tracking-[0.25em] text-red-500">Mi panel</p>
+                <h2 class="text-3xl font-bold text-gray-900">Resumen de ofertas</h2>
             </div>
-        <?php endif; ?>
+            <span class="inline-flex rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700"><?= count($offers) ?> registradas</span>
+        </div>
 
-        <form class="mt-6 grid gap-4 md:grid-cols-2" action="/panel/ofertas" method="post" enctype="multipart/form-data">
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Categoría</span>
-                <input name="category" type="text" value="<?= htmlspecialchars((string) ($old['category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: Gastronomía" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-                <?php if (($formErrors['category'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['category'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">WhatsApp</span>
-                <input name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ($currentUser['whatsapp'] ?? '')), ENT_QUOTES, 'UTF-8') ?>" placeholder="+54 9 11..." class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-                <?php if (($formErrors['whatsapp'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['whatsapp'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block md:col-span-2">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Título</span>
-                <input name="title" type="text" value="<?= htmlspecialchars((string) ($old['title'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: 2x1 en desayunos" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-                <?php if (($formErrors['title'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['title'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block md:col-span-2">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Descripción</span>
-                <textarea name="description" rows="4" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none" placeholder="Condiciones, stock y horario."><?= htmlspecialchars((string) ($old['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
-                <?php if (($formErrors['description'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['description'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block md:col-span-2">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Ubicación visible</span>
-                <input name="location" type="text" value="<?= htmlspecialchars((string) ($old['location'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: Av. Siempre Viva 123" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-                <?php if (($formErrors['location'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['location'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Latitud</span>
-                <input name="lat" type="text" value="<?= htmlspecialchars((string) ($old['lat'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="-34.6037" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-            </label>
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Longitud</span>
-                <input name="lon" type="text" value="<?= htmlspecialchars((string) ($old['lon'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="-58.3816" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-            </label>
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Expira el</span>
-                <input name="expires_at" type="datetime-local" value="<?= htmlspecialchars((string) ($old['expires_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-red-400 focus:outline-none">
-                <?php if (($formErrors['expires_at'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['expires_at'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-            </label>
-            <label class="block">
-                <span class="mb-2 block text-sm font-medium text-gray-700">Imagen</span>
-                <input name="image" type="file" accept="image/png,image/jpeg,image/webp" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-red-100 file:px-4 file:py-2 file:text-red-700">
-            </label>
-            <button type="submit" <?= $canPublish ? '' : 'disabled' ?> class="md:col-span-2 rounded-2xl px-4 py-3 font-semibold text-white transition <?= $canPublish ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-400 cursor-not-allowed' ?>">Guardar oferta</button>
-        </form>
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Activas</p>
+                <p class="mt-2 text-3xl font-bold text-emerald-700"><?= $kpis['active'] ?></p>
+            </div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Pendientes</p>
+                <p class="mt-2 text-3xl font-bold text-amber-700"><?= $kpis['pending'] ?></p>
+            </div>
+            <div class="rounded-2xl border border-gray-300 bg-gray-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-700">Vencidas</p>
+                <p class="mt-2 text-3xl font-bold text-gray-700"><?= $kpis['expired'] ?></p>
+            </div>
+        </div>
     </article>
 
-    <article class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm md:p-8">
-        <div class="mb-6 flex items-center justify-between gap-3">
-            <div>
-                <p class="mb-2 text-sm font-semibold uppercase tracking-[0.25em] text-red-500">Mis publicaciones</p>
-                <h3 class="text-2xl font-bold text-gray-900">Estado de ofertas</h3>
-            </div>
-            <span class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700"><?= count($offers) ?> registradas</span>
+    <article class="rounded-3xl border border-red-100 bg-white p-6 shadow-sm md:p-8">
+        <div class="mb-4">
+            <p class="mb-2 text-sm font-semibold uppercase tracking-[0.25em] text-red-500">Gestión rápida</p>
+            <h3 class="text-2xl font-bold text-gray-900">Lista compacta de ofertas</h3>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-3">
             <?php foreach ($offers as $offer) : ?>
-                <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                    <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                        <div>
-                            <p class="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-500"><?= htmlspecialchars($offer['category'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <h4 class="text-lg font-semibold text-gray-900"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></h4>
-                            <p class="mt-2 text-sm text-gray-600"><?= htmlspecialchars($offer['description'], ENT_QUOTES, 'UTF-8') ?></p>
+                <?php
+                $status = (string) ($offer['status'] ?? 'pending');
+                $statusLabel = $statusLabels[$status] ?? 'Pendiente';
+                $renewLabel = $status === 'expired' ? 'Renovar' : 'Duplicar';
+                ?>
+                <div class="rounded-2xl border border-red-100 bg-red-50/50 p-4">
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-red-500"><?= htmlspecialchars((string) $offer['category'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <h4 class="truncate text-lg font-semibold text-gray-900"><?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?></h4>
+                            <p class="text-sm text-gray-600">Estado: <strong><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?></strong> · Vence: <?= htmlspecialchars((string) $offer['expires_at'], ENT_QUOTES, 'UTF-8') ?></p>
                         </div>
-                        <span class="rounded-full px-3 py-1 text-xs font-semibold <?= match ($offer['status']) {
-                            'active' => 'bg-emerald-100 text-emerald-700',
-                            'pending' => 'bg-amber-100 text-amber-700',
-                            'rejected' => 'bg-rose-100 text-rose-700',
-                            default => 'bg-gray-200 text-gray-700',
-                        } ?>">
-                            <?= htmlspecialchars((string) $offer['status'], ENT_QUOTES, 'UTF-8') ?>
-                        </span>
+                        <span class="rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
-                    <div class="mt-4 grid gap-3 text-sm text-gray-600 md:grid-cols-2">
-                        <p><strong class="text-gray-900">Ubicación:</strong> <?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <p><strong class="text-gray-900">WhatsApp:</strong> <?= htmlspecialchars($offer['whatsapp'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <p><strong class="text-gray-900">Vence:</strong> <?= htmlspecialchars($offer['expires_at'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <p><strong class="text-gray-900">Coordenadas:</strong> <?= htmlspecialchars((string) ($offer['lat'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars((string) ($offer['lon'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></p>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <details class="group">
+                            <summary class="cursor-pointer rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100">Editar</summary>
+                            <form class="mt-3 grid gap-2 md:grid-cols-2" action="/panel/ofertas/<?= (int) $offer['id'] ?>" method="post">
+                                <input type="hidden" name="operation" value="editar">
+                                <input name="category" value="<?= htmlspecialchars((string) $offer['category'], ENT_QUOTES, 'UTF-8') ?>" class="rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required>
+                                <input name="title" value="<?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>" class="rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required>
+                                <input name="whatsapp" value="<?= htmlspecialchars((string) $offer['whatsapp'], ENT_QUOTES, 'UTF-8') ?>" class="rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required>
+                                <input name="location" value="<?= htmlspecialchars((string) $offer['location'], ENT_QUOTES, 'UTF-8') ?>" class="rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required>
+                                <textarea name="description" rows="2" class="md:col-span-2 rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required><?= htmlspecialchars((string) $offer['description'], ENT_QUOTES, 'UTF-8') ?></textarea>
+                                <button type="submit" class="md:col-span-2 rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500">Guardar cambios</button>
+                            </form>
+                        </details>
+
+                        <form action="/panel/ofertas/<?= (int) $offer['id'] ?>" method="post">
+                            <input type="hidden" name="operation" value="estado">
+                            <input type="hidden" name="status" value="<?= $status === 'active' ? 'pending' : 'active' ?>">
+                            <button type="submit" class="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100">Cambiar estado</button>
+                        </form>
+
+                        <form action="/panel/ofertas/<?= (int) $offer['id'] ?>" method="post">
+                            <input type="hidden" name="operation" value="duplicar_renovar">
+                            <button type="submit" class="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"><?= $renewLabel ?></button>
+                        </form>
+
+                        <form action="/panel/ofertas/<?= (int) $offer['id'] ?>/eliminar" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar esta oferta?');">
+                            <button type="submit" class="rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100">Eliminar</button>
+                        </form>
                     </div>
                 </div>
             <?php endforeach; ?>
 
             <?php if ($offers === []) : ?>
-                <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6 text-gray-600">
-                    Aún no publicaste ofertas. Usa el formulario para cargar la primera.
+                <div class="rounded-2xl border border-dashed border-red-200 bg-red-50 p-6 text-sm text-red-700">
+                    Aún no tienes ofertas cargadas en el panel.
                 </div>
             <?php endif; ?>
         </div>
