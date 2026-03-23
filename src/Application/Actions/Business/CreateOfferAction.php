@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
+use App\Application\Service\OfferPublishPolicy;
 use App\Application\Settings\SettingsInterface;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Site\SettingsRepository;
@@ -19,7 +20,8 @@ class CreateOfferAction extends PageAction
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly OfferRepository $offerRepository,
         private readonly SettingsRepository $settingsRepository,
-        private readonly SettingsInterface $settings
+        private readonly SettingsInterface $settings,
+        private readonly OfferPublishPolicy $offerPublishPolicy
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -89,8 +91,16 @@ class CreateOfferAction extends PageAction
             return $this->redirect($response, '/panel');
         }
 
-        $approvalMode = $this->settingsRepository->findByKeys(['approval_mode'])['approval_mode'] ?? 'manual';
-        $status = $approvalMode === 'auto' ? 'active' : 'pending';
+        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $policy = $this->offerPublishPolicy->resolve($user, $settings);
+
+        if (($policy['can_publish'] ?? false) !== true) {
+            $this->flash('error', (string) ($policy['blocked_reason'] ?? 'No tienes permisos para publicar ofertas.'));
+
+            return $this->redirect($response, '/panel');
+        }
+
+        $status = (string) ($policy['status'] ?? 'pending');
 
         $this->offerRepository->createForUser((int) $user['id'], [
             'category' => $payload['category'],
