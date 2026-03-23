@@ -21,7 +21,10 @@ class UpdateSettingsAction extends PageAction
         'merchant_title',
         'merchant_description',
         'footer_tagline',
+        'default_user_publish_mode',
     ];
+
+    private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
 
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
@@ -40,8 +43,12 @@ class UpdateSettingsAction extends PageAction
             $payload[$key] = trim((string) ($data[$key] ?? ''));
         }
 
+        if (!in_array($payload['default_user_publish_mode'], self::ALLOWED_USER_PUBLISH_MODES, true)) {
+            $payload['default_user_publish_mode'] = 'review';
+        }
+
         $this->settingsRepository->updateMany($payload);
-        $this->flash('success', 'Los labels del sitio fueron actualizados.');
+        $this->flash('success', 'Los textos y reglas de publicación fueron actualizados.');
 
         return $this->redirect($response, '/admin');
     }

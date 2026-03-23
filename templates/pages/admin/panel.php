@@ -13,9 +13,27 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
             <p class="text-gray-600">Completa el formulario y publica en minutos. El flujo está pensado para que sea simple, claro y rápido.</p>
         </div>
 
-        <div class="mt-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-            Modo actual:
-            <strong><?= ($approvalMode ?? 'manual') === 'auto' ? 'Aprobación automática' : 'Revisión manual' ?></strong>
+        <?php
+        $publishPolicy = is_array($publishPolicy ?? null) ? $publishPolicy : [];
+        $canPublish = (bool) ($publishPolicy['can_publish'] ?? true);
+        $policyHeadline = (string) ($publishPolicy['headline'] ?? 'Configuración de publicación activa');
+        $policyDescription = (string) ($publishPolicy['description'] ?? 'Revisá la configuración antes de publicar.');
+        ?>
+        <div class="mt-6 rounded-2xl border px-4 py-3 text-sm <?= $canPublish ? 'border-red-100 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-800' ?>">
+            <p class="font-semibold"><?= htmlspecialchars($policyHeadline, ENT_QUOTES, 'UTF-8') ?></p>
+            <p class="mt-1"><?= htmlspecialchars($policyDescription, ENT_QUOTES, 'UTF-8') ?></p>
+            <p class="mt-2 text-xs uppercase tracking-[0.15em]">
+                Modo comercial:
+                <strong><?= ($approvalMode ?? 'manual') === 'auto' ? 'Aprobación automática' : 'Revisión manual' ?></strong>
+                <?php if (($currentUser['role'] ?? 'business') === 'user') : ?>
+                    · Modo usuario:
+                    <strong><?= match ($defaultUserPublishMode ?? 'review') {
+                        'direct' => 'Inmediato',
+                        'profile_required' => 'Perfil completo',
+                        default => 'Bajo revisión',
+                    } ?></strong>
+                <?php endif; ?>
+            </p>
         </div>
 
         <?php if (($formErrors['coordinates'] ?? null) !== null || ($formErrors['image'] ?? null) !== null) : ?>
@@ -67,7 +85,7 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
                 <span class="mb-2 block text-sm font-medium text-gray-700">Imagen</span>
                 <input name="image" type="file" accept="image/png,image/jpeg,image/webp" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-red-100 file:px-4 file:py-2 file:text-red-700">
             </label>
-            <button type="submit" class="md:col-span-2 rounded-2xl bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-500">Guardar oferta</button>
+            <button type="submit" <?= $canPublish ? '' : 'disabled' ?> class="md:col-span-2 rounded-2xl px-4 py-3 font-semibold text-white transition <?= $canPublish ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-400 cursor-not-allowed' ?>">Guardar oferta</button>
         </form>
     </article>
 

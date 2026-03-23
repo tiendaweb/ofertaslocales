@@ -30,6 +30,7 @@ use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\Auth\RequireAdminMiddleware;
 use App\Application\Middleware\Auth\RequireAuthenticationMiddleware;
 use App\Application\Middleware\Auth\RequireBusinessMiddleware;
+use App\Application\Middleware\Auth\RequireOfferPublishPermissionMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -56,7 +57,9 @@ return function (App $app) {
 
     $app->group('/panel', function (Group $group) {
         $group->get('', BusinessDashboardAction::class)->setName('panel');
-        $group->post('/ofertas', CreateOfferAction::class)->setName('panel.ofertas.crear');
+        $group->post('/ofertas', CreateOfferAction::class)
+            ->add(RequireOfferPublishPermissionMiddleware::class)
+            ->setName('panel.ofertas.crear');
     })->add(RequireBusinessMiddleware::class)->add(RequireAuthenticationMiddleware::class);
 
     $app->group('/admin', function (Group $group) {

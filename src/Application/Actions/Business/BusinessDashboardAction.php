@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
+use App\Application\Service\OfferPublishPolicy;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Site\SettingsRepository;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -16,7 +17,8 @@ class BusinessDashboardAction extends PageAction
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly OfferRepository $offerRepository,
-        private readonly SettingsRepository $settingsRepository
+        private readonly SettingsRepository $settingsRepository,
+        private readonly OfferPublishPolicy $offerPublishPolicy
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -25,13 +27,16 @@ class BusinessDashboardAction extends PageAction
     {
         $user = $this->currentUser();
         $offers = $this->offerRepository->findByUserId((int) $user['id']);
-        $settings = $this->settingsRepository->findByKeys(['approval_mode']);
+        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $publishPolicy = $this->offerPublishPolicy->resolve($user, $settings);
 
         return $this->renderPage($response, 'pages/admin/panel.php', [
             'pageTitle' => 'Panel del negocio | OfertasCerca',
             'currentRoute' => 'panel',
             'offers' => $offers,
             'approvalMode' => $settings['approval_mode'] ?? 'manual',
+            'defaultUserPublishMode' => $settings['default_user_publish_mode'] ?? 'review',
+            'publishPolicy' => $publishPolicy,
         ]);
     }
 }

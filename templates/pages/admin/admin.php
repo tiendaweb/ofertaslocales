@@ -147,7 +147,7 @@ declare(strict_types=1);
                             'hero_title' => 'Título Principal del Hero',
                             'hero_description' => 'Descripción de Bienvenida',
                             'hero_primary_cta' => 'Texto del Botón Principal',
-                            'footer_tagline' => 'Frase del Pie de Página'
+                            'footer_tagline' => 'Frase del Pie de Página',
                         ];
                         foreach ($labels as $key => $label) : ?>
                         <div class="relative rounded-2xl border border-white/5 bg-slate-950/60 p-2 focus-within:border-blue-500/50 transition-colors shadow-inner">
@@ -155,6 +155,15 @@ declare(strict_types=1);
                             <input type="text" name="<?= $key ?>" value="<?= htmlspecialchars((string) ($settings[$key] ?? '')) ?>" class="w-full border-none bg-transparent px-3 pb-3 text-sm text-white focus:ring-0">
                         </div>
                         <?php endforeach; ?>
+                        <div class="rounded-2xl border border-white/5 bg-slate-950/60 p-4">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-500">Regla para usuarios (rol user)</label>
+                            <select name="default_user_publish_mode" class="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white focus:border-blue-500 focus:outline-none">
+                                <option value="direct" class="text-slate-900" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'direct' ? 'selected' : '' ?>>Publicación inmediata</option>
+                                <option value="review" class="text-slate-900" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'review' ? 'selected' : '' ?>>Publicación bajo revisión</option>
+                                <option value="profile_required" class="text-slate-900" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'profile_required' ? 'selected' : '' ?>>Solo tras completar perfil</option>
+                            </select>
+                            <p class="mt-2 text-xs text-slate-400">Define cómo publican las cuentas generales. Las cuentas negocio/admin mantienen la regla de aprobación comercial.</p>
+                        </div>
                         <button type="submit" class="w-full rounded-2xl bg-emerald-500 py-4 font-black text-slate-950 shadow-lg shadow-emerald-900/20 hover:bg-emerald-400 transition-all uppercase tracking-widest">Aplicar Cambios</button>
                     </form>
                 </div>
