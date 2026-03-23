@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Public;
 
 use App\Application\Actions\PageAction;
-use App\Application\Service\HomeMetricsService;
-use App\Application\Service\PublicOfferService;
-use DateTimeImmutable;
+use App\Application\Service\PublicCatalogService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -16,16 +14,15 @@ class HomeAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly PublicOfferService $publicOfferService,
-        private readonly HomeMetricsService $homeMetricsService
+        private readonly PublicCatalogService $publicCatalogService
     ) {
         parent::__construct($logger, $renderer);
     }
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $offers = $this->publicOfferService->getActiveOffers();
-        $metrics = $this->homeMetricsService->getMetrics();
+        $catalog = $this->publicCatalogService->buildCatalog();
+        $metrics = $catalog['metrics'];
 
         return $this->renderPage($response, 'pages/index.php', [
             'pageTitle' => 'Ofertas Cerca | Ahorra hoy',
@@ -76,58 +73,10 @@ class HomeAction extends PageAction
                 'La oferta se muestra con urgencia real según su fecha de vencimiento.',
             ],
             'pageData' => [
-                'offers' => array_map([$this, 'normalizeOffer'], $offers),
-                'categories' => array_merge(['Todas'], $this->publicOfferService->getActiveCategories()),
-                'mapOffers' => array_map([$this, 'normalizeMapOffer'], $this->publicOfferService->getActiveMapOffers()),
+                'offers' => $catalog['offers'],
+                'categories' => array_merge(['Todas'], $catalog['categories']),
+                'mapOffers' => $catalog['mapOffers'],
             ],
         ]);
-    }
-
-    private function normalizeOffer(array $offer): array
-    {
-        $expiresAt = new DateTimeImmutable($offer['expires_at']);
-
-        return [
-            'id' => (int) $offer['id'],
-            'business_name' => (string) $offer['business_name'],
-            'category' => (string) $offer['category'],
-            'title' => (string) $offer['title'],
-            'description' => (string) $offer['description'],
-            'image_url' => (string) $offer['image_url'],
-            'whatsapp' => (string) $offer['whatsapp'],
-            'location' => (string) $offer['location'],
-            'expires_at' => $expiresAt->format(DATE_ATOM),
-            'badge' => $this->resolveBadge($offer['category'], $expiresAt),
-        ];
-    }
-
-    private function normalizeMapOffer(array $offer): array
-    {
-        return [
-            'id' => (int) $offer['id'],
-            'business_name' => (string) $offer['business_name'],
-            'title' => (string) $offer['title'],
-            'description' => (string) $offer['description'],
-            'image_url' => (string) $offer['image_url'],
-            'location' => (string) $offer['location'],
-            'lat' => (float) $offer['lat'],
-            'lon' => (float) $offer['lon'],
-        ];
-    }
-
-    private function resolveBadge(string $category, DateTimeImmutable $expiresAt): string
-    {
-        $remainingSeconds = $expiresAt->getTimestamp() - time();
-
-        if ($remainingSeconds <= 14_400) {
-            return '⏳ ÚLTIMAS HORAS';
-        }
-
-        return match ($category) {
-            'Gastronomía' => '🍕 IDEAL CENA',
-            'Ferretería' => '🔥 MÁS VENDIDO',
-            'Estética' => '✂️ TENDENCIA',
-            default => '✨ RECOMENDADA',
-        };
     }
 }

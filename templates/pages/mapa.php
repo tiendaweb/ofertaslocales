@@ -10,7 +10,7 @@ declare(strict_types=1);
                 🗺️ OpenStreetMap en vivo
             </span>
             <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Encontrá ofertas activas cerca tuyo y abrí cada detalle desde el mapa.</h1>
-            <p class="text-lg text-red-100 mb-8 max-w-2xl">Los marcadores se construyen con datos entregados desde backend, muestran miniaturas al pasar el cursor y abren un modal con la información completa.</p>
+            <p class="text-lg text-red-100 mb-8 max-w-2xl">Los marcadores usan las mismas ofertas activas que ves en inicio, ofertas y negocios. Al pasar el mouse aparece la miniatura y al hacer clic se abre un panel completo con CTA directo a WhatsApp.</p>
             <div class="flex flex-wrap gap-4">
                 <div class="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 min-w-40">
                     <p class="text-sm text-red-100">Marcadores activos</p>
@@ -35,7 +35,7 @@ declare(strict_types=1);
                 </li>
                 <li class="flex gap-3">
                     <i data-lucide="message-circle-more" class="text-green-500 w-5 h-5 mt-0.5"></i>
-                    <span>Acceso a WhatsApp desde el modal sin salir del recorrido.</span>
+                    <span>Acceso a WhatsApp desde el detalle del marcador.</span>
                 </li>
             </ul>
         </div>
@@ -62,7 +62,11 @@ declare(strict_types=1);
             </div>
             <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-1">
                 <?php foreach ($mapOffers as $offer) : ?>
-                    <article class="border border-gray-100 rounded-2xl p-4 hover:border-red-200 hover:bg-red-50/40 transition">
+                    <button
+                        type="button"
+                        data-map-offer-trigger="<?= (int) $offer['id'] ?>"
+                        class="w-full text-left border border-gray-100 rounded-2xl p-4 hover:border-red-200 hover:bg-red-50/40 transition"
+                    >
                         <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2"><?= htmlspecialchars($offer['category'], ENT_QUOTES, 'UTF-8') ?></p>
                         <h3 class="font-bold text-gray-900 mb-1"><?= htmlspecialchars($offer['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
                         <p class="text-red-600 font-semibold mb-3"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></p>
@@ -70,7 +74,7 @@ declare(strict_types=1);
                             <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i><?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></p>
                             <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><?= htmlspecialchars($offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
                         </div>
-                    </article>
+                    </button>
                 <?php endforeach; ?>
             </div>
         </aside>
@@ -96,11 +100,13 @@ declare(strict_types=1);
                 <div>
                     <p id="map-modal-business" class="text-sm uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2"></p>
                     <p id="map-modal-offer" class="text-2xl font-bold text-red-600 leading-tight"></p>
+                    <p id="map-modal-category" class="text-sm font-semibold text-gray-500 mt-2"></p>
                 </div>
                 <p id="map-modal-description" class="text-gray-600 leading-7"></p>
                 <div class="space-y-3 text-sm text-gray-500">
                     <p id="map-modal-location" class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i><span></span></p>
                     <p id="map-modal-expiration" class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><span></span></p>
+                    <p id="map-modal-countdown" class="flex items-center gap-2"><i data-lucide="timer-reset" class="w-4 h-4 text-orange-500"></i><span></span></p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 pt-2">
                     <a id="map-modal-whatsapp" href="#" target="_blank" rel="noreferrer" class="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">

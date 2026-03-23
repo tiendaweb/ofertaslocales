@@ -8,6 +8,25 @@
         return;
     }
 
+    const formatRemainingTime = (expiresAt) => {
+        const expirationDate = new Date(expiresAt);
+        const diffInSeconds = Math.max(0, Math.floor((expirationDate.getTime() - Date.now()) / 1000));
+
+        if (diffInSeconds <= 0) {
+            return 'Finalizada';
+        }
+
+        const days = Math.floor(diffInSeconds / 86400);
+        const hours = Math.floor((diffInSeconds % 86400) / 3600);
+        const minutes = Math.floor((diffInSeconds % 3600) / 60);
+        const seconds = diffInSeconds % 60;
+        const time = [hours, minutes, seconds]
+            .map((value) => value.toString().padStart(2, '0'))
+            .join(':');
+
+        return days > 0 ? `${days}d ${time}` : time;
+    };
+
     const defaultCoordinates = pageData.defaultCenter || [-34.636, -58.536];
     const map = window.L.map(mapContainer).setView(defaultCoordinates, 13);
 
@@ -21,25 +40,41 @@
     const modalImage = document.getElementById('map-modal-image');
     const modalBusiness = document.getElementById('map-modal-business');
     const modalOffer = document.getElementById('map-modal-offer');
+    const modalCategory = document.getElementById('map-modal-category');
     const modalDescription = document.getElementById('map-modal-description');
     const modalLocation = document.querySelector('#map-modal-location span');
     const modalExpiration = document.querySelector('#map-modal-expiration span');
+    const modalCountdown = document.querySelector('#map-modal-countdown span');
     const modalWhatsapp = document.getElementById('map-modal-whatsapp');
 
+    let activeOffer = null;
+    const markersByOfferId = new Map();
     const bounds = [];
+
+    const refreshModalCountdown = () => {
+        if (!activeOffer || !modalCountdown) {
+            return;
+        }
+
+        modalCountdown.textContent = `Restan ${formatRemainingTime(activeOffer.expires_at)}`;
+    };
 
     const openModal = (offer) => {
         if (!modal) {
             return;
         }
 
+        activeOffer = offer;
         modalTitle.textContent = offer.title;
         modalImage.src = offer.image_url;
+        modalImage.alt = offer.title;
         modalBusiness.textContent = offer.business_name;
         modalOffer.textContent = offer.title;
+        modalCategory.textContent = offer.category;
         modalDescription.textContent = offer.description;
         modalLocation.textContent = offer.location;
         modalExpiration.textContent = offer.expires_label;
+        refreshModalCountdown();
         modalWhatsapp.href = `https://wa.me/${offer.whatsapp}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasCerca. Sigue disponible?`)}`;
         modal.classList.remove('hidden');
 
@@ -49,6 +84,8 @@
     };
 
     const closeModal = () => {
+        activeOffer = null;
+
         if (modal) {
             modal.classList.add('hidden');
         }
@@ -73,12 +110,28 @@
             opacity: 0.98,
         });
         marker.on('click', () => openModal(offer));
+        markersByOfferId.set(offer.id, { marker, offer });
         bounds.push([offer.lat, offer.lon]);
     });
 
     if (bounds.length > 0) {
         map.fitBounds(bounds, { padding: [32, 32] });
     }
+
+    document.querySelectorAll('[data-map-offer-trigger]').forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            const markerEntry = markersByOfferId.get(offerId);
+
+            if (!markerEntry) {
+                return;
+            }
+
+            map.setView(markerEntry.marker.getLatLng(), 16, { animate: true });
+            markerEntry.marker.openTooltip();
+            openModal(markerEntry.offer);
+        });
+    });
 
     closeButton?.addEventListener('click', closeModal);
     modal?.addEventListener('click', (event) => {
@@ -91,4 +144,5 @@
             closeModal();
         }
     });
+    window.setInterval(refreshModalCountdown, 1000);
 })();
