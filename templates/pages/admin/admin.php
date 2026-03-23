@@ -16,17 +16,17 @@ declare(strict_types=1);
         </div>
 
         <nav class="flex flex-col gap-2 flex-1">
-            <button @click="tab = 'moderacion'" :class="tab === 'moderacion' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
+            <button type="button" @click="tab = 'moderacion'" :class="tab === 'moderacion' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
                 <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 <span class="text-sm font-semibold">Moderación</span>
             </button>
 
-            <button @click="tab = 'textos'" :class="tab === 'textos' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
+            <button type="button" @click="tab = 'textos'" :class="tab === 'textos' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
                 <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span class="text-sm font-semibold">Textos de la Web</span>
             </button>
 
-            <button @click="tab = 'seo'" :class="tab === 'seo' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
+            <button type="button" @click="tab = 'seo'" :class="tab === 'seo' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'" class="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-300 group">
                 <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 <span class="text-sm font-semibold">SEO & Buscadores</span>
             </button>
