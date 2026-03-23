@@ -98,6 +98,112 @@ class SqliteOfferRepository implements OfferRepository
         ]);
     }
 
+
+    public function updateForUser(int $offerId, int $userId, array $data): bool
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE offers
+             SET category = :category,
+                 title = :title,
+                 description = :description,
+                 whatsapp = :whatsapp,
+                 location = :location
+             WHERE id = :id
+               AND user_id = :user_id'
+        );
+
+        $statement->execute([
+            'id' => $offerId,
+            'user_id' => $userId,
+            'category' => trim((string) $data['category']),
+            'title' => trim((string) $data['title']),
+            'description' => trim((string) $data['description']),
+            'whatsapp' => trim((string) $data['whatsapp']),
+            'location' => trim((string) $data['location']),
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function updateStatusForUser(int $offerId, int $userId, string $status): bool
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE offers
+             SET status = :status
+             WHERE id = :id
+               AND user_id = :user_id'
+        );
+        $statement->execute([
+            'id' => $offerId,
+            'user_id' => $userId,
+            'status' => $status,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function duplicateForUser(int $offerId, int $userId): ?int
+    {
+        $source = $this->pdo->prepare(
+            'SELECT category, title, description, image_url, whatsapp, location, lat, lon
+             FROM offers
+             WHERE id = :id AND user_id = :user_id'
+        );
+        $source->execute([
+            'id' => $offerId,
+            'user_id' => $userId,
+        ]);
+
+        $offer = $source->fetch();
+        if (!is_array($offer)) {
+            return null;
+        }
+
+        $statement = $this->pdo->prepare(
+            'INSERT INTO offers (
+                user_id, category, title, description, image_url,
+                whatsapp, location, lat, lon, status, created_at, expires_at
+            ) VALUES (
+                :user_id, :category, :title, :description, :image_url,
+                :whatsapp, :location, :lat, :lon, :status, :created_at, :expires_at
+            )'
+        );
+
+        $statement->execute([
+            'user_id' => $userId,
+            'category' => (string) $offer['category'],
+            'title' => (string) $offer['title'],
+            'description' => (string) $offer['description'],
+            'image_url' => $offer['image_url'],
+            'whatsapp' => (string) $offer['whatsapp'],
+            'location' => (string) $offer['location'],
+            'lat' => $offer['lat'],
+            'lon' => $offer['lon'],
+            'status' => 'pending',
+            'created_at' => gmdate('Y-m-d H:i:s'),
+            'expires_at' => gmdate('Y-m-d H:i:s', strtotime('+7 days')),
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function softDeleteForUser(int $offerId, int $userId): bool
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE offers
+             SET status = 'expired'
+             WHERE id = :id
+               AND user_id = :user_id
+               AND status <> 'expired'"
+        );
+        $statement->execute([
+            'id' => $offerId,
+            'user_id' => $userId,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
     public function expireOffers(): int
     {
         $statement = $this->pdo->prepare(

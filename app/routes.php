@@ -21,6 +21,8 @@ use App\Application\Actions\Auth\RegisterSubmitAction;
 use App\Application\Actions\Auth\StopImpersonationAction;
 use App\Application\Actions\Business\BusinessDashboardAction;
 use App\Application\Actions\Business\CreateOfferAction;
+use App\Application\Actions\Business\DeleteBusinessOfferAction;
+use App\Application\Actions\Business\UpdateBusinessOfferAction;
 use App\Application\Actions\Public\BusinessesAction;
 use App\Application\Actions\Public\HomeAction;
 use App\Application\Actions\Public\MapAction;
@@ -60,6 +62,8 @@ return function (App $app) {
         $group->post('/ofertas', CreateOfferAction::class)
             ->add(RequireOfferPublishPermissionMiddleware::class)
             ->setName('panel.ofertas.crear');
+        $group->post('/ofertas/{id}', UpdateBusinessOfferAction::class)->setName('panel.ofertas.actualizar');
+        $group->post('/ofertas/{id}/eliminar', DeleteBusinessOfferAction::class)->setName('panel.ofertas.eliminar');
     })->add(RequireBusinessMiddleware::class)->add(RequireAuthenticationMiddleware::class);
 
     $app->group('/admin', function (Group $group) {
