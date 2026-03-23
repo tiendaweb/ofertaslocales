@@ -169,70 +169,81 @@ declare(strict_types=1);
             </form>
         </div>
 
-        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
-            <h3 class="mb-4 text-xl font-black text-gray-900">Gestión de usuarios</h3>
-            <?php $users = $usersPagination['items'] ?? []; ?>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-xs text-gray-700">
-                    <thead>
-                        <tr class="border-b border-red-100 text-[11px] uppercase tracking-widest text-red-500">
-                            <th class="px-2 py-3 text-left">Cuenta</th>
-                            <th class="px-2 py-3 text-left">Rol</th>
-                            <th class="px-2 py-3 text-left">Estado</th>
-                            <th class="px-2 py-3 text-left">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($users as $user) : ?>
-                            <tr class="border-t border-red-50 align-top">
-                                <td class="px-2 py-3">
-                                    <p class="font-semibold text-gray-900"><?= htmlspecialchars((string) $user['email']) ?></p>
-                                    <p class="text-gray-600"><?= htmlspecialchars((string) ($user['business_name'] ?? 'Sin nombre comercial')) ?></p>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <span class="rounded-full border border-red-100 bg-red-50 px-3 py-1 font-semibold text-red-700"><?= htmlspecialchars((string) $user['role']) ?></span>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <span class="rounded-full px-3 py-1 font-semibold <?= ($user['status'] ?? 'active') === 'suspended' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' ?>">
-                                        <?= htmlspecialchars((string) ($user['status'] ?? 'active')) ?>
-                                    </span>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <div class="space-y-2">
-                                        <form action="/admin/users/<?= (int) $user['id'] ?>" method="post" class="grid gap-2 md:grid-cols-4">
-                                            <input type="email" name="email" value="<?= htmlspecialchars((string) $user['email']) ?>" required class="rounded-lg border border-red-100 bg-red-50/40 px-2 py-1 text-xs text-gray-800 focus:border-red-400 focus:outline-none">
-                                            <input type="text" name="business_name" value="<?= htmlspecialchars((string) ($user['business_name'] ?? '')) ?>" class="rounded-lg border border-red-100 bg-red-50/40 px-2 py-1 text-xs text-gray-800 focus:border-red-400 focus:outline-none">
-                                            <input type="text" name="whatsapp" value="<?= htmlspecialchars((string) ($user['whatsapp'] ?? '')) ?>" class="rounded-lg border border-red-100 bg-red-50/40 px-2 py-1 text-xs text-gray-800 focus:border-red-400 focus:outline-none">
-                                            <select name="role" class="rounded-lg border border-red-100 bg-red-50/40 px-2 py-1 text-xs text-gray-800 focus:border-red-400 focus:outline-none">
-                                                <?php foreach (['user' => 'Usuario', 'business' => 'Negocio', 'admin' => 'Administrador'] as $roleValue => $roleLabel) : ?>
-                                                    <option value="<?= $roleValue ?>" <?= ($user['role'] ?? '') === $roleValue ? 'selected' : '' ?>><?= $roleLabel ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <button type="submit" class="rounded-lg bg-red-600 px-2 py-1 font-semibold text-white hover:bg-red-500 md:col-span-4">Guardar cambios</button>
-                                        </form>
-                                        <div class="flex flex-wrap gap-2">
-                                            <?php if (($user['status'] ?? 'active') === 'suspended') : ?>
-                                                <form action="/admin/users/<?= (int) $user['id'] ?>/unsuspend" method="post">
-                                                    <button type="submit" class="rounded-lg bg-emerald-500 px-3 py-1 font-semibold text-white hover:bg-emerald-400">Reactivar</button>
-                                                </form>
-                                            <?php else : ?>
-                                                <form action="/admin/users/<?= (int) $user['id'] ?>/suspend" method="post" class="flex items-center gap-2">
-                                                    <input type="text" name="reason" placeholder="Motivo (opcional)" class="rounded-lg border border-red-100 bg-red-50/40 px-2 py-1 text-xs text-gray-800 focus:border-red-400 focus:outline-none">
-                                                    <button type="submit" class="rounded-lg bg-rose-600 px-3 py-1 font-semibold text-white hover:bg-rose-500">Suspender</button>
-                                                </form>
-                                            <?php endif; ?>
-                                            <form action="/admin/users/<?= (int) $user['id'] ?>/impersonate" method="post">
-                                                <button type="submit" class="rounded-lg bg-gray-800 px-3 py-1 font-semibold text-white hover:bg-gray-700">Ingresar como</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <div class="rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <div class="border-b border-gray-100 p-6">
+        <h3 class="text-xl font-bold text-gray-900">Gestión de Usuarios</h3>
+    </div>
+
+    <?php $users = $usersPagination['items'] ?? []; ?>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50/50">
+                <tr class="text-[11px] uppercase tracking-wider text-gray-500">
+                    <th class="px-6 py-4 text-left font-semibold">Usuario</th>
+                    <th class="px-6 py-4 text-left font-semibold">Rol</th>
+                    <th class="px-6 py-4 text-left font-semibold">Estado</th>
+                    <th class="px-6 py-4 text-right font-semibold">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+                <?php foreach ($users as $user) : ?>
+                    <tr class="group hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-900"><?= htmlspecialchars((string) $user['email']) ?></span>
+                                <span class="text-xs text-gray-500"><?= htmlspecialchars((string) ($user['business_name'] ?? 'Sin nombre comercial')) ?></span>
+                                <?php if (!empty($user['whatsapp'])): ?>
+                                    <span class="text-[10px] text-emerald-600 font-medium mt-1">WA: <?= htmlspecialchars($user['whatsapp']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 uppercase">
+                                <?= htmlspecialchars((string) $user['role']) ?>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <?php $isSuspended = ($user['status'] ?? 'active') === 'suspended'; ?>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <?= $isSuspended ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' ?>">
+                                <span class="mr-1.5 h-1.5 w-1.5 rounded-full <?= $isSuspended ? 'bg-amber-500' : 'bg-emerald-500' ?>"></span>
+                                <?= ucfirst(htmlspecialchars((string) ($user['status'] ?? 'active'))) ?>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-end gap-3">
+                                <form action="/admin/users/<?= (int) $user['id'] ?>/impersonate" method="post" title="Ingresar como usuario">
+                                    <button type="submit" class="text-gray-400 hover:text-gray-900 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+                                <button type="button" class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+
+                                <?php if ($isSuspended) : ?>
+                                    <form action="/admin/users/<?= (int) $user['id'] ?>/unsuspend" method="post">
+                                        <button type="submit" class="text-emerald-600 hover:text-emerald-700 text-xs font-bold">Activar</button>
+                                    </form>
+                                <?php else : ?>
+                                    <form action="/admin/users/<?= (int) $user['id'] ?>/suspend" method="post" class="flex items-center gap-1">
+                                        <input type="text" name="reason" placeholder="Motivo" class="hidden md:block w-20 rounded border-gray-200 py-0.5 px-1 text-[10px] focus:ring-0">
+                                        <button type="submit" class="text-rose-600 hover:text-rose-700 text-xs font-bold">Suspender</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
     </div>
 
     <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-red-100 bg-white/95 px-3 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/80">
