@@ -94,6 +94,12 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
                             <?= $item['label'] ?>
                         </a>
                     <?php endforeach; ?>
+
+                    <?php if (($currentUser['role'] ?? null) === 'business' && isset($currentUser['id'])) : ?>
+                        <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="rounded-full bg-red-50 text-red-700 px-4 py-1.5 font-semibold hover:bg-red-100 transition-all">
+                            Mi Negocio
+                        </a>
+                    <?php endif; ?>
                     
                     <?php if ($currentUser === null) : ?>
                         <a href="/login" class="rounded-full bg-gray-900 text-white px-4 py-1.5 hover:bg-gray-800 transition shadow-sm">

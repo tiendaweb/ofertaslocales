@@ -9,25 +9,33 @@ $socialButtons = array_values(array_filter([
         'name' => 'Instagram',
         'icon' => 'instagram',
         'url' => $business['instagram_url'] ?? null,
-        'color' => 'text-pink-600',
+        'container' => 'bg-rose-50 border-rose-200 text-rose-700 group-hover:bg-gradient-to-br group-hover:from-fuchsia-500 group-hover:via-rose-500 group-hover:to-violet-500 group-hover:border-transparent group-hover:text-white',
+        'focus' => 'focus-visible:ring-rose-500/60',
+        'aria_label' => 'Abrir Instagram del negocio',
     ],
     [
         'name' => 'Facebook',
         'icon' => 'facebook',
         'url' => $business['facebook_url'] ?? null,
-        'color' => 'text-blue-600',
+        'container' => 'bg-blue-50 border-blue-200 text-blue-700 group-hover:bg-[#1877F2] group-hover:border-[#1877F2] group-hover:text-white',
+        'focus' => 'focus-visible:ring-blue-500/60',
+        'aria_label' => 'Abrir Facebook del negocio',
     ],
     [
         'name' => 'TikTok',
-        'icon' => 'music-2',
+        'icon' => 'music-4',
         'url' => $business['tiktok_url'] ?? null,
-        'color' => 'text-gray-700',
+        'container' => 'bg-zinc-100 border-zinc-300 text-zinc-900 group-hover:bg-zinc-900 group-hover:border-cyan-300 group-hover:text-cyan-200',
+        'focus' => 'focus-visible:ring-cyan-400/70',
+        'aria_label' => 'Abrir TikTok del negocio',
     ],
     [
         'name' => 'Web',
         'icon' => 'globe',
         'url' => $business['website_url'] ?? null,
-        'color' => 'text-gray-600',
+        'container' => 'bg-slate-100 border-slate-300 text-slate-700 group-hover:bg-slate-700 group-hover:border-slate-800 group-hover:text-white',
+        'focus' => 'focus-visible:ring-slate-500/70',
+        'aria_label' => 'Abrir sitio web del negocio',
     ],
 ], static fn (array $social): bool => is_string($social['url']) && $social['url'] !== ''));
 ?>
@@ -69,9 +77,15 @@ $socialButtons = array_values(array_filter([
             <?php if ($socialButtons !== []) : ?>
                 <div class="flex gap-4 mb-8 overflow-x-auto pb-2 hide-scrollbar">
                     <?php foreach ($socialButtons as $social) : ?>
-                        <a href="<?= htmlspecialchars((string) $social['url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center gap-2 group">
-                            <div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-red-50 group-hover:border-red-100 transition-all">
-                                <i data-lucide="<?= htmlspecialchars((string) $social['icon'], ENT_QUOTES, 'UTF-8') ?>" class="w-6 h-6 <?= htmlspecialchars((string) $social['color'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                        <a
+                            href="<?= htmlspecialchars((string) $social['url'], ENT_QUOTES, 'UTF-8') ?>"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="<?= htmlspecialchars((string) ($social['aria_label'] ?? ('Abrir ' . $social['name'] . ' del negocio')), ENT_QUOTES, 'UTF-8') ?>"
+                            class="flex flex-col items-center gap-2 group rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 <?= htmlspecialchars((string) $social['focus'], ENT_QUOTES, 'UTF-8') ?>"
+                        >
+                            <div class="w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-200 <?= htmlspecialchars((string) $social['container'], ENT_QUOTES, 'UTF-8') ?>">
+                                <i data-lucide="<?= htmlspecialchars((string) $social['icon'], ENT_QUOTES, 'UTF-8') ?>" class="w-6 h-6"></i>
                             </div>
                             <span class="text-[10px] font-bold text-gray-500 uppercase"><?= htmlspecialchars((string) $social['name'], ENT_QUOTES, 'UTF-8') ?></span>
                         </a>

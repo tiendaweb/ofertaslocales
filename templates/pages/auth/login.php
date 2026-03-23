@@ -6,9 +6,9 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
 ?>
 
 <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
-    <section class="max-w-md w-full bg-white rounded-[2.5rem] border border-gray-100 p-8 md:p-10 shadow-xl shadow-red-900/5">
+    <section class="max-w-md w-full bg-white rounded-[2.5rem] border border-red-100 p-8 md:p-10 shadow-xl shadow-red-900/10">
         <div class="text-center mb-8">
-            <span class="inline-block py-1 px-3 rounded-full bg-red-50 text-red-600 text-xs font-bold uppercase tracking-widest mb-4">
+            <span class="inline-block py-1 px-3 rounded-full border border-red-100 bg-red-50 text-red-700 text-xs font-bold uppercase tracking-widest mb-4">
                 Acceso Seguro
             </span>
             <h2 class="text-3xl font-black text-gray-900 mb-2">¡Hola de nuevo!</h2>
@@ -27,12 +27,12 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
                 <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Correo electrónico</label>
                 <div class="relative">
                     <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                    <input 
+                    <input
                         name="email" 
                         type="email" 
                         value="<?= htmlspecialchars((string) ($old['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" 
                         placeholder="ejemplo@correo.com" 
-                        class="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-12 pr-4 py-3.5 text-gray-900 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none"
+                        class="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-12 pr-4 py-3.5 text-gray-900 transition-all outline-none focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"
                     >
                 </div>
                 <?php if (($formErrors['email'] ?? null) !== null) : ?>
@@ -49,11 +49,11 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
                 </div>
                 <div class="relative">
                     <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                    <input 
+                    <input
                         name="password" 
                         type="password" 
                         placeholder="••••••••" 
-                        class="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-12 pr-4 py-3.5 text-gray-900 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none"
+                        class="w-full rounded-2xl border border-gray-200 bg-gray-50 pl-12 pr-4 py-3.5 text-gray-900 transition-all outline-none focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"
                     >
                 </div>
                 <?php if (($formErrors['password'] ?? null) !== null) : ?>
@@ -63,7 +63,7 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
                 <?php endif; ?>
             </div>
 
-            <button type="submit" class="w-full rounded-2xl bg-red-600 hover:bg-red-700 px-4 py-4 font-bold text-white shadow-lg shadow-red-600/20 transition-all active:scale-[0.98]">
+            <button type="submit" class="w-full rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 px-4 py-4 font-bold text-white shadow-lg shadow-red-600/25 transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-600/35 active:scale-[0.98]">
                 Entrar al panel
             </button>
         </form>

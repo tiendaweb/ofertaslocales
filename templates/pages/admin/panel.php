@@ -37,6 +37,20 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
 ?>
 
 <section class="max-w-7xl mx-auto space-y-8 text-black">
+    <?php if (($currentUser['role'] ?? null) === 'business' && isset($currentUser['id'])) : ?>
+        <article class="rounded-3xl border border-red-100 bg-white p-4 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-red-500">Perfil público</p>
+                    <p class="text-sm text-gray-600">Gestiona tus ofertas y revisa cómo ve tu negocio la audiencia.</p>
+                </div>
+                <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/30">
+                    <i data-lucide="store" class="h-4 w-4"></i>
+                    Mi Negocio
+                </a>
+            </div>
+        </article>
+    <?php endif; ?>
     
     <article class="rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 md:p-8">
         <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
