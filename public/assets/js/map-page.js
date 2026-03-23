@@ -133,6 +133,7 @@
         refreshModalCountdown();
         modalWhatsapp.href = `https://wa.me/${offer.whatsapp}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasCerca. Sigue disponible?`)}`;
         modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
 
         if (window.lucide) {
             window.lucide.createIcons();
@@ -145,6 +146,8 @@
         if (modal) {
             modal.classList.add('hidden');
         }
+
+        document.body.classList.remove('overflow-hidden');
     };
 
     const updateOffersDistanceUI = () => {
