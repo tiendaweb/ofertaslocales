@@ -45,6 +45,10 @@ class AuthService
             return null;
         }
 
+        if (($account['status'] ?? 'active') !== 'active' || (int) ($account['is_suspended'] ?? 0) === 1) {
+            return null;
+        }
+
         return $account;
     }
 
@@ -54,7 +58,49 @@ class AuthService
             session_regenerate_id(true);
         }
 
-        $_SESSION['auth'] = [
+        $_SESSION['auth'] = $this->buildSessionPayload($account);
+    }
+
+    public function impersonate(array $account, int $impersonatorId): void
+    {
+        $_SESSION['auth'] = $this->buildSessionPayload($account) + [
+            'impersonator_id' => $impersonatorId,
+        ];
+    }
+
+    public function isImpersonating(): bool
+    {
+        return isset($_SESSION['auth']['impersonator_id']);
+    }
+
+    public function stopImpersonation(): void
+    {
+        $impersonatorId = (int) ($_SESSION['auth']['impersonator_id'] ?? 0);
+        if ($impersonatorId <= 0) {
+            return;
+        }
+
+        $admin = $this->accountRepository->findById($impersonatorId);
+        if ($admin === null) {
+            $this->logout();
+
+            return;
+        }
+
+        $_SESSION['auth'] = $this->buildSessionPayload($admin);
+    }
+
+    public function logout(): void
+    {
+        unset($_SESSION['auth']);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+    }
+
+    private function buildSessionPayload(array $account): array
+    {
+        return [
             'user' => [
                 'id' => (int) $account['id'],
                 'email' => (string) $account['email'],
@@ -64,13 +110,5 @@ class AuthService
             ],
             'logged_in_at' => gmdate('Y-m-d H:i:s'),
         ];
-    }
-
-    public function logout(): void
-    {
-        unset($_SESSION['auth']);
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id(true);
-        }
     }
 }

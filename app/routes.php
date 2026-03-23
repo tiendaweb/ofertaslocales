@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 use App\Application\Actions\Admin\AdminDashboardAction;
+use App\Application\Actions\Admin\CreateAdminUserAction;
+use App\Application\Actions\Admin\ImpersonateAdminUserAction;
+use App\Application\Actions\Admin\ListAdminUsersAction;
+use App\Application\Actions\Admin\SuspendAdminUserAction;
+use App\Application\Actions\Admin\UnsuspendAdminUserAction;
+use App\Application\Actions\Admin\UpdateAdminUserAction;
 use App\Application\Actions\Admin\UpdateApprovalModeAction;
 use App\Application\Actions\Admin\UpdateOfferStatusAction;
 use App\Application\Actions\Admin\UpdateSeoAction;
@@ -12,6 +18,7 @@ use App\Application\Actions\Auth\LoginSubmitAction;
 use App\Application\Actions\Auth\LogoutAction;
 use App\Application\Actions\Auth\RegisterPageAction;
 use App\Application\Actions\Auth\RegisterSubmitAction;
+use App\Application\Actions\Auth\StopImpersonationAction;
 use App\Application\Actions\Business\BusinessDashboardAction;
 use App\Application\Actions\Business\CreateOfferAction;
 use App\Application\Actions\Public\BusinessesAction;
@@ -43,6 +50,9 @@ return function (App $app) {
     $app->get('/register', RegisterPageAction::class)->setName('registro');
     $app->post('/register', RegisterSubmitAction::class);
     $app->post('/logout', LogoutAction::class)->setName('logout');
+    $app->post('/impersonation/stop', StopImpersonationAction::class)
+        ->add(RequireAuthenticationMiddleware::class)
+        ->setName('impersonation.stop');
 
     $app->group('/panel', function (Group $group) {
         $group->get('', BusinessDashboardAction::class)->setName('panel');
@@ -55,6 +65,14 @@ return function (App $app) {
         $group->post('/approval-mode', UpdateApprovalModeAction::class)->setName('admin.approval-mode');
         $group->post('/settings', UpdateSettingsAction::class)->setName('admin.settings');
         $group->post('/seo/{page_name}', UpdateSeoAction::class)->setName('admin.seo');
+        $group->group('/users', function (Group $usersGroup) {
+            $usersGroup->get('', ListAdminUsersAction::class)->setName('admin.users.index');
+            $usersGroup->post('', CreateAdminUserAction::class)->setName('admin.users.create');
+            $usersGroup->post('/{id}', UpdateAdminUserAction::class)->setName('admin.users.update');
+            $usersGroup->post('/{id}/suspend', SuspendAdminUserAction::class)->setName('admin.users.suspend');
+            $usersGroup->post('/{id}/unsuspend', UnsuspendAdminUserAction::class)->setName('admin.users.unsuspend');
+            $usersGroup->post('/{id}/impersonate', ImpersonateAdminUserAction::class)->setName('admin.users.impersonate');
+        })->add(RequireAdminMiddleware::class);
     })->add(RequireAdminMiddleware::class)->add(RequireAuthenticationMiddleware::class);
 
     $app->group('/users', function (Group $group) {

@@ -12,7 +12,7 @@ use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class AdminDashboardAction extends PageAction
+class ListAdminUsersAction extends PageAction
 {
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
@@ -34,7 +34,7 @@ class AdminDashboardAction extends PageAction
         return $this->renderPage($response, 'pages/admin/admin.php', [
             'pageTitle' => 'Administración | OfertasCerca',
             'currentRoute' => 'admin',
-            'activeTab' => (string) ($queryParams['tab'] ?? 'moderacion'),
+            'activeTab' => 'usuarios',
             'pendingOffers' => $this->offerRepository->countPendingOffers(),
             'adminCount' => $this->accountRepository->countByRole('admin'),
             'businessCount' => $this->accountRepository->countByRole('business'),

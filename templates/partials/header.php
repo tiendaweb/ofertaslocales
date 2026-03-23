@@ -20,6 +20,7 @@ $isPublicRoute = in_array($currentRoute ?? '', array_keys($publicNavigationItems
 $isAdminRoute = ($currentRoute ?? '') === 'admin';
 $publishHref = ($currentRoute ?? '') === 'inicio' ? '#publicar' : '/#publicar';
 $currentUser = $currentUser ?? null;
+$isImpersonating = isset($_SESSION['auth']['impersonator_id']);
 ?>
 <?php if ($isPublicRoute) : ?>
     <nav class="sticky top-0 z-50 bg-white shadow-sm px-4 py-3 flex justify-between items-center">
@@ -94,6 +95,13 @@ $currentUser = $currentUser ?? null;
                 <?php endif; ?>
                 <?php if ($currentUser !== null) : ?>
                     <div class="flex items-center gap-3 text-sm text-slate-300">
+                        <?php if ($isImpersonating) : ?>
+                            <form action="/impersonation/stop" method="post">
+                                <button type="submit" class="rounded-full border border-amber-400/30 bg-amber-500/20 px-4 py-2 text-amber-200 hover:bg-amber-500/30 transition">
+                                    Volver a admin
+                                </button>
+                            </form>
+                        <?php endif; ?>
                         <span>
                             Sesión: <strong class="text-white"><?= htmlspecialchars((string) ($currentUser['business_name'] ?? $currentUser['email']), ENT_QUOTES, 'UTF-8') ?></strong>
                         </span>
