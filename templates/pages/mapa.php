@@ -45,9 +45,45 @@ declare(strict_types=1);
 <section class="max-w-6xl mx-auto px-4 py-16">
     <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <article class="bg-white rounded-3xl overflow-hidden shadow-lg border border-gray-100">
-            <div class="p-6 md:p-8 border-b border-gray-100">
-                <h2 class="text-2xl md:text-3xl font-bold mb-2">📍 Ofertas activas en el mapa</h2>
-                <p class="text-gray-600">Desplazate, acercate y tocá cada punto para ver información completa del comercio y su promoción.</p>
+            <div class="p-6 md:p-8 border-b border-gray-100 space-y-5">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2">📍 Ofertas activas en el mapa</h2>
+                    <p class="text-gray-600">Desplazate, acercate y tocá cada punto para ver información completa del comercio y su promoción.</p>
+                </div>
+                <div class="grid gap-3 md:grid-cols-[1fr_auto_auto]">
+                    <label for="map-location-search" class="sr-only">Buscar ubicación</label>
+                    <input
+                        id="map-location-search"
+                        type="search"
+                        placeholder="Buscar ubicación (ej: Palermo, CABA)"
+                        class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-300"
+                    >
+                    <button
+                        type="button"
+                        id="map-location-search-button"
+                        class="rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-3 text-sm transition"
+                    >
+                        Buscar ubicación
+                    </button>
+                    <button
+                        type="button"
+                        id="map-use-my-location"
+                        class="rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold px-4 py-3 text-sm transition"
+                    >
+                        Usar mi ubicación
+                    </button>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                    <button
+                        type="button"
+                        id="map-center-user"
+                        class="hidden inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 font-semibold hover:bg-red-100 transition"
+                    >
+                        <i data-lucide="locate-fixed" class="w-4 h-4"></i>
+                        Centrar en tu ubicación
+                    </button>
+                    <p id="map-location-feedback" class="min-h-6"></p>
+                </div>
             </div>
             <div id="offers-map" class="h-[28rem] w-full bg-gray-200"></div>
         </article>
@@ -60,16 +96,21 @@ declare(strict_types=1);
                 </div>
                 <a href="/ofertas" class="text-sm font-semibold text-red-600 hover:text-red-700 transition">Ver grilla</a>
             </div>
-            <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-1">
+            <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-1" id="map-offers-list">
                 <?php foreach ($mapOffers as $offer) : ?>
                     <button
                         type="button"
                         data-map-offer-trigger="<?= (int) $offer['id'] ?>"
+                        data-offer-lat="<?= htmlspecialchars((string) $offer['lat'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-offer-lon="<?= htmlspecialchars((string) $offer['lon'], ENT_QUOTES, 'UTF-8') ?>"
                         class="w-full text-left border border-gray-100 rounded-2xl p-4 hover:border-red-200 hover:bg-red-50/40 transition"
                     >
                         <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2"><?= htmlspecialchars($offer['category'], ENT_QUOTES, 'UTF-8') ?></p>
                         <h3 class="font-bold text-gray-900 mb-1"><?= htmlspecialchars($offer['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                        <p class="text-red-600 font-semibold mb-3"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+                            <p class="text-red-600 font-semibold"><?= htmlspecialchars($offer['title'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <span data-offer-distance-badge class="hidden text-xs font-semibold rounded-full bg-red-50 text-red-700 px-2.5 py-1 whitespace-nowrap"></span>
+                        </div>
                         <div class="space-y-2 text-sm text-gray-500">
                             <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i><?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></p>
                             <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><?= htmlspecialchars($offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
