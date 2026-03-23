@@ -429,6 +429,184 @@
         window.setTimeout(() => map.invalidateSize(), 120);
     };
 
+
+    const setupInlineEditMode = () => {
+        const config = window.inlineEditConfig || {};
+        if (!config.isAdmin) {
+            return;
+        }
+
+        const toggleButton = document.querySelector('[data-inline-edit-toggle]');
+        const panel = document.querySelector('[data-inline-edit-panel]');
+        const feedbackNode = document.querySelector('[data-inline-edit-feedback]');
+        const saveButton = document.querySelector('[data-inline-edit-save]');
+        const cancelButton = document.querySelector('[data-inline-edit-cancel]');
+        const editableNodes = Array.from(document.querySelectorAll('[data-editable-key]'));
+
+        if (!toggleButton || !panel || editableNodes.length === 0) {
+            return;
+        }
+
+        const editors = new Map();
+        let isEditing = false;
+
+        const setFeedback = (message, tone = 'neutral') => {
+            if (!feedbackNode) {
+                return;
+            }
+
+            feedbackNode.textContent = message;
+            feedbackNode.classList.remove('text-indigo-600', 'text-emerald-700', 'text-rose-700');
+            if (tone === 'success') {
+                feedbackNode.classList.add('text-emerald-700');
+                return;
+            }
+
+            if (tone === 'error') {
+                feedbackNode.classList.add('text-rose-700');
+                return;
+            }
+
+            feedbackNode.classList.add('text-indigo-600');
+        };
+
+        const buildEditor = (node) => {
+            const key = node.dataset.editableKey || '';
+            const attr = node.dataset.editableAttr || 'text';
+            const type = node.dataset.editableType || 'text';
+            const initialValue = attr === 'href' ? (node.getAttribute('href') || '') : (node.textContent || '').trim();
+            const input = type === 'textarea' ? document.createElement('textarea') : document.createElement('input');
+
+            if (type !== 'textarea') {
+                input.setAttribute('type', type === 'url' ? 'url' : 'text');
+            }
+
+            input.value = initialValue;
+            input.className = 'mt-2 w-full rounded-xl border border-indigo-200 bg-white/90 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40';
+            input.setAttribute('data-inline-editor-input', 'true');
+            input.setAttribute('data-inline-editor-key', key);
+            input.hidden = true;
+
+            node.insertAdjacentElement('afterend', input);
+            editors.set(key, {
+                key,
+                node,
+                input,
+                attr,
+                originalValue: initialValue,
+            });
+        };
+
+        const applyValue = (editor, value) => {
+            if (editor.attr === 'href') {
+                editor.node.setAttribute('href', value);
+                return;
+            }
+
+            editor.node.textContent = value;
+        };
+
+        editableNodes.forEach(buildEditor);
+
+        const setMode = (enabled) => {
+            isEditing = enabled;
+            panel.classList.toggle('hidden', !enabled);
+            toggleButton.textContent = enabled ? 'Desactivar Modo Edición' : 'Activar Modo Edición';
+
+            editors.forEach((editor) => {
+                editor.input.hidden = !enabled;
+                editor.node.classList.toggle('ring-2', enabled);
+                editor.node.classList.toggle('ring-indigo-300', enabled);
+                editor.node.classList.toggle('rounded-md', enabled);
+                if (enabled) {
+                    editor.input.value = editor.attr === 'href'
+                        ? (editor.node.getAttribute('href') || '')
+                        : (editor.node.textContent || '').trim();
+                }
+            });
+
+            if (!enabled) {
+                setFeedback('');
+            } else {
+                setFeedback('Editá los campos marcados y guardá para aplicar cambios.');
+            }
+        };
+
+        const rollback = () => {
+            editors.forEach((editor) => {
+                applyValue(editor, editor.originalValue);
+                editor.input.value = editor.originalValue;
+            });
+        };
+
+        const saveChanges = async () => {
+            const fields = {};
+
+            editors.forEach((editor) => {
+                const nextValue = editor.input.value.trim();
+                applyValue(editor, nextValue);
+                if (nextValue !== editor.originalValue) {
+                    fields[editor.key] = nextValue;
+                }
+            });
+
+            if (Object.keys(fields).length === 0) {
+                setFeedback('No hay cambios para guardar.');
+                return;
+            }
+
+            saveButton?.setAttribute('disabled', 'disabled');
+            setFeedback('Guardando cambios...');
+
+            try {
+                const response = await fetch(config.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ fields }),
+                    credentials: 'same-origin',
+                });
+
+                const payload = await response.json();
+                if (!response.ok || !payload.ok) {
+                    rollback();
+                    setFeedback(payload.message || 'No se pudieron guardar los cambios.', 'error');
+                    return;
+                }
+
+                Object.keys(fields).forEach((key) => {
+                    const editor = editors.get(key);
+                    if (editor) {
+                        editor.originalValue = fields[key];
+                    }
+                });
+
+                setFeedback(payload.message || 'Cambios guardados correctamente.', 'success');
+                setMode(false);
+            } catch (error) {
+                rollback();
+                setFeedback('Error de red al guardar. Se revirtieron los cambios visuales.', 'error');
+            } finally {
+                saveButton?.removeAttribute('disabled');
+            }
+        };
+
+        toggleButton.addEventListener('click', () => {
+            setMode(!isEditing);
+        });
+
+        saveButton?.addEventListener('click', () => {
+            void saveChanges();
+        });
+
+        cancelButton?.addEventListener('click', () => {
+            rollback();
+            setMode(false);
+        });
+    };
+
     const updateCountdowns = () => {
         document.querySelectorAll('[data-expiration]').forEach((node) => {
             node.textContent = formatRemainingTime(node.getAttribute('data-expiration') || '');
@@ -438,6 +616,7 @@
     setupOffersListing();
     setupOfferForm();
     setupHomeMapPreview();
+    setupInlineEditMode();
     updateCountdowns();
     window.setInterval(updateCountdowns, 1000);
 })();

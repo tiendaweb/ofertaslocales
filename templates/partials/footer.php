@@ -14,18 +14,18 @@ $isAdminRoute = ($currentRoute ?? '') === 'admin';
             </div>
             <div class="text-sm">
                 <p>© <?= htmlspecialchars((string) $currentYear, ENT_QUOTES, 'UTF-8') ?> Ofertas Cerca | Generador de clientes locales</p>
-                <p class="mt-1">Hecho con ❤️ para potenciar negocios de barrio.</p>
+                <p class="mt-1" data-editable-key="footer_tagline" data-editable-type="text"><?= htmlspecialchars((string) ($labels['footer_tagline'] ?? 'Hecho con ❤️ para potenciar negocios de barrio.'), ENT_QUOTES, 'UTF-8') ?></p>
             </div>
             <div class="flex gap-4 text-sm">
-                <a href="/register" class="hover:text-white transition">Publicar</a>
-                <a href="/login" class="hover:text-white transition">Ingresar</a>
-                <a href="/mapa" class="hover:text-white transition">Mapa</a>
+                <a href="<?= htmlspecialchars((string) ($labels['footer_link_publish_url'] ?? '/register'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_publish_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Publicar</a>
+                <a href="<?= htmlspecialchars((string) ($labels['footer_link_login_url'] ?? '/login'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_login_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Ingresar</a>
+                <a href="<?= htmlspecialchars((string) ($labels['footer_link_map_url'] ?? '/mapa'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_map_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Mapa</a>
             </div>
         </div>
     </footer>
 
     <a
-        href="https://wa.me/5491112345678?text=Hola,%20tengo%20una%20consulta%20sobre%20OfertasCerca"
+        href="<?= htmlspecialchars((string) ($labels['footer_whatsapp_url'] ?? 'https://wa.me/5491112345678?text=Hola,%20tengo%20una%20consulta%20sobre%20OfertasCerca'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_whatsapp_url" data-editable-attr="href" data-editable-type="url"
         target="_blank"
         rel="noreferrer"
         class="fixed bottom-24 right-4 md:bottom-6 md:right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-40 flex items-center justify-center"
