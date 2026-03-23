@@ -63,7 +63,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findByEmail(string $email): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, status, is_suspended, created_at
+            'SELECT id, email, password, role, business_name, whatsapp, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, created_at
              FROM users
              WHERE email = :email
              LIMIT 1'
@@ -77,7 +77,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findById(int $id): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
+            'SELECT id, email, password, role, business_name, whatsapp, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
              FROM users
              WHERE id = :id
              LIMIT 1'
@@ -91,8 +91,8 @@ class SqliteAccountRepository implements AccountRepository
     public function create(array $data): array
     {
         $statement = $this->pdo->prepare(
-            'INSERT INTO users (email, password, role, business_name, whatsapp, status, is_suspended, created_at, updated_at)
-             VALUES (:email, :password, :role, :business_name, :whatsapp, :status, :is_suspended, :created_at, :updated_at)'
+            'INSERT INTO users (email, password, role, business_name, whatsapp, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, created_at, updated_at)
+             VALUES (:email, :password, :role, :business_name, :whatsapp, :street, :street_number, :postal_code, :city, :municipality, :province, :address_lat, :address_lon, :status, :is_suspended, :created_at, :updated_at)'
         );
 
         $createdAt = gmdate('Y-m-d H:i:s');
@@ -102,6 +102,14 @@ class SqliteAccountRepository implements AccountRepository
             'role' => $data['role'] ?? 'business',
             'business_name' => isset($data['business_name']) ? trim((string) $data['business_name']) : null,
             'whatsapp' => isset($data['whatsapp']) ? trim((string) $data['whatsapp']) : null,
+            'street' => isset($data['street']) ? trim((string) $data['street']) : null,
+            'street_number' => isset($data['street_number']) ? trim((string) $data['street_number']) : null,
+            'postal_code' => isset($data['postal_code']) ? trim((string) $data['postal_code']) : null,
+            'city' => isset($data['city']) ? trim((string) $data['city']) : null,
+            'municipality' => isset($data['municipality']) ? trim((string) $data['municipality']) : null,
+            'province' => isset($data['province']) ? trim((string) $data['province']) : null,
+            'address_lat' => isset($data['address_lat']) ? (float) $data['address_lat'] : null,
+            'address_lon' => isset($data['address_lon']) ? (float) $data['address_lon'] : null,
             'status' => $data['status'] ?? 'active',
             'is_suspended' => ($data['status'] ?? 'active') === 'suspended' ? 1 : 0,
             'created_at' => $createdAt,

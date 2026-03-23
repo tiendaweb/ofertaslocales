@@ -23,7 +23,7 @@ $flash = $flash ?? [];
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <?php if (($currentRoute ?? '') === 'mapa') : ?>
+    <?php if (in_array(($currentRoute ?? ''), ['mapa', 'registro'], true)) : ?>
         <link
             rel="stylesheet"
             href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -76,7 +76,7 @@ $flash = $flash ?? [];
         <script id="page-data" type="application/json"><?= $pageDataJson ?></script>
     <?php endif; ?>
 
-    <?php if (($currentRoute ?? '') === 'mapa') : ?>
+    <?php if (in_array(($currentRoute ?? ''), ['mapa', 'registro'], true)) : ?>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <?php endif; ?>
 
