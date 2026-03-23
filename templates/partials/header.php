@@ -34,6 +34,17 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
             </div>
 
             <div class="flex items-center gap-3">
+
+                <?php if ($currentUser !== null && ($currentUser['role'] ?? '') === 'admin') : ?>
+                    <button
+                        type="button"
+                        id="inline-edit-toggle"
+                        data-inline-edit-toggle
+                        class="hidden sm:inline-flex bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full font-semibold text-sm hover:bg-indigo-100 transition"
+                    >
+                        Activar Modo Edición
+                    </button>
+                <?php endif; ?>
                 <a href="<?= htmlspecialchars($publishHref, ENT_QUOTES, 'UTF-8') ?>"
                    class="hidden sm:inline-flex bg-red-50 text-red-600 px-4 py-2 rounded-full font-semibold text-sm hover:bg-red-100 transition">
                     Publicar Gratis

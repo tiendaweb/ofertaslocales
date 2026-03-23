@@ -48,6 +48,27 @@ $flash = $flash ?? [];
 <body class="<?= $isPublicRoute ? 'min-h-screen bg-gray-50 font-sans text-gray-800' : ($isAdminRoute ? 'min-h-screen text-gray-800' : 'text-slate-100 min-h-screen') ?>">
     <?php include __DIR__ . '/partials/header.php'; ?>
 
+    <?php if ($isPublicRoute && ($currentUser['role'] ?? '') === 'admin') : ?>
+        <section class="max-w-6xl mx-auto px-4 pt-4" id="inline-edit-toolbar" data-inline-edit-toolbar>
+            <div class="hidden rounded-2xl border border-indigo-200 bg-indigo-50/80 px-4 py-3 md:px-5 md:py-4" data-inline-edit-panel>
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <p class="text-sm text-indigo-700 font-medium">
+                        Modo edición activo: podés cambiar los textos y URLs marcados sin salir de esta página.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button type="button" data-inline-edit-cancel class="rounded-xl border border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 transition">
+                            Cancelar
+                        </button>
+                        <button type="button" data-inline-edit-save class="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+                            Guardar cambios
+                        </button>
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-indigo-600" data-inline-edit-feedback></p>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <main class="<?= $isPublicRoute ? 'pb-36 md:pb-36' : ($isAdminRoute ? 'max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-28' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10') ?>">
         <?php if (($flash['success'] ?? null) !== null || ($flash['error'] ?? null) !== null) : ?>
             <section class="<?= $isPublicRoute ? 'max-w-6xl mx-auto px-4 pt-6' : 'mb-6' ?>">
@@ -82,6 +103,12 @@ $flash = $flash ?? [];
     <?php endif; ?>
 
     <?php if ($isPublicRoute) : ?>
+        <script>
+            window.inlineEditConfig = {
+                isAdmin: <?= (($currentUser['role'] ?? '') === 'admin') ? 'true' : 'false' ?>,
+                endpoint: '/admin/inline-content',
+            };
+        </script>
         <script src="/assets/js/public-pages.js"></script>
     <?php endif; ?>
 

@@ -10,6 +10,7 @@ use App\Application\Actions\Admin\SuspendAdminUserAction;
 use App\Application\Actions\Admin\UnsuspendAdminUserAction;
 use App\Application\Actions\Admin\UpdateAdminUserAction;
 use App\Application\Actions\Admin\UpdateApprovalModeAction;
+use App\Application\Actions\Admin\UpdateInlineContentAction;
 use App\Application\Actions\Admin\UpdateOfferStatusAction;
 use App\Application\Actions\Admin\UpdateSeoAction;
 use App\Application\Actions\Admin\UpdateSettingsAction;
@@ -74,6 +75,7 @@ return function (App $app) {
         $group->post('/approval-mode', UpdateApprovalModeAction::class)->setName('admin.approval-mode');
         $group->post('/settings', UpdateSettingsAction::class)->setName('admin.settings');
         $group->post('/seo/{page_name}', UpdateSeoAction::class)->setName('admin.seo');
+        $group->post('/inline-content', UpdateInlineContentAction::class)->setName('admin.inline-content');
         $group->group('/users', function (Group $usersGroup) {
             $usersGroup->get('', ListAdminUsersAction::class)->setName('admin.users.index');
             $usersGroup->post('', CreateAdminUserAction::class)->setName('admin.users.create');

@@ -32,9 +32,15 @@ class HomeAction extends PageAction
             'hero_title',
             'hero_description',
             'hero_primary_cta',
+            'hero_primary_cta_url',
             'merchant_badge',
             'merchant_title',
             'merchant_description',
+            'footer_tagline',
+            'footer_whatsapp_url',
+            'footer_link_publish_url',
+            'footer_link_login_url',
+            'footer_link_map_url',
         ]);
         $seo = $this->seoRepository->findByPage('home') ?? [];
 
