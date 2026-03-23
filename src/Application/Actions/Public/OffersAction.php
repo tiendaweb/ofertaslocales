@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Public;
 
 use App\Application\Actions\PageAction;
-use App\Application\Service\PublicOfferService;
-use DateTimeImmutable;
+use App\Application\Service\PublicCatalogService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -15,56 +14,35 @@ class OffersAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly PublicOfferService $publicOfferService
+        private readonly PublicCatalogService $publicCatalogService
     ) {
         parent::__construct($logger, $renderer);
     }
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $offers = $this->publicOfferService->getActiveOffers();
+        $queryParams = $request->getQueryParams();
+        $selectedBusinessId = isset($queryParams['negocio']) && ctype_digit((string) $queryParams['negocio'])
+            ? (int) $queryParams['negocio']
+            : null;
+        $catalog = $this->publicCatalogService->buildCatalog($selectedBusinessId);
+
+        if ($selectedBusinessId !== null && $catalog['selectedBusiness'] === null) {
+            $selectedBusinessId = null;
+            $catalog = $this->publicCatalogService->buildCatalog();
+        }
 
         return $this->renderPage($response, 'pages/ofertas.php', [
             'pageTitle' => 'Ofertas activas | OfertasCerca',
             'currentRoute' => 'ofertas',
+            'offers' => $catalog['offers'],
+            'totalOffers' => count($catalog['offers']),
+            'selectedBusiness' => $catalog['selectedBusiness'],
             'pageData' => [
-                'offers' => array_map([$this, 'normalizeOffer'], $offers),
-                'categories' => array_merge(['Todas'], $this->publicOfferService->getActiveCategories()),
+                'offers' => $catalog['offers'],
+                'categories' => array_merge(['Todas'], $catalog['categories']),
+                'selectedBusinessId' => $catalog['selectedBusinessId'],
             ],
         ]);
-    }
-
-    private function normalizeOffer(array $offer): array
-    {
-        $expiresAt = new DateTimeImmutable($offer['expires_at']);
-
-        return [
-            'id' => (int) $offer['id'],
-            'business_name' => (string) $offer['business_name'],
-            'category' => (string) $offer['category'],
-            'title' => (string) $offer['title'],
-            'description' => (string) $offer['description'],
-            'image_url' => (string) $offer['image_url'],
-            'whatsapp' => (string) $offer['whatsapp'],
-            'location' => (string) $offer['location'],
-            'expires_at' => $expiresAt->format(DATE_ATOM),
-            'badge' => $this->resolveBadge($offer['category'], $expiresAt),
-        ];
-    }
-
-    private function resolveBadge(string $category, DateTimeImmutable $expiresAt): string
-    {
-        $remainingSeconds = $expiresAt->getTimestamp() - time();
-
-        if ($remainingSeconds <= 14_400) {
-            return '⏳ ÚLTIMAS HORAS';
-        }
-
-        return match ($category) {
-            'Gastronomía' => '🍕 IDEAL CENA',
-            'Ferretería' => '🔥 MÁS VENDIDO',
-            'Estética' => '✂️ TENDENCIA',
-            default => '✨ RECOMENDADA',
-        };
     }
 }

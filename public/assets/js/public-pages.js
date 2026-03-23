@@ -7,16 +7,19 @@
         const diffInSeconds = Math.max(0, Math.floor((expirationDate.getTime() - Date.now()) / 1000));
 
         if (diffInSeconds <= 0) {
-            return 'Finalizado';
+            return 'Finalizada';
         }
 
-        const hours = Math.floor(diffInSeconds / 3600);
+        const days = Math.floor(diffInSeconds / 86400);
+        const hours = Math.floor((diffInSeconds % 86400) / 3600);
         const minutes = Math.floor((diffInSeconds % 3600) / 60);
         const seconds = diffInSeconds % 60;
 
-        return [hours, minutes, seconds]
+        const time = [hours, minutes, seconds]
             .map((value) => value.toString().padStart(2, '0'))
             .join(':');
+
+        return days > 0 ? `${days}d ${time}` : time;
     };
 
     const buildWhatsAppLink = (offer) => {
@@ -52,34 +55,43 @@
         container.innerHTML = `
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 ${offers.map((item) => `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+                    <article class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
                         <div class="relative h-48 overflow-hidden bg-gray-200">
                             <img src="${item.image_url}" alt="${item.business_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             <div class="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
                                 ${item.badge}
                             </div>
-                            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur text-gray-800 text-xs font-medium px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
-                                <i data-lucide="map-pin" class="w-3 h-3"></i> ${item.location}
+                            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur text-gray-800 text-xs font-medium px-2 py-1 rounded-md shadow-sm flex items-center gap-1 max-w-[65%]">
+                                <i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>
+                                <span class="truncate">${item.location}</span>
                             </div>
                         </div>
                         <div class="p-5 flex-grow flex flex-col">
-                            <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">${item.category}</div>
-                            <h3 class="font-bold text-gray-900 text-lg mb-2">${item.business_name}</h3>
-                            <p class="text-red-600 font-bold text-xl mb-3 leading-tight">${item.title}</p>
+                            <div class="flex items-center justify-between gap-3 mb-2">
+                                <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">${item.category}</div>
+                                <a href="/ofertas?negocio=${item.user_id}" class="text-xs font-semibold text-red-600 hover:text-red-700 transition">${item.business_name}</a>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-lg mb-2 leading-tight">${item.title}</h3>
                             <p class="text-gray-500 text-sm mb-4">${item.description}</p>
-                            <div class="mt-auto">
-                                <div class="flex items-center gap-2 mb-4 bg-red-50 p-2.5 rounded-lg border border-red-100">
-                                    <i data-lucide="clock" class="text-red-500 w-[18px] h-[18px]"></i>
-                                    <span class="text-sm font-medium text-gray-700">Termina en:</span>
-                                    <span data-expiration="${item.expires_at}" class="text-red-600 font-bold ml-auto tabular-nums">${formatRemainingTime(item.expires_at)}</span>
+                            <div class="mt-auto space-y-3">
+                                <div class="rounded-xl border border-gray-100 bg-gray-50 p-3 text-sm text-gray-600">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="store" class="w-4 h-4 text-gray-500"></i>
+                                        <span class="font-semibold text-gray-900">${item.business_name}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="clock" class="text-red-500 w-[18px] h-[18px]"></i>
+                                        <span class="font-medium text-gray-700">Termina en:</span>
+                                        <span data-expiration="${item.expires_at}" class="text-red-600 font-bold ml-auto tabular-nums">${formatRemainingTime(item.expires_at)}</span>
+                                    </div>
                                 </div>
-                                <a href="${buildWhatsAppLink(item)}" target="_blank" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                <a href="${buildWhatsAppLink(item)}" target="_blank" rel="noreferrer" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
                                     <i data-lucide="message-circle" class="w-5 h-5"></i>
                                     Quiero esta oferta
                                 </a>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 `).join('')}
             </div>
         `;
@@ -96,7 +108,14 @@
         const offersContainer = document.getElementById('offers-container');
         const categorySelect = document.getElementById('inputCategory');
 
-        if (!filtersContainer || !offersContainer || offers.length === 0) {
+        if (categorySelect && categorySelect.children.length === 0) {
+            categorySelect.innerHTML = categories
+                .filter((category) => category !== 'Todas')
+                .map((category) => `<option value="${category}">${category}</option>`)
+                .join('');
+        }
+
+        if (!filtersContainer || !offersContainer) {
             return;
         }
 
@@ -112,13 +131,6 @@
                     ${category}
                 </button>
             `).join('');
-
-            if (categorySelect && categorySelect.children.length === 0) {
-                categorySelect.innerHTML = categories
-                    .filter((category) => category !== 'Todas')
-                    .map((category) => `<option value="${category}">${category}</option>`)
-                    .join('');
-            }
         };
 
         const renderOffers = () => {
@@ -189,7 +201,6 @@
             });
         }
     };
-
 
     const setupHomeMapPreview = () => {
         const previewContainer = document.getElementById('home-map-preview');

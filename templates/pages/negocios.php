@@ -9,8 +9,8 @@ declare(strict_types=1);
             <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
                 🏪 Comercios locales
             </span>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Negocios registrados con ofertas listas para activarse en tu zona.</h1>
-            <p class="text-lg text-red-100 mb-8 max-w-2xl">Explorá comercios de barrio, revisá cuántas promociones tienen activas y elegí con quién contactar primero.</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Negocios registrados con ofertas activas y publicaciones conectadas al resto del sitio.</h1>
+            <p class="text-lg text-red-100 mb-8 max-w-2xl">Cada ficha se construye desde las ofertas vigentes para que nombre, ubicación, categoría y cantidad de publicaciones se mantengan sincronizados con inicio, ofertas y mapa.</p>
             <div class="flex flex-wrap gap-4">
                 <div class="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 min-w-40">
                     <p class="text-sm text-red-100">Negocios visibles</p>
@@ -27,15 +27,15 @@ declare(strict_types=1);
             <ul class="space-y-4">
                 <li class="flex gap-3">
                     <i data-lucide="badge-check" class="text-green-500 w-5 h-5 mt-0.5"></i>
-                    <span>Comercios organizados por cantidad de ofertas activas.</span>
+                    <span>Nombre comercial, ubicación principal y categoría destacada del negocio.</span>
                 </li>
                 <li class="flex gap-3">
                     <i data-lucide="clock-3" class="text-red-500 w-5 h-5 mt-0.5"></i>
-                    <span>Próximo vencimiento visible para priorizar contactos rápidos.</span>
+                    <span>Cantidad de ofertas activas y próximo vencimiento para priorizar contactos.</span>
                 </li>
                 <li class="flex gap-3">
-                    <i data-lucide="map-pinned" class="text-blue-500 w-5 h-5 mt-0.5"></i>
-                    <span>Acceso directo al mapa para pasar de la lista al recorrido.</span>
+                    <i data-lucide="scroll-text" class="text-blue-500 w-5 h-5 mt-0.5"></i>
+                    <span>Acceso directo a sus publicaciones activas y navegación cruzada con el mapa.</span>
                 </li>
             </ul>
         </div>
@@ -48,27 +48,66 @@ declare(strict_types=1);
             <article class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2"><?= htmlspecialchars($business['role'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <h3 class="text-xl font-bold text-gray-900"><?= htmlspecialchars($business['business_name'] ?: 'Sin nombre comercial', ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2">Negocio activo</p>
+                        <h3 class="text-xl font-bold text-gray-900"><?= htmlspecialchars($business['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
                     </div>
                     <span class="bg-red-50 text-red-600 text-xs font-bold px-3 py-1 rounded-full"><?= (int) $business['active_offers'] ?> activas</span>
                 </div>
-                <p class="text-sm text-gray-500 flex items-center gap-2">
-                    <i data-lucide="mail" class="w-4 h-4"></i>
-                    <?= htmlspecialchars($business['email'], ENT_QUOTES, 'UTF-8') ?>
-                </p>
+
+                <div class="space-y-2 text-sm text-gray-500">
+                    <p class="flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i>
+                        <?= htmlspecialchars($business['location'], ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <i data-lucide="tag" class="w-4 h-4 text-yellow-500"></i>
+                        <?= htmlspecialchars($business['category'], ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-4 h-4 text-green-500"></i>
+                        <?= htmlspecialchars($business['whatsapp'], ENT_QUOTES, 'UTF-8') ?>
+                    </p>
+                </div>
+
                 <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 space-y-2">
                     <div class="flex items-center justify-between text-sm text-gray-600 gap-3">
                         <span class="flex items-center gap-2"><i data-lucide="store" class="w-4 h-4 text-red-500"></i> Estado visible</span>
-                        <span class="font-semibold text-gray-900"><?= (int) $business['active_offers'] > 0 ? 'Con promociones' : 'Sin promociones' ?></span>
+                        <span class="font-semibold text-gray-900">Con promociones</span>
                     </div>
                     <div class="flex items-center justify-between text-sm text-gray-600 gap-3">
                         <span class="flex items-center gap-2"><i data-lucide="timer" class="w-4 h-4 text-yellow-500"></i> Próximo cierre</span>
                         <span class="font-semibold text-gray-900"><?= htmlspecialchars($business['next_expiration_label'], ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
                 </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-[0.18em]">Publicaciones activas</h4>
+                        <a href="/ofertas?negocio=<?= (int) $business['id'] ?>" class="text-sm font-semibold text-red-600 hover:text-red-700 transition">
+                            Ver todas
+                        </a>
+                    </div>
+                    <div class="space-y-3">
+                        <?php foreach ($business['active_publications'] as $publication) : ?>
+                            <a
+                                href="/ofertas?negocio=<?= (int) $business['id'] ?>"
+                                class="block border border-gray-100 rounded-2xl p-4 hover:border-red-200 hover:bg-red-50/40 transition"
+                            >
+                                <p class="text-xs uppercase tracking-[0.18em] text-gray-400 font-semibold mb-2">
+                                    <?= htmlspecialchars($publication['category'], ENT_QUOTES, 'UTF-8') ?>
+                                </p>
+                                <p class="font-semibold text-gray-900 mb-1"><?= htmlspecialchars($publication['title'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <div class="space-y-1 text-sm text-gray-500">
+                                    <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i><?= htmlspecialchars($publication['location'], ENT_QUOTES, 'UTF-8') ?></p>
+                                    <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><?= htmlspecialchars($publication['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <div class="mt-auto flex gap-3">
-                    <a href="/ofertas" class="flex-1 bg-gray-900 text-white rounded-xl px-4 py-3 text-center font-semibold hover:bg-gray-800 transition">Ver ofertas</a>
+                    <a href="/ofertas?negocio=<?= (int) $business['id'] ?>" class="flex-1 bg-gray-900 text-white rounded-xl px-4 py-3 text-center font-semibold hover:bg-gray-800 transition">Ver publicaciones</a>
                     <a href="/mapa" class="flex-1 bg-red-50 text-red-600 rounded-xl px-4 py-3 text-center font-semibold hover:bg-red-100 transition">Ir al mapa</a>
                 </div>
             </article>
