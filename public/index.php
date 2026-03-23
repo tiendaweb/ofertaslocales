@@ -2,76 +2,56 @@
 
 declare(strict_types=1);
 
-// 1. Importaciones esenciales de PSR-7 y Slim
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Application\Handlers\HttpErrorHandler;
+use App\Application\Handlers\ShutdownHandler;
+use App\Application\ResponseEmitter\ResponseEmitter;
+use App\Application\Settings\SettingsInterface;
+use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
+use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+$containerBuilder = new ContainerBuilder();
+
+$settings = require __DIR__ . '/../app/settings.php';
+$settings($containerBuilder);
+
+$dependencies = require __DIR__ . '/../app/dependencies.php';
+$dependencies($containerBuilder);
+
+$repositories = require __DIR__ . '/../app/repositories.php';
+$repositories($containerBuilder);
+
+$container = $containerBuilder->build();
+AppFactory::setContainer($container);
+
 $app = AppFactory::create();
+$request = ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
 
-// 2. Ajuste para subdirectorios en Laragon
-$app->setBasePath('/static');
+$callableResolver = $app->getCallableResolver();
+$responseFactory = $app->getResponseFactory();
 
-// 3. Conexión PDO a SQLite
-// Asegurate de que la carpeta 'database' exista un nivel arriba de 'public'
-$dbPath = __DIR__ . '/../database/app.sqlite';
-try {
-    $pdo = new PDO("sqlite:" . $dbPath);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$appSettings = $container->get(SettingsInterface::class);
+$displayErrorDetails = $appSettings->get('displayErrorDetails');
+$logErrors = $appSettings->get('logError');
+$logErrorDetails = $appSettings->get('logErrorDetails');
 
-    // Inicializar tabla si no existe
-    $pdo->exec("CREATE TABLE IF NOT EXISTS tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )");
-} catch (PDOException $e) {
-    die("Error de conexión: " . $e->getMessage());
-}
-
-// 4. Middlewares
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
-$app->addErrorMiddleware(true, true, true);
 
-// --- RUTAS ---
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+register_shutdown_function($shutdownHandler);
 
-// 1. Ruta GET: Servir la UI
-$app->get('/', function (Request $request, Response $response) {
-    $htmlPath = __DIR__ . '/ui.html';
-    if (file_exists($htmlPath)) {
-        $html = file_get_contents($htmlPath);
-        $response->getBody()->write($html);
-    } else {
-        $response->getBody()->write("Error: No se encuentra el archivo ui.html en " . __DIR__);
-    }
-    return $response->withHeader('Content-Type', 'text/html');
-});
+$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, $logErrors, $logErrorDetails);
+$errorMiddleware->setDefaultErrorHandler($errorHandler);
 
-// 2. Ruta GET: Obtener datos (API)
-$app->get('/api/tasks', function (Request $request, Response $response) use ($pdo) {
-    $stmt = $pdo->query("SELECT * FROM tasks ORDER BY id DESC");
-    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $response->getBody()->write(json_encode($tasks));
-    return $response->withHeader('Content-Type', 'application/json');
-});
+$middleware = require __DIR__ . '/../app/middleware.php';
+$middleware($app);
 
-// 3. Ruta POST: Guardar dato (API)
-$app->post('/api/tasks', function (Request $request, Response $response) use ($pdo) {
-    $data = $request->getParsedBody();
-    
-    if (isset($data['title'])) {
-        $stmt = $pdo->prepare("INSERT INTO tasks (title) VALUES (:title)");
-        $stmt->execute(['title' => $data['title']]);
-        $payload = json_encode(['status' => 'success']);
-    } else {
-        $payload = json_encode(['status' => 'error', 'message' => 'Falta el titulo']);
-    }
-    
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');
-});
+$routes = require __DIR__ . '/../app/routes.php';
+$routes($app);
 
-$app->run();
+$response = $app->handle($request);
+(new ResponseEmitter())->emit($response);

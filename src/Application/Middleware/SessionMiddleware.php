@@ -11,16 +11,21 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 class SessionMiddleware implements Middleware
 {
-    /**
-     * {@inheritdoc}
-     */
     public function process(Request $request, RequestHandler $handler): Response
     {
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
+            if (!headers_sent()) {
+                session_set_cookie_params([
+                    'httponly' => true,
+                    'samesite' => 'Lax',
+                ]);
+            }
+
             session_start();
-            $request = $request->withAttribute('session', $_SESSION);
         }
 
-        return $handler->handle($request);
+        $_SESSION = $_SESSION ?? [];
+
+        return $handler->handle($request->withAttribute('session', $_SESSION));
     }
 }
