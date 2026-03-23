@@ -87,4 +87,31 @@ class AuthFlowTest extends TestCase
         self::assertSame(302, $response->getStatusCode());
         self::assertSame('/panel', $response->getHeaderLine('Location'));
     }
+
+    public function testBusinessRegisterRejectsInvalidSocialUrl(): void
+    {
+        $app = $this->getAppInstance();
+        $request = $this->createRequest('POST', '/register')->withParsedBody([
+            'role' => 'business',
+            'email' => 'nuevo-negocio@ofertascerca.test',
+            'password' => 'supersecreto',
+            'password_confirmation' => 'supersecreto',
+            'business_name' => 'Nuevo Negocio',
+            'whatsapp' => '+54 9 11 4444 5555',
+            'street' => 'Calle Falsa',
+            'street_number' => '123',
+            'postal_code' => '1000',
+            'city' => 'Buenos Aires',
+            'municipality' => 'Comuna 1',
+            'province' => 'Buenos Aires',
+            'address_lat' => '-34.6037',
+            'address_lon' => '-58.3816',
+            'instagram_url' => 'notaurl',
+        ]);
+        $response = $app->handle($request);
+
+        self::assertSame(302, $response->getStatusCode());
+        self::assertSame('/register', $response->getHeaderLine('Location'));
+        self::assertSame('La URL de Instagram no es válida.', $_SESSION['flash']['form_errors']['instagram_url'] ?? null);
+    }
 }

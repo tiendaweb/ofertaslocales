@@ -68,6 +68,12 @@ class PublicCatalogService
             'expires_at' => $expiresAt->format(DATE_ATOM),
             'expires_label' => 'Vence ' . $expiresAt->format('d/m H:i'),
             'badge' => $this->resolveBadge((string) $offer['category'], $expiresAt),
+            'business_bio' => $offer['bio'] !== null ? (string) $offer['bio'] : null,
+            'business_instagram_url' => $offer['instagram_url'] !== null ? (string) $offer['instagram_url'] : null,
+            'business_facebook_url' => $offer['facebook_url'] !== null ? (string) $offer['facebook_url'] : null,
+            'business_tiktok_url' => $offer['tiktok_url'] !== null ? (string) $offer['tiktok_url'] : null,
+            'business_website_url' => $offer['website_url'] !== null ? (string) $offer['website_url'] : null,
+            'business_logo_url' => $offer['logo_url'] !== null ? (string) $offer['logo_url'] : null,
         ];
     }
 
@@ -99,6 +105,12 @@ class PublicCatalogService
                     'active_offers' => 0,
                     'next_expiration' => $offer['expires_at'],
                     'next_expiration_label' => $offer['expires_label'],
+                    'bio' => $offer['business_bio'],
+                    'instagram_url' => $offer['business_instagram_url'],
+                    'facebook_url' => $offer['business_facebook_url'],
+                    'tiktok_url' => $offer['business_tiktok_url'],
+                    'website_url' => $offer['business_website_url'],
+                    'logo_url' => $offer['business_logo_url'],
                     'active_publications' => [],
                 ];
             }

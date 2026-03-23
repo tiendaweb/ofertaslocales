@@ -24,6 +24,7 @@ use App\Application\Actions\Business\CreateOfferAction;
 use App\Application\Actions\Business\DeleteBusinessOfferAction;
 use App\Application\Actions\Business\UpdateBusinessOfferAction;
 use App\Application\Actions\Public\BusinessesAction;
+use App\Application\Actions\Public\BusinessDetailAction;
 use App\Application\Actions\Public\HomeAction;
 use App\Application\Actions\Public\MapAction;
 use App\Application\Actions\Public\OffersAction;
@@ -46,6 +47,7 @@ return function (App $app) {
     $app->get('/', HomeAction::class)->setName('inicio');
     $app->get('/ofertas', OffersAction::class)->setName('ofertas');
     $app->get('/negocios', BusinessesAction::class)->setName('negocios');
+    $app->get('/negocios/{id:[0-9]+}', BusinessDetailAction::class)->setName('negocios.detalle');
     $app->get('/mapa', MapAction::class)->setName('mapa');
 
     $app->get('/login', LoginPageAction::class)->setName('login');

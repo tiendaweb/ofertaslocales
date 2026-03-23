@@ -49,7 +49,11 @@ declare(strict_types=1);
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2">Negocio activo</p>
-                        <h3 class="text-xl font-bold text-gray-900"><?= htmlspecialchars($business['business_name'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <h3 class="text-xl font-bold text-gray-900">
+                            <a href="/negocios/<?= (int) $business['id'] ?>" class="hover:text-red-600 transition">
+                                <?= htmlspecialchars($business['business_name'], ENT_QUOTES, 'UTF-8') ?>
+                            </a>
+                        </h3>
                     </div>
                     <span class="bg-red-50 text-red-600 text-xs font-bold px-3 py-1 rounded-full"><?= (int) $business['active_offers'] ?> activas</span>
                 </div>
@@ -107,7 +111,7 @@ declare(strict_types=1);
                 </div>
 
                 <div class="mt-auto flex gap-3">
-                    <a href="/ofertas?negocio=<?= (int) $business['id'] ?>" class="flex-1 bg-gray-900 text-white rounded-xl px-4 py-3 text-center font-semibold hover:bg-gray-800 transition">Ver publicaciones</a>
+                    <a href="/negocios/<?= (int) $business['id'] ?>" class="flex-1 bg-gray-900 text-white rounded-xl px-4 py-3 text-center font-semibold hover:bg-gray-800 transition">Ver perfil</a>
                     <a href="/mapa" class="flex-1 bg-red-50 text-red-600 rounded-xl px-4 py-3 text-center font-semibold hover:bg-red-100 transition">Ir al mapa</a>
                 </div>
             </article>

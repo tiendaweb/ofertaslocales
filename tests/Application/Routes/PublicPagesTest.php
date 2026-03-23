@@ -35,6 +35,7 @@ class PublicPagesTest extends TestCase
             ['/'],
             ['/ofertas'],
             ['/negocios'],
+            ['/negocios/2'],
             ['/mapa'],
             ['/login'],
             ['/register'],

@@ -70,6 +70,38 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
             <?php if (($formErrors['business_name'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['business_name'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
         </label>
 
+        <h3 class="md:col-span-2 text-lg font-semibold text-white mt-2">Perfil comercial</h3>
+        <label class="block md:col-span-2">
+            <span class="block text-sm text-slate-300 mb-2">Bio corta (solo negocios)</span>
+            <textarea name="bio" rows="3" maxlength="280" placeholder="Contá en una línea qué hace tu negocio." class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"><?= htmlspecialchars((string) ($old['bio'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+            <?php if (($formErrors['bio'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['bio'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+        <label class="block">
+            <span class="block text-sm text-slate-300 mb-2">Instagram</span>
+            <input name="instagram_url" type="text" value="<?= htmlspecialchars((string) ($old['instagram_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="instagram.com/tu_negocio" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            <?php if (($formErrors['instagram_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['instagram_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+        <label class="block">
+            <span class="block text-sm text-slate-300 mb-2">Facebook</span>
+            <input name="facebook_url" type="text" value="<?= htmlspecialchars((string) ($old['facebook_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="facebook.com/tu_negocio" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            <?php if (($formErrors['facebook_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['facebook_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+        <label class="block">
+            <span class="block text-sm text-slate-300 mb-2">TikTok</span>
+            <input name="tiktok_url" type="text" value="<?= htmlspecialchars((string) ($old['tiktok_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="tiktok.com/@tu_negocio" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            <?php if (($formErrors['tiktok_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['tiktok_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+        <label class="block">
+            <span class="block text-sm text-slate-300 mb-2">Web</span>
+            <input name="website_url" type="text" value="<?= htmlspecialchars((string) ($old['website_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="www.tu-negocio.com" class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            <?php if (($formErrors['website_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['website_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+        <label class="block md:col-span-2">
+            <span class="block text-sm text-slate-300 mb-2">Logo (URL)</span>
+            <input name="logo_url" type="text" value="<?= htmlspecialchars((string) ($old['logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="https://..." class="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+            <?php if (($formErrors['logo_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-300"><?= htmlspecialchars((string) $formErrors['logo_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+        </label>
+
         <h3 class="md:col-span-2 text-lg font-semibold text-white mt-2">Dirección y ubicación</h3>
 
         <label class="block">
