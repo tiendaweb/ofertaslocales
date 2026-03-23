@@ -29,6 +29,8 @@ class BusinessDashboardAction extends PageAction
         $offers = $this->offerRepository->findByUserId((int) $user['id']);
         $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
         $publishPolicy = $this->offerPublishPolicy->resolve($user, $settings);
+        $offerDraft = is_array($_SESSION['offer_draft'] ?? null) ? $_SESSION['offer_draft'] : [];
+        unset($_SESSION['offer_draft']);
 
         return $this->renderPage($response, 'pages/admin/panel.php', [
             'pageTitle' => 'Panel del negocio | OfertasCerca',
@@ -37,6 +39,7 @@ class BusinessDashboardAction extends PageAction
             'approvalMode' => $settings['approval_mode'] ?? 'manual',
             'defaultUserPublishMode' => $settings['default_user_publish_mode'] ?? 'review',
             'publishPolicy' => $publishPolicy,
+            'offerDraft' => $offerDraft,
         ]);
     }
 }

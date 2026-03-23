@@ -160,14 +160,15 @@ declare(strict_types=1);
                     </div>
 
                     <form id="offerForm" class="space-y-4" action="/register" method="get">
+                        <input type="hidden" name="role" value="business">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del negocio</label>
-                                <input required type="text" id="inputBusiness" name="negocio" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ferretería Juan">
+                                <input required type="text" id="inputBusiness" name="business_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ferretería Juan">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                                <select id="inputCategory" name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"></select>
+                                <select id="inputCategory" name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"></select>
                             </div>
                         </div>
 
@@ -176,13 +177,13 @@ declare(strict_types=1);
                                 <span>¿Qué ofreces? (La oferta estrella)</span>
                                 <span id="charCount" class="text-xs text-gray-500">0/40</span>
                             </label>
-                            <input required type="text" id="inputOffer" name="oferta" maxlength="40" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-red-600 font-medium" placeholder="Ej: 2x1 en Pinturas Alba hoy">
+                            <input required type="text" id="inputOffer" name="title" maxlength="40" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-red-600 font-medium" placeholder="Ej: 2x1 en Pinturas Alba hoy">
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Barrio/Ciudad)</label>
-                                <input required type="text" id="inputLocation" name="ubicacion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ciudadela">
+                                <input required type="text" id="inputLocation" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ciudadela">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Número de WhatsApp</label>

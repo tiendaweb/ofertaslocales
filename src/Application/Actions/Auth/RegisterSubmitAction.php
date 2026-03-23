@@ -45,6 +45,14 @@ class RegisterSubmitAction extends PageAction
         $tiktokUrl = trim((string) ($data['tiktok_url'] ?? ''));
         $websiteUrl = trim((string) ($data['website_url'] ?? ''));
         $logoUrl = trim((string) ($data['logo_url'] ?? ''));
+        $offerDraft = [
+            'category' => trim((string) ($data['draft_category'] ?? ($data['category'] ?? ''))),
+            'title' => trim((string) ($data['draft_title'] ?? ($data['title'] ?? ''))),
+            'description' => trim((string) ($data['draft_description'] ?? ($data['description'] ?? ''))),
+            'whatsapp' => trim((string) ($data['draft_whatsapp'] ?? '')),
+            'location' => trim((string) ($data['draft_location'] ?? ($data['location'] ?? ''))),
+            'business_name' => $businessName,
+        ];
 
         if (!in_array($role, ['business', 'user'], true)) {
             $role = 'user';
@@ -56,8 +64,8 @@ class RegisterSubmitAction extends PageAction
             $errors['business_name'] = 'El nombre del local es obligatorio para registrar un negocio.';
         }
 
-        if ($whatsapp === '') {
-            $errors['whatsapp'] = 'El WhatsApp es obligatorio para publicar ofertas.';
+        if ($role === 'business' && $whatsapp === '') {
+            $errors['whatsapp'] = 'El WhatsApp es obligatorio para registrar un negocio.';
         }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -142,6 +150,10 @@ class RegisterSubmitAction extends PageAction
             'tiktok_url' => $tiktokUrl,
             'website_url' => $websiteUrl,
             'logo_url' => $logoUrl,
+            'category' => $offerDraft['category'],
+            'title' => $offerDraft['title'],
+            'description' => $offerDraft['description'],
+            'location' => $offerDraft['location'],
         ];
 
         if ($errors !== []) {
@@ -181,9 +193,16 @@ class RegisterSubmitAction extends PageAction
         }
 
         $this->authService->login($account);
-        $this->flash('success', 'Tu cuenta ya está lista. Ahora puedes publicar ofertas desde tu panel.');
+        if ($role === 'business') {
+            $_SESSION['offer_draft'] = $offerDraft;
+            $this->flash('success', 'Tu cuenta de negocio ya está lista. Completamos tu oferta en el panel para que solo la revises y publiques.');
 
-        return $this->redirect($response, '/panel');
+            return $this->redirect($response, '/panel');
+        }
+
+        $this->flash('success', 'Tu cuenta de usuario se creó correctamente. Puedes explorar ofertas desde el inicio.');
+
+        return $this->redirect($response, '/');
     }
 
     private function normalizeUrl(string $url): string|false|null

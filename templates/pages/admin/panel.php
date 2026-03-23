@@ -23,7 +23,15 @@ foreach ($offers as $offer) {
 }
 
 $formErrors = is_array($flash['form_errors'] ?? null) ? $flash['form_errors'] : [];
-$old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
+$flashOld = is_array($flash['old'] ?? null) ? $flash['old'] : [];
+$offerDraft = is_array($offerDraft ?? null) ? $offerDraft : [];
+$old = $flashOld !== [] ? $flashOld : [
+    'category' => (string) ($offerDraft['category'] ?? ''),
+    'title' => (string) ($offerDraft['title'] ?? ''),
+    'description' => (string) ($offerDraft['description'] ?? ''),
+    'location' => (string) ($offerDraft['location'] ?? ''),
+    'whatsapp' => (string) ($offerDraft['whatsapp'] ?? ''),
+];
 $defaultWhatsapp = (string) ($old['whatsapp'] ?? ($currentUser['whatsapp'] ?? ''));
 $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtotime('+24 hours')));
 ?>
@@ -234,6 +242,14 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                     </div>
 
                     <div class="border-t border-gray-100 p-4 bg-white">
+                        <div class="mb-4 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+                            <img
+                                src="<?= htmlspecialchars((string) ($offer['image_url'] ?: 'https://placehold.co/1200x600/f3f4f6/6b7280?text=Sin+imagen'), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="Imagen de <?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                class="h-48 w-full object-cover"
+                                loading="lazy"
+                            >
+                        </div>
                         <div class="flex flex-wrap gap-2">
                             <details class="group/edit">
                                 <summary class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-50 px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-100 hover:text-black list-none [&::-webkit-details-marker]:hidden">
