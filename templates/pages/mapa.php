@@ -118,8 +118,8 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
     </main>
 </div>
 
-<div id="map-offer-modal" class="hidden fixed inset-0 z-[60] bg-gray-950/70 backdrop-blur-sm px-4 py-6 md:p-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl">
+<div id="map-offer-modal" class="hidden fixed inset-0 z-[1200] bg-gray-950/70 backdrop-blur-sm px-4 py-6 md:p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl max-h-[calc(100vh-2rem)] overflow-y-auto">
         <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
             <div>
                 <p class="text-xs uppercase tracking-[0.22em] text-red-500 font-semibold mb-1">Detalle del marcador</p>
