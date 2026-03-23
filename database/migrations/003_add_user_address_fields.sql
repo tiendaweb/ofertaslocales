@@ -1,0 +1,8 @@
+ALTER TABLE users ADD COLUMN street TEXT;
+ALTER TABLE users ADD COLUMN street_number TEXT;
+ALTER TABLE users ADD COLUMN postal_code TEXT;
+ALTER TABLE users ADD COLUMN city TEXT;
+ALTER TABLE users ADD COLUMN municipality TEXT;
+ALTER TABLE users ADD COLUMN province TEXT;
+ALTER TABLE users ADD COLUMN address_lat REAL;
+ALTER TABLE users ADD COLUMN address_lon REAL;

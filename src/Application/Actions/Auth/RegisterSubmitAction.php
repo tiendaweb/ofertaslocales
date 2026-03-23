@@ -31,6 +31,14 @@ class RegisterSubmitAction extends PageAction
         $whatsapp = trim((string) ($data['whatsapp'] ?? ''));
         $password = (string) ($data['password'] ?? '');
         $passwordConfirmation = (string) ($data['password_confirmation'] ?? '');
+        $street = trim((string) ($data['street'] ?? ''));
+        $streetNumber = trim((string) ($data['street_number'] ?? ''));
+        $postalCode = trim((string) ($data['postal_code'] ?? ''));
+        $city = trim((string) ($data['city'] ?? ''));
+        $municipality = trim((string) ($data['municipality'] ?? ''));
+        $province = trim((string) ($data['province'] ?? ''));
+        $addressLat = trim((string) ($data['address_lat'] ?? ''));
+        $addressLon = trim((string) ($data['address_lon'] ?? ''));
 
         if (!in_array($role, ['business', 'user'], true)) {
             $role = 'user';
@@ -62,11 +70,44 @@ class RegisterSubmitAction extends PageAction
             $errors['email'] = 'Ya existe una cuenta con este correo electrónico.';
         }
 
+        $addressFields = [
+            'street' => ['value' => $street, 'label' => 'calle'],
+            'street_number' => ['value' => $streetNumber, 'label' => 'número'],
+            'postal_code' => ['value' => $postalCode, 'label' => 'código postal'],
+            'city' => ['value' => $city, 'label' => 'ciudad'],
+            'municipality' => ['value' => $municipality, 'label' => 'municipio'],
+            'province' => ['value' => $province, 'label' => 'provincia'],
+        ];
+
+        if ($role === 'business') {
+            foreach ($addressFields as $field => $config) {
+                if ($config['value'] === '') {
+                    $errors[$field] = sprintf('El campo %s es obligatorio para negocios.', $config['label']);
+                }
+            }
+
+            if ($addressLat === '' || !is_numeric($addressLat)) {
+                $errors['address_lat'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
+            }
+
+            if ($addressLon === '' || !is_numeric($addressLon)) {
+                $errors['address_lon'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
+            }
+        }
+
         $old = [
             'email' => $email,
             'role' => $role,
             'business_name' => $businessName,
             'whatsapp' => $whatsapp,
+            'street' => $street,
+            'street_number' => $streetNumber,
+            'postal_code' => $postalCode,
+            'city' => $city,
+            'municipality' => $municipality,
+            'province' => $province,
+            'address_lat' => $addressLat,
+            'address_lon' => $addressLon,
         ];
 
         if ($errors !== []) {
@@ -82,6 +123,14 @@ class RegisterSubmitAction extends PageAction
                 'role' => $role,
                 'business_name' => $businessName !== '' ? $businessName : null,
                 'whatsapp' => $whatsapp,
+                'street' => $street !== '' ? $street : null,
+                'street_number' => $streetNumber !== '' ? $streetNumber : null,
+                'postal_code' => $postalCode !== '' ? $postalCode : null,
+                'city' => $city !== '' ? $city : null,
+                'municipality' => $municipality !== '' ? $municipality : null,
+                'province' => $province !== '' ? $province : null,
+                'address_lat' => $addressLat !== '' ? (float) $addressLat : null,
+                'address_lon' => $addressLon !== '' ? (float) $addressLon : null,
             ]);
         } catch (PDOException) {
             $this->flashFormErrors([
