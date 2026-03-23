@@ -3,113 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager | Premium UI</title>
+    <title>OfertasCerca | Interfaz estática de referencia</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #020617; }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .neon-blue { box-shadow: 0 0 15px rgba(37, 99, 235, 0.2); }
+        body { background: linear-gradient(180deg, #020617 0%, #0f172a 100%); }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen p-4 md:p-12 flex justify-center items-start">
-
-    <div x-data="taskApp()" x-init="init()" class="w-full max-w-xl">
-        
-        <div class="glass rounded-3xl p-8 neon-blue">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="p-2 bg-blue-600/20 rounded-lg">
-                    <i data-lucide="layout-grid" class="text-blue-400 w-6 h-6"></i>
-                </div>
-                <h1 class="text-2xl font-bold tracking-tight text-white">Proyectos <span class="text-blue-500 text-sm font-mono">v1.0</span></h1>
-            </div>
-
-            <form @submit.prevent="addTask" class="relative mb-10">
-                <input 
-                    type="text" 
-                    x-model="newTaskTitle" 
-                    placeholder="Escribí una nueva tarea..." 
-                    class="w-full bg-slate-900/50 border border-white/10 rounded-xl py-4 pl-5 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-500"
-                >
-                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg transition-colors flex items-center justify-center">
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                </button>
-            </form>
-
-            <div class="space-y-3">
-                <template x-for="task in tasks" :key="task.id">
-                    <div class="group flex items-center justify-between bg-white/5 border border-white/5 p-4 rounded-xl hover:bg-white/10 transition-all">
-                        <div class="flex items-center gap-4">
-                            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
-                            <span x-text="task.title" class="text-slate-300 group-hover:text-white transition-colors"></span>
-                        </div>
-                        <span x-text="formatDate(task.created_at)" class="text-[10px] font-mono text-slate-500 bg-slate-900/80 px-2 py-1 rounded"></span>
-                    </div>
-                </template>
-
-                <div x-show="tasks.length === 0" class="text-center py-10">
-                    <p class="text-slate-500 text-sm italic">No hay tareas pendientes</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function taskApp() {
-            return {
-                tasks: [],
-                newTaskTitle: '',
-                // Detectamos si estamos en /static/ o en el root
-                apiBase: window.location.pathname.endsWith('/') 
-                           ? window.location.pathname + 'api/tasks' 
-                           : window.location.pathname + '/api/tasks',
-
-                async init() {
-                    lucide.createIcons();
-                    await this.fetchTasks();
-                },
-
-                async fetchTasks() {
-                    try {
-                        const res = await fetch(this.apiBase);
-                        this.tasks = await res.json();
-                    } catch (e) {
-                        console.error("Error cargando tareas:", e);
-                    }
-                },
-
-                async addTask() {
-                    if (!this.newTaskTitle.trim()) return;
-
-                    try {
-                        const res = await fetch(this.apiBase, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ title: this.newTaskTitle })
-                        });
-                        
-                        if (res.ok) {
-                            this.newTaskTitle = '';
-                            await this.fetchTasks();
-                            // Reiniciar iconos de Lucide para los nuevos elementos
-                            setTimeout(() => lucide.createIcons(), 50);
-                        }
-                    } catch (e) {
-                        console.error("Error al guardar:", e);
-                    }
-                },
-
-                formatDate(dateString) {
-                    const date = new Date(dateString);
-                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-            }
-        }
-    </script>
+<body class="min-h-screen text-slate-100 flex items-center justify-center p-6">
+    <main class="max-w-2xl w-full rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-blue-500/10">
+        <p class="text-sm uppercase tracking-[0.28em] text-blue-300 mb-3">Archivo legado</p>
+        <h1 class="text-3xl font-semibold text-white mb-4">La app ya no depende del concepto de tareas.</h1>
+        <p class="text-slate-300 leading-7 mb-6">
+            El punto de entrada válido quedó unificado en <code class="text-blue-300">public/index.php</code> usando la estructura Slim existente.
+            Las rutas públicas y privadas ahora viven en <code class="text-blue-300">app/routes.php</code>.
+        </p>
+        <ul class="grid gap-3 text-sm">
+            <li><a href="/" class="block rounded-2xl bg-blue-500/15 px-4 py-3 hover:bg-blue-500/25">Ir a Inicio</a></li>
+            <li><a href="/ofertas" class="block rounded-2xl bg-blue-500/15 px-4 py-3 hover:bg-blue-500/25">Ir a Ofertas</a></li>
+            <li><a href="/negocios" class="block rounded-2xl bg-blue-500/15 px-4 py-3 hover:bg-blue-500/25">Ir a Negocios</a></li>
+            <li><a href="/admin" class="block rounded-2xl bg-blue-500/15 px-4 py-3 hover:bg-blue-500/25">Ir a Administración</a></li>
+        </ul>
+    </main>
 </body>
 </html>
