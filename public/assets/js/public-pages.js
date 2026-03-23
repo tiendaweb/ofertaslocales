@@ -53,7 +53,7 @@
         }
 
         container.innerHTML = `
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-7 2xl:gap-8 items-stretch">
                 ${offers.map((item) => `
                     <article class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
                         <div class="relative h-48 overflow-hidden bg-gray-200">
