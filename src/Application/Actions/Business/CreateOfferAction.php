@@ -140,12 +140,24 @@ class CreateOfferAction extends PageAction
         }
 
         $uploadPath = $this->settings->get('paths')['uploads'];
-        if (!is_dir($uploadPath)) {
-            mkdir($uploadPath, 0775, true);
+        if (!is_dir($uploadPath) && !mkdir($uploadPath, 0775, true) && !is_dir($uploadPath)) {
+            return ['error' => 'No se pudo preparar la carpeta de imágenes.'];
         }
 
-        $filename = sprintf('oferta-%s.%s', bin2hex(random_bytes(8)), $allowedExtensions[$mimeType]);
-        $image->moveTo($uploadPath . DIRECTORY_SEPARATOR . $filename);
+        if (!is_writable($uploadPath)) {
+            return ['error' => 'La carpeta de imágenes no tiene permisos de escritura.'];
+        }
+
+        try {
+            $filename = sprintf('oferta-%s.%s', bin2hex(random_bytes(8)), $allowedExtensions[$mimeType]);
+            $image->moveTo($uploadPath . DIRECTORY_SEPARATOR . $filename);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Error al guardar imagen de oferta.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return ['error' => 'No se pudo guardar la imagen. Verifica permisos e intenta nuevamente.'];
+        }
 
         return ['path' => '/uploads/' . $filename];
     }
