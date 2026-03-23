@@ -28,7 +28,7 @@ return function (ContainerBuilder $containerBuilder) {
         SqliteBootstrapper::class => function (ContainerInterface $container) {
             $settings = $container->get(SettingsInterface::class);
 
-            return new SqliteBootstrapper($settings->get('paths')['databaseSchema']);
+            return new SqliteBootstrapper($settings->get('paths')['databaseMigrations']);
         },
         \PDO::class => function (ContainerInterface $container) {
             $settings = $container->get(SettingsInterface::class);
