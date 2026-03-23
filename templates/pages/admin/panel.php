@@ -167,8 +167,19 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                         <input id="panel-offer-lon" name="lon" value="<?= htmlspecialchars((string) ($old['lon'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" placeholder="-58.3816">
                     </div>
                 </div>
+
+                <div class="relative z-10 mb-4 grid gap-3 md:grid-cols-[1fr_auto_auto]">
+                    <input id="panel-offer-location-search" type="text" class="<?= $inputClass ?> py-2" placeholder="Buscar dirección (Ej: Obelisco, Buenos Aires)">
+                    <button id="panel-offer-location-search-button" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition hover:border-red-200 hover:text-red-600">
+                        <i data-lucide="search" class="h-4 w-4"></i> Buscar
+                    </button>
+                    <button id="panel-offer-use-my-location" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100">
+                        <i data-lucide="locate-fixed" class="h-4 w-4"></i> Usar mi ubicación
+                    </button>
+                </div>
+                <p id="panel-offer-location-feedback" class="relative z-10 mb-4 text-xs font-semibold text-gray-500" aria-live="polite"></p>
                 
-                <div id="panel-offer-map" class="h-72 w-full rounded-2xl border border-gray-200 bg-gray-100 overflow-hidden shadow-inner z-0"></div>
+                <div id="panel-offer-map" class="relative z-0 h-72 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-inner"></div>
                 <p class="mt-3 text-xs font-medium text-gray-500 flex items-center gap-1">
                     <i data-lucide="info" class="h-3 w-3"></i> Haz clic en el mapa para actualizar las coordenadas automáticamente.
                 </p>
@@ -315,6 +326,10 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
         const mapContainer = document.getElementById('panel-offer-map');
         const latInput = document.getElementById('panel-offer-lat');
         const lonInput = document.getElementById('panel-offer-lon');
+        const locationSearchInput = document.getElementById('panel-offer-location-search');
+        const locationSearchButton = document.getElementById('panel-offer-location-search-button');
+        const useMyLocationButton = document.getElementById('panel-offer-use-my-location');
+        const locationFeedback = document.getElementById('panel-offer-location-feedback');
 
         if (!mapContainer || !latInput || !lonInput) {
             return;
@@ -335,22 +350,160 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
             draggable: true,
         }).addTo(map);
 
+        const setLocationFeedback = (message, type = 'neutral') => {
+            if (!locationFeedback) {
+                return;
+            }
+
+            locationFeedback.textContent = message;
+            locationFeedback.classList.remove('text-gray-500', 'text-red-600', 'text-emerald-600');
+            if (type === 'error') {
+                locationFeedback.classList.add('text-red-600');
+                return;
+            }
+
+            if (type === 'success') {
+                locationFeedback.classList.add('text-emerald-600');
+                return;
+            }
+
+            locationFeedback.classList.add('text-gray-500');
+        };
+
         const syncFields = (latLng) => {
             latInput.value = Number(latLng.lat).toFixed(6);
             lonInput.value = Number(latLng.lng).toFixed(6);
         };
 
+        const updateMarkerAndCoordinates = (lat, lon, zoom = 15) => {
+            marker.setLatLng([lat, lon]);
+            syncFields({ lat, lng: lon });
+            map.setView([lat, lon], zoom, { animate: true });
+        };
+
+        const geocodeLocation = async (query) => {
+            const endpoint = new URL('https://nominatim.openstreetmap.org/search');
+            endpoint.searchParams.set('q', query);
+            endpoint.searchParams.set('format', 'jsonv2');
+            endpoint.searchParams.set('limit', '1');
+            endpoint.searchParams.set('addressdetails', '1');
+            endpoint.searchParams.set('accept-language', 'es');
+
+            const response = await fetch(endpoint.toString(), {
+                headers: {
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('No fue posible buscar la dirección. Inténtalo nuevamente.');
+            }
+
+            const data = await response.json();
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error('No encontramos resultados para esa dirección.');
+            }
+
+            const result = data[0];
+            const lat = Number(result.lat);
+            const lon = Number(result.lon);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+                throw new Error('La dirección encontrada no tiene coordenadas válidas.');
+            }
+
+            return {
+                lat,
+                lon,
+                label: result.display_name || query,
+            };
+        };
+
+        const handleSearchLocation = async () => {
+            if (!locationSearchInput) {
+                return;
+            }
+
+            const query = locationSearchInput.value.trim();
+            if (query === '') {
+                setLocationFeedback('Escribe una dirección antes de buscar.', 'error');
+                return;
+            }
+
+            locationSearchButton?.setAttribute('disabled', 'disabled');
+            locationSearchButton?.classList.add('opacity-70', 'cursor-not-allowed');
+            setLocationFeedback('Buscando dirección en el mapa...', 'neutral');
+
+            try {
+                const result = await geocodeLocation(query);
+                updateMarkerAndCoordinates(result.lat, result.lon);
+                setLocationFeedback(`Dirección encontrada: ${result.label}`, 'success');
+            } catch (error) {
+                setLocationFeedback(error instanceof Error ? error.message : 'No pudimos completar la búsqueda.', 'error');
+            } finally {
+                locationSearchButton?.removeAttribute('disabled');
+                locationSearchButton?.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        };
+
         if (hasInitialCoordinates) {
             syncFields({ lat: parsedLat, lng: parsedLon });
+            setLocationFeedback('Se cargaron las coordenadas actuales de tu oferta.', 'neutral');
+        } else {
+            setLocationFeedback('Define la ubicación con el mapa, búsqueda o geolocalización.', 'neutral');
         }
 
         marker.on('dragend', () => {
             syncFields(marker.getLatLng());
+            setLocationFeedback('Ubicación actualizada moviendo el marcador.', 'success');
         });
 
         map.on('click', (event) => {
             marker.setLatLng(event.latlng);
             syncFields(event.latlng);
+            setLocationFeedback('Ubicación actualizada desde el mapa.', 'success');
+        });
+
+        locationSearchButton?.addEventListener('click', () => {
+            void handleSearchLocation();
+        });
+        locationSearchInput?.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                void handleSearchLocation();
+            }
+        });
+
+        useMyLocationButton?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                setLocationFeedback('Tu navegador no permite geolocalización.', 'error');
+                return;
+            }
+
+            setLocationFeedback('Detectando tu ubicación actual...', 'neutral');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    updateMarkerAndCoordinates(latitude, longitude);
+                    setLocationFeedback('Ubicación detectada correctamente con GPS del navegador.', 'success');
+                },
+                (error) => {
+                    let message = 'No pudimos acceder a tu ubicación.';
+                    if (error.code === 1) {
+                        message = 'Permiso de ubicación denegado. Habilítalo en tu navegador.';
+                    } else if (error.code === 2) {
+                        message = 'No se pudo determinar tu ubicación actual.';
+                    } else if (error.code === 3) {
+                        message = 'La solicitud de ubicación tardó demasiado tiempo.';
+                    }
+
+                    setLocationFeedback(message, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 12000,
+                    maximumAge: 0,
+                }
+            );
         });
 
         window.setTimeout(() => map.invalidateSize(), 180);
