@@ -48,7 +48,7 @@ $flash = $flash ?? [];
 <body class="<?= $isPublicRoute ? 'min-h-screen bg-gray-50 font-sans text-gray-800' : ($isAdminRoute ? 'min-h-screen text-gray-800' : 'text-slate-100 min-h-screen') ?>">
     <?php include __DIR__ . '/partials/header.php'; ?>
 
-    <main class="<?= $isPublicRoute ? 'pb-28 md:pb-16' : ($isAdminRoute ? 'max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-28' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10') ?>">
+    <main class="<?= $isPublicRoute ? 'pb-36 md:pb-36' : ($isAdminRoute ? 'max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8 pb-28' : 'max-w-6xl mx-auto px-4 py-8 md:px-6 md:py-10') ?>">
         <?php if (($flash['success'] ?? null) !== null || ($flash['error'] ?? null) !== null) : ?>
             <section class="<?= $isPublicRoute ? 'max-w-6xl mx-auto px-4 pt-6' : 'mb-6' ?>">
                 <?php if (($flash['success'] ?? null) !== null) : ?>
@@ -70,7 +70,7 @@ $flash = $flash ?? [];
     <?php include __DIR__ . '/partials/footer.php'; ?>
 
     <?php if ($isPublicRoute) : ?>
-        <?php include __DIR__ . '/partials/footer-nav.php'; ?>
+        <?php include __DIR__ . '/partials/navigation.php'; ?>
     <?php endif; ?>
 
     <?php if ($pageDataJson !== false && $pageDataJson !== null) : ?>
