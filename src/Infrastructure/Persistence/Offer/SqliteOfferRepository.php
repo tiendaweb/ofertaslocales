@@ -54,7 +54,7 @@ class SqliteOfferRepository implements OfferRepository
              LEFT JOIN offers ON offers.user_id = users.id AND offers.status = 'active'
              WHERE users.role IN ('business', 'admin')
              GROUP BY users.id, users.business_name, users.email, users.role
-             ORDER BY users.business_name ASC"
+             ORDER BY active_offers DESC, users.business_name ASC"
         );
 
         return $statement->fetchAll();
@@ -63,11 +63,13 @@ class SqliteOfferRepository implements OfferRepository
     public function findMapOffers(): array
     {
         $statement = $this->pdo->query(
-            "SELECT offers.id, offers.title, offers.description, offers.image_url, offers.location,
-                    offers.lat, offers.lon, offers.expires_at, users.business_name
+            "SELECT offers.id, offers.category, offers.title, offers.description, offers.image_url, offers.whatsapp,
+                    offers.location, offers.lat, offers.lon, offers.expires_at, users.business_name
              FROM offers
              INNER JOIN users ON users.id = offers.user_id
              WHERE offers.status = 'active'
+               AND offers.lat IS NOT NULL
+               AND offers.lon IS NOT NULL
              ORDER BY offers.expires_at ASC"
         );
 
