@@ -16,7 +16,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findBusinessAccounts(): array
     {
         $statement = $this->pdo->query(
-            "SELECT id, email, role, business_name, created_at
+            "SELECT id, email, role, business_name, whatsapp, created_at
              FROM users
              WHERE role IN ('business', 'admin')
              ORDER BY business_name ASC"

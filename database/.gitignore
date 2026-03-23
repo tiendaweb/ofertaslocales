@@ -1,3 +1,4 @@
 *.sqlite
 !.gitignore
-!schema.sql
+!migrations/
+!migrations/*.sql

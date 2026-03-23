@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Application\Actions\Public;
 
 use App\Application\Actions\PageAction;
-use App\Domain\Offer\OfferRepository;
-use App\Domain\User\AccountRepository;
+use App\Application\Service\HomeMetricsService;
+use App\Application\Service\PublicOfferService;
 use DateTimeImmutable;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -16,19 +16,16 @@ class HomeAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly OfferRepository $offerRepository,
-        private readonly AccountRepository $accountRepository
+        private readonly PublicOfferService $publicOfferService,
+        private readonly HomeMetricsService $homeMetricsService
     ) {
         parent::__construct($logger, $renderer);
     }
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $offers = $this->offerRepository->findActiveOffers();
-        $categories = array_values(array_unique(array_map(
-            static fn (array $offer): string => $offer['category'],
-            $offers
-        )));
+        $offers = $this->publicOfferService->getActiveOffers();
+        $metrics = $this->homeMetricsService->getMetrics();
 
         return $this->renderPage($response, 'pages/index.php', [
             'pageTitle' => 'Ofertas Cerca | Ahorra hoy',
@@ -36,20 +33,20 @@ class HomeAction extends PageAction
             'stats' => [
                 [
                     'icon' => 'tag',
-                    'value' => '+' . count($offers),
+                    'value' => '+' . $metrics['activeOffers'],
                     'label' => 'Ofertas activas hoy',
                     'containerClass' => 'bg-red-50 text-red-500',
                 ],
                 [
                     'icon' => 'message-circle',
-                    'value' => '+' . max(count($offers) * 4, 12),
+                    'value' => '+' . $metrics['estimatedContacts'],
                     'label' => 'Consultas estimadas en 24hs',
                     'containerClass' => 'bg-green-50 text-green-500',
                 ],
                 [
                     'icon' => 'store',
-                    'value' => '+' . $this->accountRepository->countByRole('business'),
-                    'label' => 'Negocios asociados',
+                    'value' => '+' . $metrics['activeBusinesses'],
+                    'label' => 'Negocios con ofertas activas',
                     'containerClass' => 'bg-blue-50 text-blue-500',
                 ],
             ],
@@ -80,8 +77,8 @@ class HomeAction extends PageAction
             ],
             'pageData' => [
                 'offers' => array_map([$this, 'normalizeOffer'], $offers),
-                'categories' => array_merge(['Todas'], $categories),
-                'mapOffers' => array_map([$this, 'normalizeMapOffer'], $this->offerRepository->findMapOffers()),
+                'categories' => array_merge(['Todas'], $this->publicOfferService->getActiveCategories()),
+                'mapOffers' => array_map([$this, 'normalizeMapOffer'], $this->publicOfferService->getActiveMapOffers()),
             ],
         ]);
     }
@@ -106,8 +103,6 @@ class HomeAction extends PageAction
 
     private function normalizeMapOffer(array $offer): array
     {
-        $expiresAt = new DateTimeImmutable($offer['expires_at']);
-
         return [
             'id' => (int) $offer['id'],
             'business_name' => (string) $offer['business_name'],

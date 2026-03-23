@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Public;
 
 use App\Application\Actions\PageAction;
-use App\Domain\Offer\OfferRepository;
+use App\Application\Service\PublicOfferService;
 use DateTimeImmutable;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -15,25 +15,21 @@ class OffersAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly OfferRepository $offerRepository
+        private readonly PublicOfferService $publicOfferService
     ) {
         parent::__construct($logger, $renderer);
     }
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $offers = $this->offerRepository->findActiveOffers();
-        $categories = array_values(array_unique(array_map(
-            static fn (array $offer): string => $offer['category'],
-            $offers
-        )));
+        $offers = $this->publicOfferService->getActiveOffers();
 
         return $this->renderPage($response, 'pages/ofertas.php', [
             'pageTitle' => 'Ofertas activas | OfertasCerca',
             'currentRoute' => 'ofertas',
             'pageData' => [
                 'offers' => array_map([$this, 'normalizeOffer'], $offers),
-                'categories' => array_merge(['Todas'], $categories),
+                'categories' => array_merge(['Todas'], $this->publicOfferService->getActiveCategories()),
             ],
         ]);
     }
