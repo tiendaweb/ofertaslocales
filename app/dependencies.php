@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Application\Auth\AuthService;
 use App\Application\Settings\SettingsInterface;
 use App\Infrastructure\Persistence\Database\SqliteBootstrapper;
 use App\Infrastructure\View\PhpTemplateRenderer;
@@ -52,5 +53,6 @@ return function (ContainerBuilder $containerBuilder) {
 
             return new PhpTemplateRenderer($settings->get('paths')['templates']);
         },
+        AuthService::class => \DI\autowire(),
     ]);
 };

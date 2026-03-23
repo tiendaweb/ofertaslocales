@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS offers (
     location TEXT NOT NULL,
     lat REAL,
     lon REAL,
-    status TEXT NOT NULL CHECK (status IN ('pending', 'active', 'expired')) DEFAULT 'pending',
+    status TEXT NOT NULL CHECK (status IN ('pending', 'active', 'expired', 'rejected')) DEFAULT 'pending',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at TEXT NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP, '+1 day')),
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -64,10 +64,10 @@ INSERT OR IGNORE INTO seo (page_name, title, meta_description, og_image) VALUES
     ('mapa', 'OfertasCerca | Mapa', 'Mapa con negocios que tienen ofertas activas cerca tuyo.', '/uploads/og-mapa.png');
 
 INSERT OR IGNORE INTO users (id, email, password, role, business_name, whatsapp, created_at) VALUES
-    (1, 'admin@ofertascerca.test', '$2y$10$adminDemo', 'admin', 'OfertasCerca Admin', '+54 9 11 0000 0000', '2026-03-23 08:00:00'),
-    (2, 'panaderia@barrio.test', '$2y$10$panaderiaDemo', 'business', 'Panadería del Barrio', '+54 9 11 1234 5678', '2026-03-23 09:00:00'),
-    (3, 'deportes@centro.test', '$2y$10$deportesDemo', 'business', 'Deportes Centro', '+54 9 11 2222 3333', '2026-03-23 10:30:00'),
-    (4, 'visitante@ofertascerca.test', '$2y$10$usuarioDemo', 'user', NULL, NULL, '2026-03-23 11:00:00');
+    (1, 'admin@ofertascerca.test', '$2y$12$q6GfPIC2Tn9wbZ34ozGIG.wWdEwvPh8KSX95WV91Q0ahY7Y.XLX9e', 'admin', 'OfertasCerca Admin', '+54 9 11 0000 0000', '2026-03-23 08:00:00'),
+    (2, 'panaderia@barrio.test', '$2y$12$nhQstU3bHuRg/PuxuHEZE.Z0S8ntc.gu17XL1w48Na2AQEuJcC0D.', 'business', 'Panadería del Barrio', '+54 9 11 1234 5678', '2026-03-23 09:00:00'),
+    (3, 'deportes@centro.test', '$2y$12$Ely.rCI6kJgxXeLnlZlpRe00S0ZXSQJR0aQKGpnJY74hv4AjQA9mK', 'business', 'Deportes Centro', '+54 9 11 2222 3333', '2026-03-23 10:30:00'),
+    (4, 'visitante@ofertascerca.test', '$2y$12$ja9qkoTw7XzN0I70tyoPBu8AwFooQ6MJrhnJ3hL4l1rud0MDP5rPO', 'user', NULL, NULL, '2026-03-23 11:00:00');
 
 INSERT OR IGNORE INTO offers (
     id,

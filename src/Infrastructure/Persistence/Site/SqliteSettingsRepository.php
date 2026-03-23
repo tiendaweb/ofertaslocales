@@ -44,4 +44,19 @@ class SqliteSettingsRepository implements SettingsRepository
 
         return $settings;
     }
+
+    public function updateMany(array $settings): void
+    {
+        $statement = $this->pdo->prepare(
+            'INSERT INTO settings (key, value) VALUES (:key, :value)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+        );
+
+        foreach ($settings as $key => $value) {
+            $statement->execute([
+                'key' => (string) $key,
+                'value' => (string) $value,
+            ]);
+        }
+    }
 }

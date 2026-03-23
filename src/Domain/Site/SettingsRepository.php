@@ -9,4 +9,6 @@ interface SettingsRepository
     public function findAll(): array;
 
     public function findByKeys(array $keys): array;
+
+    public function updateMany(array $settings): void;
 }
