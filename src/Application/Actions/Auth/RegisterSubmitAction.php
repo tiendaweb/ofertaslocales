@@ -26,18 +26,24 @@ class RegisterSubmitAction extends PageAction
     {
         $data = (array) $request->getParsedBody();
         $email = strtolower(trim((string) ($data['email'] ?? '')));
+        $role = trim((string) ($data['role'] ?? 'user'));
         $businessName = trim((string) ($data['business_name'] ?? ''));
         $whatsapp = trim((string) ($data['whatsapp'] ?? ''));
         $password = (string) ($data['password'] ?? '');
         $passwordConfirmation = (string) ($data['password_confirmation'] ?? '');
 
+        if (!in_array($role, ['business', 'user'], true)) {
+            $role = 'user';
+        }
+
         $errors = [];
-        if ($businessName === '') {
+
+        if ($role === 'business' && $businessName === '') {
             $errors['business_name'] = 'El nombre del local es obligatorio para registrar un negocio.';
         }
 
         if ($whatsapp === '') {
-            $errors['whatsapp'] = 'El WhatsApp del negocio es obligatorio.';
+            $errors['whatsapp'] = 'El WhatsApp es obligatorio para publicar ofertas.';
         }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -58,6 +64,7 @@ class RegisterSubmitAction extends PageAction
 
         $old = [
             'email' => $email,
+            'role' => $role,
             'business_name' => $businessName,
             'whatsapp' => $whatsapp,
         ];
@@ -72,8 +79,8 @@ class RegisterSubmitAction extends PageAction
             $account = $this->accountRepository->createBusinessAccount([
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
-                'role' => 'business',
-                'business_name' => $businessName,
+                'role' => $role,
+                'business_name' => $businessName !== '' ? $businessName : null,
                 'whatsapp' => $whatsapp,
             ]);
         } catch (PDOException) {
@@ -85,7 +92,7 @@ class RegisterSubmitAction extends PageAction
         }
 
         $this->authService->login($account);
-        $this->flash('success', 'Tu negocio ya puede ingresar y publicar ofertas.');
+        $this->flash('success', 'Tu cuenta ya está lista. Ahora puedes publicar ofertas desde tu panel.');
 
         return $this->redirect($response, '/panel');
     }

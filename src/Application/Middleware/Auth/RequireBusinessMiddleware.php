@@ -18,11 +18,11 @@ class RequireBusinessMiddleware implements MiddlewareInterface
 
     public function process(Request $request, RequestHandler $handler): Response
     {
-        if ($this->authService->hasRole('business')) {
+        if ($this->authService->hasRole('business', 'user')) {
             return $handler->handle($request);
         }
 
-        $_SESSION['flash']['error'] = 'Solo los negocios autenticados pueden acceder a este panel.';
+        $_SESSION['flash']['error'] = 'Debes iniciar sesión para acceder a tu panel de publicaciones.';
 
         $response = new \Slim\Psr7\Response();
 

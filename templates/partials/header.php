@@ -12,11 +12,12 @@ $publicNavigationItems = [
 $privateNavigationItems = $publicNavigationItems + [
     'login' => ['href' => '/login', 'label' => 'Ingresar', 'icon' => 'log-in'],
     'registro' => ['href' => '/register', 'label' => 'Registro', 'icon' => 'user-plus'],
-    'panel' => ['href' => '/panel', 'label' => 'Panel negocio', 'icon' => 'layout-dashboard'],
+    'panel' => ['href' => '/panel', 'label' => 'Mi panel', 'icon' => 'layout-dashboard'],
     'admin' => ['href' => '/admin', 'label' => 'Admin', 'icon' => 'shield-check'],
 ];
 
 $isPublicRoute = in_array($currentRoute ?? '', array_keys($publicNavigationItems), true);
+$isAdminRoute = ($currentRoute ?? '') === 'admin';
 $publishHref = ($currentRoute ?? '') === 'inicio' ? '#publicar' : '/#publicar';
 $currentUser = $currentUser ?? null;
 ?>
@@ -67,28 +68,30 @@ $currentUser = $currentUser ?? null;
                 </div>
             </div>
             <div class="flex flex-col gap-3 md:items-end">
-                <nav class="flex flex-wrap gap-2 text-sm">
-                    <?php foreach ($privateNavigationItems as $routeName => $item) : ?>
-                        <?php
-                        if ($routeName === 'admin' && (($currentUser['role'] ?? null) !== 'admin')) {
-                            continue;
-                        }
-                        if ($routeName === 'panel' && (($currentUser['role'] ?? null) !== 'business')) {
-                            continue;
-                        }
-                        if (in_array($routeName, ['login', 'registro'], true) && $currentUser !== null) {
-                            continue;
-                        }
-                        $isCurrent = ($currentRoute ?? '') === $routeName;
-                        ?>
-                        <a
-                            href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>"
-                            class="rounded-full px-4 py-2 transition <?= $isCurrent ? 'bg-blue-500 text-slate-950 font-semibold' : 'chip text-slate-200 hover:bg-slate-800' ?>"
-                        >
-                            <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
-                        </a>
-                    <?php endforeach; ?>
-                </nav>
+                <?php if (!$isAdminRoute) : ?>
+                    <nav class="flex flex-wrap gap-2 text-sm">
+                        <?php foreach ($privateNavigationItems as $routeName => $item) : ?>
+                            <?php
+                            if ($routeName === 'admin' && (($currentUser['role'] ?? null) !== 'admin')) {
+                                continue;
+                            }
+                            if ($routeName === 'panel' && !in_array(($currentUser['role'] ?? null), ['business', 'user'], true)) {
+                                continue;
+                            }
+                            if (in_array($routeName, ['login', 'registro'], true) && $currentUser !== null) {
+                                continue;
+                            }
+                            $isCurrent = ($currentRoute ?? '') === $routeName;
+                            ?>
+                            <a
+                                href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') ?>"
+                                class="rounded-full px-4 py-2 transition <?= $isCurrent ? 'bg-blue-500 text-slate-950 font-semibold' : 'chip text-slate-200 hover:bg-slate-800' ?>"
+                            >
+                                <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </nav>
+                <?php endif; ?>
                 <?php if ($currentUser !== null) : ?>
                     <div class="flex items-center gap-3 text-sm text-slate-300">
                         <span>
