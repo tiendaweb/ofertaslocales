@@ -6,6 +6,7 @@ namespace App\Application\Actions\Public;
 
 use App\Application\Actions\PageAction;
 use App\Application\Service\PublicCatalogService;
+use App\Domain\Site\SeoRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -14,7 +15,8 @@ class OffersAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly PublicCatalogService $publicCatalogService
+        private readonly PublicCatalogService $publicCatalogService,
+        private readonly SeoRepository $seoRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -32,8 +34,12 @@ class OffersAction extends PageAction
             $catalog = $this->publicCatalogService->buildCatalog();
         }
 
+        $seo = $this->seoRepository->findByPage('ofertas') ?? [];
+
         return $this->renderPage($response, 'pages/ofertas.php', [
-            'pageTitle' => 'Ofertas activas | OfertasCerca',
+            'pageTitle' => $seo['title'] ?? 'Ofertas activas | OfertasCerca',
+            'metaDescription' => $seo['meta_description'] ?? null,
+            'ogImage' => $seo['og_image'] ?? null,
             'currentRoute' => 'ofertas',
             'offers' => $catalog['offers'],
             'totalOffers' => count($catalog['offers']),

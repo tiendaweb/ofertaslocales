@@ -12,6 +12,13 @@ class RegisterPageAction extends PageAction
 {
     public function __invoke(Request $request, Response $response, array $args): Response
     {
+        if ($this->currentUser() !== null) {
+            $role = (string) ($this->currentUser()['role'] ?? 'user');
+            $redirectTo = $role === 'admin' ? '/admin' : ($role === 'business' ? '/panel' : '/');
+
+            return $this->redirect($response, $redirectTo);
+        }
+
         return $this->renderPage($response, 'pages/auth/register.php', [
             'pageTitle' => 'Crear cuenta | OfertasCerca',
             'currentRoute' => 'registro',

@@ -6,6 +6,8 @@ namespace App\Application\Actions\Admin;
 
 use App\Application\Actions\PageAction;
 use App\Domain\Offer\OfferRepository;
+use App\Domain\Site\SeoRepository;
+use App\Domain\Site\SettingsRepository;
 use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -16,7 +18,9 @@ class AdminDashboardAction extends PageAction
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly OfferRepository $offerRepository,
-        private readonly AccountRepository $accountRepository
+        private readonly AccountRepository $accountRepository,
+        private readonly SettingsRepository $settingsRepository,
+        private readonly SeoRepository $seoRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -29,6 +33,9 @@ class AdminDashboardAction extends PageAction
             'pendingOffers' => $this->offerRepository->countPendingOffers(),
             'adminCount' => $this->accountRepository->countByRole('admin'),
             'businessCount' => $this->accountRepository->countByRole('business'),
+            'offers' => $this->offerRepository->findForModeration(),
+            'settings' => $this->settingsRepository->findAll(),
+            'seoPages' => $this->seoRepository->findAll(),
         ]);
     }
 }

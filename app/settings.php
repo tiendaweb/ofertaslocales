@@ -18,6 +18,7 @@ return function (ContainerBuilder $containerBuilder) {
                     'templates' => __DIR__ . '/../templates',
                     'database' => __DIR__ . '/../database/app.sqlite',
                     'databaseMigrations' => __DIR__ . '/../database/migrations',
+                    'uploads' => __DIR__ . '/../public/uploads',
                 ],
                 'logger' => [
                     'name' => 'ofertas-cerca',

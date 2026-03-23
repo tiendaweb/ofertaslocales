@@ -6,18 +6,18 @@ declare(strict_types=1);
 <header class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4 text-center">
     <div class="max-w-3xl mx-auto">
         <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
-            📍 Descubrí tu zona
+            <?= htmlspecialchars((string) ($labels['hero_badge'] ?? '📍 Descubrí tu zona'), ENT_QUOTES, 'UTF-8') ?>
         </span>
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
-            Ofertas cerca tuyo que te hacen <span class="text-yellow-300">ahorrar HOY</span>
+            <?= htmlspecialchars((string) ($labels['hero_title'] ?? 'Ofertas cerca tuyo que te hacen ahorrar HOY'), ENT_QUOTES, 'UTF-8') ?>
         </h1>
         <p class="text-lg md:text-xl text-red-100 mb-8 max-w-2xl mx-auto font-light">
-            Encontrá descuentos reales, contactá directo al vendedor por WhatsApp y asegurá tu precio antes de que el reloj llegue a cero.
+            <?= htmlspecialchars((string) ($labels['hero_description'] ?? 'Encontrá descuentos reales, contactá directo al vendedor por WhatsApp y asegurá tu precio antes de que el reloj llegue a cero.'), ENT_QUOTES, 'UTF-8') ?>
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
             <a href="/ofertas" class="bg-yellow-400 text-yellow-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow-lg flex items-center justify-center gap-2">
                 <i data-lucide="search" class="w-5 h-5"></i>
-                Ver descuentos ahora
+                <?= htmlspecialchars((string) ($labels['hero_primary_cta'] ?? 'Ver descuentos ahora'), ENT_QUOTES, 'UTF-8') ?>
             </a>
         </div>
     </div>
@@ -79,13 +79,13 @@ declare(strict_types=1);
             <div class="grid grid-cols-1 lg:grid-cols-2">
                 <div class="p-8 md:p-12 flex flex-col justify-center">
                     <div class="inline-block bg-red-600/20 text-red-400 font-semibold px-3 py-1 rounded-full text-sm w-max mb-6">
-                        Para Comerciantes
+                        <?= htmlspecialchars((string) ($labels['merchant_badge'] ?? 'Para Comerciantes'), ENT_QUOTES, 'UTF-8') ?>
                     </div>
                     <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                        Conseguí más clientes <span class="text-yellow-400">hoy mismo</span>
+                        <?= htmlspecialchars((string) ($labels['merchant_title'] ?? 'Conseguí más clientes hoy mismo'), ENT_QUOTES, 'UTF-8') ?>
                     </h2>
                     <p class="text-gray-300 text-lg mb-8">
-                        Publicá tu oferta GRATIS. Llega a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.
+                        <?= htmlspecialchars((string) ($labels['merchant_description'] ?? 'Publicá tu oferta GRATIS. Llega a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.'), ENT_QUOTES, 'UTF-8') ?>
                     </p>
 
                     <ul class="space-y-4 mb-8">
