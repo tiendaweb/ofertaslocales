@@ -204,11 +204,77 @@
 
     const setupHomeMapPreview = () => {
         const previewContainer = document.getElementById('home-map-preview');
+        const centerMeButton = document.getElementById('home-map-center-me');
+        const nearbyButton = document.getElementById('home-map-filter-nearby');
+        const feedbackNode = document.getElementById('home-map-feedback');
+        const modal = document.getElementById('home-map-offer-modal');
+        const modalClose = document.getElementById('home-map-modal-close');
+        const modalBusiness = document.getElementById('home-map-modal-business');
+        const modalTitle = document.getElementById('home-map-modal-title');
+        const modalImage = document.getElementById('home-map-modal-image');
+        const modalCategory = document.getElementById('home-map-modal-category');
+        const modalDescription = document.getElementById('home-map-modal-description');
+        const modalLocation = document.querySelector('#home-map-modal-location span');
+        const modalWhatsapp = document.getElementById('home-map-modal-whatsapp');
         const mapOffers = Array.isArray(pageData.mapOffers) ? pageData.mapOffers.slice(0, 8) : [];
 
         if (!previewContainer) {
             return;
         }
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll('\'', '&#039;');
+
+        const setFeedback = (message, isError = false) => {
+            if (!feedbackNode) {
+                return;
+            }
+
+            feedbackNode.textContent = message;
+            feedbackNode.classList.toggle('text-red-600', isError);
+            feedbackNode.classList.toggle('text-gray-500', !isError);
+        };
+
+        const closeModal = () => {
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        const openModal = (offer) => {
+            if (!modal || !modalBusiness || !modalTitle || !modalImage || !modalCategory || !modalDescription || !modalLocation || !modalWhatsapp) {
+                return;
+            }
+
+            modalBusiness.textContent = offer.business_name || 'Negocio';
+            modalTitle.textContent = offer.title || 'Oferta seleccionada';
+            modalImage.src = offer.image_url || '';
+            modalImage.alt = offer.title || 'Oferta seleccionada';
+            modalCategory.textContent = offer.category || '';
+            modalDescription.textContent = offer.description || 'Sin descripción adicional.';
+            modalLocation.textContent = offer.location || 'Ubicación no especificada';
+            modalWhatsapp.href = buildWhatsAppLink(offer);
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        };
+
+        modalClose?.addEventListener('click', closeModal);
+        modal?.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
 
         if (mapOffers.length === 0) {
             previewContainer.innerHTML = `
@@ -225,6 +291,9 @@
                 window.lucide.createIcons();
             }
 
+            centerMeButton?.setAttribute('disabled', 'disabled');
+            nearbyButton?.setAttribute('disabled', 'disabled');
+            setFeedback('No hay ofertas geolocalizadas para mostrar todavía.');
             return;
         }
 
@@ -239,7 +308,8 @@
                             </div>
                             <h3 class="font-bold text-gray-900 mb-1">${offer.business_name}</h3>
                             <p class="text-red-600 font-semibold mb-2">${offer.title}</p>
-                            <p class="text-sm text-gray-500">${offer.location}</p>
+                            <p class="text-sm text-gray-500 mb-3">${offer.location}</p>
+                            <a href="/mapa" class="text-sm font-semibold text-gray-800 hover:text-red-600 transition">Ver en mapa completo</a>
                         </article>
                     `).join('')}
                 </div>
@@ -249,6 +319,9 @@
                 window.lucide.createIcons();
             }
 
+            centerMeButton?.setAttribute('disabled', 'disabled');
+            nearbyButton?.setAttribute('disabled', 'disabled');
+            setFeedback('Vista previa estática activa: Leaflet no se pudo cargar.', true);
             return;
         }
 
@@ -256,41 +329,103 @@
 
         const validOffers = mapOffers.filter((offer) => Number.isFinite(Number(offer.lat)) && Number.isFinite(Number(offer.lon)));
         if (validOffers.length === 0) {
+            setFeedback('No hay coordenadas válidas para construir el mapa.', true);
             return;
         }
 
         const first = validOffers[0];
         const map = window.L.map(previewContainer, {
-            zoomControl: false,
-            scrollWheelZoom: false,
+            zoomControl: true,
+            scrollWheelZoom: true,
             attributionControl: true,
-        }).setView([Number(first.lat), Number(first.lon)], 12);
+        }).setView([Number(first.lat), Number(first.lon)], 13);
 
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
 
         const bounds = [];
+        const offerPoints = [];
         validOffers.forEach((offer) => {
             const lat = Number(offer.lat);
             const lon = Number(offer.lon);
             const marker = window.L.marker([lat, lon]).addTo(map);
-            marker.bindPopup(`
+            marker.bindTooltip(`
                 <div class="w-48">
-                    <img src="${offer.image_url}" alt="${offer.title}" class="w-full h-20 object-cover rounded-lg mb-2">
-                    <p class="text-xs uppercase tracking-wider text-gray-500">${offer.category}</p>
-                    <p class="font-semibold text-gray-900">${offer.business_name}</p>
-                    <p class="text-red-600 font-semibold text-sm">${offer.title}</p>
-                    <a class="text-xs text-blue-600 font-semibold" href="/mapa">Abrir mapa completo</a>
+                    <img src="${escapeHtml(offer.image_url)}" alt="${escapeHtml(offer.title)}" class="w-full h-20 object-cover rounded-lg mb-2">
+                    <p class="text-xs uppercase tracking-wider text-gray-500">${escapeHtml(offer.category)}</p>
+                    <p class="font-semibold text-gray-900">${escapeHtml(offer.business_name)}</p>
+                    <p class="text-red-600 font-semibold text-sm">${escapeHtml(offer.title)}</p>
+                    <p class="text-xs text-gray-500 mt-1">Tocá para abrir la oferta</p>
                 </div>
-            `);
+            `, { direction: 'top', offset: [0, -10] });
+
+            marker.on('click', () => {
+                openModal(offer);
+            });
+
             bounds.push([lat, lon]);
+            offerPoints.push({ lat, lon, offer });
         });
 
         if (bounds.length > 1) {
             map.fitBounds(bounds, { padding: [24, 24] });
         }
 
+        const fitToNearby = (originLat, originLon, maxItems = 4) => {
+            const rank = offerPoints
+                .map((point) => {
+                    const distance = Math.hypot(point.lat - originLat, point.lon - originLon);
+                    return { ...point, distance };
+                })
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, Math.max(1, maxItems));
+
+            const nearBounds = rank.map((point) => [point.lat, point.lon]);
+            nearBounds.push([originLat, originLon]);
+            map.fitBounds(nearBounds, { padding: [32, 32], maxZoom: 15 });
+            setFeedback(`Mostrando ${rank.length} ofertas cercanas a tu ubicación.`);
+        };
+
+        centerMeButton?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                setFeedback('Tu navegador no soporta geolocalización.', true);
+                return;
+            }
+
+            setFeedback('Buscando tu ubicación...');
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                map.setView([lat, lon], 14, { animate: true });
+                window.L.circleMarker([lat, lon], {
+                    radius: 7,
+                    color: '#dc2626',
+                    weight: 3,
+                    fillColor: '#ef4444',
+                    fillOpacity: 0.35,
+                }).addTo(map);
+                setFeedback('Mapa centrado en tu ubicación actual.');
+            }, () => {
+                setFeedback('No pudimos acceder a tu ubicación. Revisa los permisos del navegador.', true);
+            }, { enableHighAccuracy: true, timeout: 7000 });
+        });
+
+        nearbyButton?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                setFeedback('Tu navegador no soporta geolocalización.', true);
+                return;
+            }
+
+            setFeedback('Calculando ofertas cercanas...');
+            navigator.geolocation.getCurrentPosition((position) => {
+                fitToNearby(position.coords.latitude, position.coords.longitude);
+            }, () => {
+                setFeedback('No fue posible obtener tu ubicación para filtrar cercanas.', true);
+            }, { enableHighAccuracy: true, timeout: 7000 });
+        });
+
+        setFeedback('Mapa interactivo activo: podés hacer zoom y tocar un punto para ver la oferta.');
         window.setTimeout(() => map.invalidateSize(), 120);
     };
 
