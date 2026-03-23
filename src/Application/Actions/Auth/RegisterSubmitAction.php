@@ -39,6 +39,12 @@ class RegisterSubmitAction extends PageAction
         $province = trim((string) ($data['province'] ?? ''));
         $addressLat = trim((string) ($data['address_lat'] ?? ''));
         $addressLon = trim((string) ($data['address_lon'] ?? ''));
+        $bio = trim((string) ($data['bio'] ?? ''));
+        $instagramUrl = trim((string) ($data['instagram_url'] ?? ''));
+        $facebookUrl = trim((string) ($data['facebook_url'] ?? ''));
+        $tiktokUrl = trim((string) ($data['tiktok_url'] ?? ''));
+        $websiteUrl = trim((string) ($data['website_url'] ?? ''));
+        $logoUrl = trim((string) ($data['logo_url'] ?? ''));
 
         if (!in_array($role, ['business', 'user'], true)) {
             $role = 'user';
@@ -93,6 +99,28 @@ class RegisterSubmitAction extends PageAction
             if ($addressLon === '' || !is_numeric($addressLon)) {
                 $errors['address_lon'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
             }
+
+            if ($bio !== '' && mb_strlen($bio) > 280) {
+                $errors['bio'] = 'La bio corta no puede superar los 280 caracteres.';
+            }
+        }
+
+        $socialUrlMap = [
+            'instagram_url' => ['label' => 'Instagram', 'value' => $instagramUrl],
+            'facebook_url' => ['label' => 'Facebook', 'value' => $facebookUrl],
+            'tiktok_url' => ['label' => 'TikTok', 'value' => $tiktokUrl],
+            'website_url' => ['label' => 'sitio web', 'value' => $websiteUrl],
+            'logo_url' => ['label' => 'logo', 'value' => $logoUrl],
+        ];
+        $sanitizedUrls = [];
+        foreach ($socialUrlMap as $field => $config) {
+            $normalized = $this->normalizeUrl((string) $config['value']);
+            if ($normalized === false) {
+                $errors[$field] = sprintf('La URL de %s no es válida.', $config['label']);
+                continue;
+            }
+
+            $sanitizedUrls[$field] = $normalized;
         }
 
         $old = [
@@ -108,6 +136,12 @@ class RegisterSubmitAction extends PageAction
             'province' => $province,
             'address_lat' => $addressLat,
             'address_lon' => $addressLon,
+            'bio' => $bio,
+            'instagram_url' => $instagramUrl,
+            'facebook_url' => $facebookUrl,
+            'tiktok_url' => $tiktokUrl,
+            'website_url' => $websiteUrl,
+            'logo_url' => $logoUrl,
         ];
 
         if ($errors !== []) {
@@ -131,6 +165,12 @@ class RegisterSubmitAction extends PageAction
                 'province' => $province !== '' ? $province : null,
                 'address_lat' => $addressLat !== '' ? (float) $addressLat : null,
                 'address_lon' => $addressLon !== '' ? (float) $addressLon : null,
+                'bio' => $bio !== '' ? $bio : null,
+                'instagram_url' => $sanitizedUrls['instagram_url'] ?? null,
+                'facebook_url' => $sanitizedUrls['facebook_url'] ?? null,
+                'tiktok_url' => $sanitizedUrls['tiktok_url'] ?? null,
+                'website_url' => $sanitizedUrls['website_url'] ?? null,
+                'logo_url' => $sanitizedUrls['logo_url'] ?? null,
             ]);
         } catch (PDOException) {
             $this->flashFormErrors([
@@ -144,5 +184,32 @@ class RegisterSubmitAction extends PageAction
         $this->flash('success', 'Tu cuenta ya está lista. Ahora puedes publicar ofertas desde tu panel.');
 
         return $this->redirect($response, '/panel');
+    }
+
+    private function normalizeUrl(string $url): string|false|null
+    {
+        if ($url === '') {
+            return null;
+        }
+
+        $normalized = preg_match('#^https?://#i', $url) === 1
+            ? $url
+            : 'https://' . ltrim($url, '/');
+
+        if (filter_var($normalized, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
+        $parts = parse_url($normalized);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        return $normalized;
     }
 }
