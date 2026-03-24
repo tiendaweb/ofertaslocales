@@ -34,6 +34,16 @@ $old = $flashOld !== [] ? $flashOld : [
 ];
 $defaultWhatsapp = (string) ($old['whatsapp'] ?? ($currentUser['whatsapp'] ?? ''));
 $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtotime('+24 hours')));
+$approvedCategories = is_array($approvedCategories ?? null) ? $approvedCategories : [];
+$businessProfile = is_array($businessProfile ?? null) ? $businessProfile : [];
+$businessAddressParts = array_filter([
+    trim(((string) ($businessProfile['street'] ?? '')) . ' ' . ((string) ($businessProfile['street_number'] ?? ''))),
+    trim((string) ($businessProfile['city'] ?? '')),
+    trim((string) ($businessProfile['province'] ?? '')),
+], static fn (string $value): bool => $value !== '');
+$businessAddress = implode(', ', $businessAddressParts);
+$businessLat = $businessProfile['address_lat'] ?? null;
+$businessLon = $businessProfile['address_lon'] ?? null;
 ?>
 
 <section class="max-w-7xl mx-auto space-y-8 text-black">
@@ -102,7 +112,7 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                 <i data-lucide="plus-square" class="h-4 w-4"></i> Publicar
             </p>
             <h2 class="text-3xl font-extrabold tracking-tight text-black">Crear nueva oferta</h2>
-            <p class="mt-2 text-sm text-gray-500">Carga una oferta rápidamente. Marca la ubicación en el mapa o usa coordenadas.</p>
+            <p class="mt-2 text-sm text-gray-500">Carga una oferta rápidamente usando la dirección registrada en tu negocio.</p>
         </div>
 
         <?php if ($formErrors !== []) : ?>
@@ -129,7 +139,15 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-category">
                     <i data-lucide="tag" class="h-4 w-4 text-gray-400"></i> Categoría
                 </label>
-                <input id="panel-offer-category" name="category" required value="<?= htmlspecialchars((string) ($old['category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="Ej: Gastronomía">
+                <select id="panel-offer-category" name="category" required class="<?= $inputClass ?>">
+                    <option value="">Selecciona una categoría aprobada</option>
+                    <?php foreach ($approvedCategories as $categoryOption) : ?>
+                        <option value="<?= htmlspecialchars((string) $categoryOption, ENT_QUOTES, 'UTF-8') ?>" <?= (string) ($old['category'] ?? '') === (string) $categoryOption ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $categoryOption, ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="text" name="requested_category" value="<?= htmlspecialchars((string) ($old['requested_category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> mt-2" placeholder="¿No existe? Propón una nueva categoría">
             </div>
             
             <div>
@@ -153,11 +171,11 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                 <input id="panel-offer-whatsapp" name="whatsapp" required value="<?= htmlspecialchars($defaultWhatsapp, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="54911...">
             </div>
             
-            <div>
-                <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-location">
-                    <i data-lucide="map-pin" class="h-4 w-4 text-gray-400"></i> Ubicación
-                </label>
-                <input id="panel-offer-location" name="location" required value="<?= htmlspecialchars((string) ($old['location'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="Ej: Av. Siempre Viva 123">
+            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Ubicación registrada del negocio</p>
+                <p class="mt-2 text-sm text-gray-700"><?= htmlspecialchars($businessAddress !== '' ? $businessAddress : 'Sin dirección registrada', ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="mt-1 text-xs text-gray-500">Lat: <?= htmlspecialchars((string) $businessLat, ENT_QUOTES, 'UTF-8') ?> | Lon: <?= htmlspecialchars((string) $businessLon, ENT_QUOTES, 'UTF-8') ?></p>
+                <input type="hidden" name="location" value="<?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8') ?>">
             </div>
             
             <div>
@@ -174,38 +192,8 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                 <input id="panel-offer-image" type="file" name="image" accept="image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition-all file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-black file:px-4 file:py-2 file:text-xs file:font-bold file:text-white file:transition-colors hover:file:bg-red-600 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/10">
             </div>
             
-            <div class="md:col-span-2 rounded-2xl border border-gray-100 bg-gray-50/50 p-6 mt-2">
-                <p class="mb-4 flex items-center gap-2 text-sm font-bold text-black">
-                    <i data-lucide="map" class="h-4 w-4 text-red-500"></i> Ubicación exacta en mapa
-                </p>
-                
-                <div class="grid gap-4 md:grid-cols-2 mb-4">
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-gray-500" for="panel-offer-lat">Latitud</label>
-                        <input id="panel-offer-lat" name="lat" value="<?= htmlspecialchars((string) ($old['lat'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" placeholder="-34.6037">
-                    </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-gray-500" for="panel-offer-lon">Longitud</label>
-                        <input id="panel-offer-lon" name="lon" value="<?= htmlspecialchars((string) ($old['lon'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" placeholder="-58.3816">
-                    </div>
-                </div>
-
-                <div class="relative z-10 mb-4 grid gap-3 md:grid-cols-[1fr_auto_auto]">
-                    <input id="panel-offer-location-search" type="text" class="<?= $inputClass ?> py-2" placeholder="Buscar dirección (Ej: Obelisco, Buenos Aires)">
-                    <button id="panel-offer-location-search-button" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition hover:border-red-200 hover:text-red-600">
-                        <i data-lucide="search" class="h-4 w-4"></i> Buscar
-                    </button>
-                    <button id="panel-offer-use-my-location" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100">
-                        <i data-lucide="locate-fixed" class="h-4 w-4"></i> Usar mi ubicación
-                    </button>
-                </div>
-                <p id="panel-offer-location-feedback" class="relative z-10 mb-4 text-xs font-semibold text-gray-500" aria-live="polite"></p>
-                
-                <div id="panel-offer-map" class="relative z-0 h-72 w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-inner"></div>
-                <p class="mt-3 text-xs font-medium text-gray-500 flex items-center gap-1">
-                    <i data-lucide="info" class="h-3 w-3"></i> Haz clic en el mapa para actualizar las coordenadas automáticamente.
-                </p>
-            </div>
+            <input type="hidden" name="lat" value="<?= htmlspecialchars((string) $businessLat, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="lon" value="<?= htmlspecialchars((string) $businessLon, ENT_QUOTES, 'UTF-8') ?>">
             
             <div class="md:col-span-2 mt-4">
                 <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-black px-8 py-4 text-sm font-bold text-white shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-600/20">
@@ -276,7 +264,13 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                                         
                                         <div>
                                             <label class="mb-1 block text-xs font-bold text-gray-500">Categoría</label>
-                                            <input name="category" value="<?= htmlspecialchars((string) $offer['category'], ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" required>
+                                            <select name="category" class="<?= $inputClass ?> py-2" required>
+                                                <?php foreach ($approvedCategories as $categoryOption) : ?>
+                                                    <option value="<?= htmlspecialchars((string) $categoryOption, ENT_QUOTES, 'UTF-8') ?>" <?= (string) $offer['category'] === (string) $categoryOption ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars((string) $categoryOption, ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
                                         <div>
                                             <label class="mb-1 block text-xs font-bold text-gray-500">Título</label>
@@ -288,7 +282,7 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
                                         </div>
                                         <div>
                                             <label class="mb-1 block text-xs font-bold text-gray-500">Ubicación</label>
-                                            <input name="location" value="<?= htmlspecialchars((string) $offer['location'], ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" required>
+                                            <input name="location" value="<?= htmlspecialchars((string) $offer['location'], ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" readonly>
                                         </div>
                                         <div class="md:col-span-2">
                                             <label class="mb-1 block text-xs font-bold text-gray-500">Descripción</label>

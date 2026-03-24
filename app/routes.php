@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 use App\Application\Actions\Admin\AdminDashboardAction;
 use App\Application\Actions\Admin\CreateAdminUserAction;
+use App\Application\Actions\Admin\CreateAdminCategoryAction;
 use App\Application\Actions\Admin\ImpersonateAdminUserAction;
 use App\Application\Actions\Admin\ListAdminUsersAction;
 use App\Application\Actions\Admin\SuspendAdminUserAction;
 use App\Application\Actions\Admin\UnsuspendAdminUserAction;
 use App\Application\Actions\Admin\UpdateAdminUserAction;
+use App\Application\Actions\Admin\UpdateAdminCategoryStatusAction;
 use App\Application\Actions\Admin\UpdateApprovalModeAction;
 use App\Application\Actions\Admin\UpdateInlineContentAction;
 use App\Application\Actions\Admin\UpdateOfferStatusAction;
@@ -75,6 +77,8 @@ return function (App $app) {
         $group->get('', AdminDashboardAction::class)->setName('admin');
         $group->post('/offers/{id}/status', UpdateOfferStatusAction::class)->setName('admin.offers.status');
         $group->post('/approval-mode', UpdateApprovalModeAction::class)->setName('admin.approval-mode');
+        $group->post('/categories', CreateAdminCategoryAction::class)->setName('admin.categories.create');
+        $group->post('/categories/{id:[0-9]+}/status', UpdateAdminCategoryStatusAction::class)->setName('admin.categories.status');
         $group->post('/settings', UpdateSettingsAction::class)->setName('admin.settings');
         $group->post('/seo/{page_name}', UpdateSeoAction::class)->setName('admin.seo');
         $group->post('/inline-content', UpdateInlineContentAction::class)->setName('admin.inline-content');

@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Application\Service;
 
+use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\PublicOfferRepository;
 use DateTimeImmutable;
 
 class PublicCatalogService
 {
-    public function __construct(private readonly PublicOfferRepository $publicOfferRepository)
-    {
+    public function __construct(
+        private readonly PublicOfferRepository $publicOfferRepository,
+        private readonly CategoryRepository $categoryRepository
+    ) {
     }
 
     public function buildCatalog(?int $selectedBusinessId = null): array
@@ -83,6 +86,10 @@ class PublicCatalogService
             static fn (array $offer): string => $offer['category'],
             $offers
         )));
+        sort($categories);
+
+        $approved = $this->categoryRepository->findApprovedNames();
+        $categories = array_values(array_unique(array_merge($approved, $categories)));
         sort($categories);
 
         return $categories;
