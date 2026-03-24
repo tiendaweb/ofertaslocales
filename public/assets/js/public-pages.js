@@ -57,7 +57,7 @@
                 ${offers.map((item) => `
                     <article class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
                         <div class="relative h-48 overflow-hidden bg-gray-200">
-                            <a href="/mapa" class="block h-full w-full" aria-label="Ver oferta en el mapa">
+                            <a href="/mapa?oferta=${item.id}" class="block h-full w-full" aria-label="Ver oferta en el mapa">
                                 <img src="${item.image_url}" alt="${item.business_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             </a>
                             <div class="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
@@ -91,7 +91,7 @@
                                     <i data-lucide="message-circle" class="w-5 h-5"></i>
                                     Quiero esta oferta
                                 </a>
-                                <a href="/mapa" class="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                <a href="/mapa?oferta=${item.id}" class="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
                                     <i data-lucide="map" class="w-5 h-5"></i>
                                     Ver en el mapa
                                 </a>
@@ -112,6 +112,7 @@
         const categories = Array.isArray(pageData.categories) ? pageData.categories : [];
         const filtersContainer = document.getElementById('category-filters');
         const offersContainer = document.getElementById('offers-container');
+        const offersCountSummary = document.getElementById('offers-count-summary');
         const categorySelect = document.getElementById('inputCategory');
 
         if (categorySelect && categorySelect.children.length === 0) {
@@ -143,6 +144,12 @@
             const filteredOffers = activeCategory === 'Todas'
                 ? offers
                 : offers.filter((offer) => offer.category === activeCategory);
+
+            if (offersCountSummary) {
+                offersCountSummary.textContent = activeCategory === 'Todas'
+                    ? `Mostrando ${filteredOffers.length} oferta${filteredOffers.length === 1 ? '' : 's'} activa${filteredOffers.length === 1 ? '' : 's'}.`
+                    : `Mostrando ${filteredOffers.length} oferta${filteredOffers.length === 1 ? '' : 's'} en ${activeCategory}.`;
+            }
 
             renderOfferCards(filteredOffers, offersContainer);
         };

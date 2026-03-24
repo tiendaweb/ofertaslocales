@@ -14,6 +14,9 @@ $totalOffers = isset($totalOffers) ? (int) $totalOffers : (isset($pageData['offe
                 <i data-lucide="zap" class="text-yellow-500 w-6 h-6"></i>
                 Ofertas de Hoy
             </h2>
+            <p id="offers-count-summary" class="mt-2 text-sm font-medium text-gray-500">
+                Mostrando <?= $totalOffers ?> oferta<?= $totalOffers === 1 ? '' : 's' ?> activa<?= $totalOffers === 1 ? '' : 's' ?>.
+            </p>
         </div>
 
         <div id="category-filters" class="flex overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar gap-2"></div>
@@ -21,6 +24,5 @@ $totalOffers = isset($totalOffers) ? (int) $totalOffers : (isset($pageData['offe
 
     <div id="offers-container"></div>
 </section>
-
 
 

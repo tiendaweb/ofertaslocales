@@ -181,6 +181,56 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
 </div>
 
 <style>
+    .map-leaflet-tooltip {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .map-leaflet-tooltip .leaflet-tooltip-content {
+        margin: 0;
+    }
+
+    .map-offer-tooltip {
+        width: 220px;
+        border-radius: 14px;
+        background: #ffffff;
+        border: 1px solid #fee2e2;
+        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.22);
+        padding: 10px;
+    }
+
+    .map-offer-tooltip__image {
+        width: 100%;
+        height: 104px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-bottom: 8px;
+    }
+
+    .map-offer-tooltip__business {
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #111827;
+        margin-bottom: 4px;
+        letter-spacing: .04em;
+    }
+
+    .map-offer-tooltip__title {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #dc2626;
+        margin-bottom: 4px;
+    }
+
+    .map-offer-tooltip__location {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
         width: 4px;
     }

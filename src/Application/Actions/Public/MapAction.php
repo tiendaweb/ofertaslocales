@@ -27,6 +27,10 @@ class MapAction extends PageAction
     {
         $catalog = $this->publicCatalogService->buildCatalog();
         $mapOffers = $catalog['mapOffers'];
+        $queryParams = $request->getQueryParams();
+        $selectedOfferId = isset($queryParams['oferta']) && ctype_digit((string) $queryParams['oferta'])
+            ? (int) $queryParams['oferta']
+            : null;
         $labels = $this->settingsRepository->findByKeys([
             'hero_badge',
             'hero_title',
@@ -56,6 +60,7 @@ class MapAction extends PageAction
             'pageData' => [
                 'mapOffers' => $mapOffers,
                 'defaultCenter' => $catalog['defaultCenter'],
+                'selectedOfferId' => $selectedOfferId,
             ],
         ]);
     }
