@@ -10,7 +10,26 @@ declare(strict_types=1);
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($businesses as $business) : ?>
+            <?php
+            $businessImage = (string) ($business['logo_url'] ?? '');
+            if ($businessImage === '' && isset($business['cover_image_url'])) {
+                $businessImage = (string) $business['cover_image_url'];
+            }
+            if ($businessImage === '' && isset($business['active_publications'][0]['image_url'])) {
+                $businessImage = (string) $business['active_publications'][0]['image_url'];
+            }
+            $mapLink = isset($business['active_publications'][0]['id'])
+                ? '/mapa?oferta=' . (int) $business['active_publications'][0]['id']
+                : '/mapa';
+            ?>
             <article class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 flex flex-col gap-4">
+                <a href="/negocios/<?= (int) $business['id'] ?>" class="block rounded-2xl overflow-hidden border border-gray-100 bg-gray-100 h-40">
+                    <img
+                        src="<?= htmlspecialchars($businessImage !== '' ? $businessImage : 'https://placehold.co/1200x600/f3f4f6/1f2937?text=Negocio', ENT_QUOTES, 'UTF-8') ?>"
+                        alt="Imagen de <?= htmlspecialchars($business['business_name'], ENT_QUOTES, 'UTF-8') ?>"
+                        class="w-full h-full object-cover transition duration-500 hover:scale-105"
+                    >
+                </a>
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <p class="text-xs uppercase tracking-[0.22em] text-gray-400 font-semibold mb-2">Negocio activo</p>
@@ -75,7 +94,7 @@ declare(strict_types=1);
 
                 <div class="mt-auto flex gap-3 pt-4">
                     <a href="/negocios/<?= (int) $business['id'] ?>" class="flex-1 bg-gray-900 text-white rounded-xl px-4 py-3 text-center font-semibold hover:bg-gray-800 transition">Ver perfil</a>
-                    <a href="/mapa" class="flex-1 bg-red-50 text-red-600 rounded-xl px-4 py-3 text-center font-semibold hover:bg-red-100 transition">Ir al mapa</a>
+                    <a href="<?= htmlspecialchars($mapLink, ENT_QUOTES, 'UTF-8') ?>" class="flex-1 bg-red-50 text-red-600 rounded-xl px-4 py-3 text-center font-semibold hover:bg-red-100 transition">Ir al mapa</a>
                 </div>
             </article>
         <?php endforeach; ?>

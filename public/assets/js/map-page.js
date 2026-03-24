@@ -2,6 +2,7 @@
     const pageDataElement = document.getElementById('page-data');
     const pageData = pageDataElement ? JSON.parse(pageDataElement.textContent || '{}') : {};
     const offers = Array.isArray(pageData.mapOffers) ? pageData.mapOffers : [];
+    const selectedOfferId = Number(pageData.selectedOfferId || 0);
     const mapContainer = document.getElementById('offers-map');
 
     if (!mapContainer || !window.L || offers.length === 0) {
@@ -16,6 +17,12 @@
     const locationFeedback = document.getElementById('map-location-feedback');
     const mapOffersList = document.getElementById('map-offers-list');
     const offerTriggers = Array.from(document.querySelectorAll('[data-map-offer-trigger]'));
+    const escapeHtml = (value) => String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('\'', '&#039;');
 
     const formatRemainingTime = (expiresAt) => {
         const expirationDate = new Date(expiresAt);
@@ -124,6 +131,21 @@
     let isLocatingUser = false;
     const markersByOfferId = new Map();
     const bounds = [];
+
+    const focusOfferOnMap = (offerId, openDetails = true) => {
+        const markerEntry = markersByOfferId.get(Number(offerId));
+
+        if (!markerEntry) {
+            return;
+        }
+
+        map.setView(markerEntry.marker.getLatLng(), 16, { animate: true });
+        markerEntry.marker.openTooltip();
+
+        if (openDetails) {
+            openModal(markerEntry.offer);
+        }
+    };
 
     const refreshModalCountdown = () => {
         if (!activeOffer || !modalCountdown) {
@@ -375,18 +397,19 @@
         offer.lat = lat;
         offer.lon = lon;
 
-        const marker = window.L.marker([lat, lon], { icon: redMarkerIcon }).addTo(map);
+        const marker = window.L.marker([lat, lon], { icon: redMarkerIcon, riseOnHover: true }).addTo(map);
         marker.bindTooltip(`
-            <div class="w-48">
-                <img src="${offer.image_url}" alt="${offer.title}" class="w-full h-24 object-cover rounded-xl mb-2">
-                <p class="font-bold text-gray-900 text-sm">${offer.business_name}</p>
-                <p class="text-red-600 font-semibold text-sm">${offer.title}</p>
-                <p class="text-gray-500 text-xs mt-1">${offer.location}</p>
+            <div class="map-offer-tooltip">
+                <img src="${escapeHtml(offer.image_url)}" alt="${escapeHtml(offer.title)}" class="map-offer-tooltip__image">
+                <p class="map-offer-tooltip__business">${escapeHtml(offer.business_name)}</p>
+                <p class="map-offer-tooltip__title">${escapeHtml(offer.title)}</p>
+                <p class="map-offer-tooltip__location">${escapeHtml(offer.location)}</p>
             </div>
         `, {
             direction: 'top',
             offset: [0, -10],
             opacity: 0.98,
+            className: 'map-leaflet-tooltip',
         });
         marker.on('click', () => openModal(offer));
         markersByOfferId.set(offer.id, { marker, offer, distanceKm: Number.POSITIVE_INFINITY });
@@ -401,15 +424,27 @@
         trigger.dataset.originalOrder = index.toString();
         trigger.addEventListener('click', () => {
             const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            focusOfferOnMap(offerId, true);
+        });
+        trigger.addEventListener('mouseenter', () => {
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
             const markerEntry = markersByOfferId.get(offerId);
-
-            if (!markerEntry) {
-                return;
-            }
-
-            map.setView(markerEntry.marker.getLatLng(), 16, { animate: true });
-            markerEntry.marker.openTooltip();
-            openModal(markerEntry.offer);
+            markerEntry?.marker.openTooltip();
+        });
+        trigger.addEventListener('mouseleave', () => {
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            const markerEntry = markersByOfferId.get(offerId);
+            markerEntry?.marker.closeTooltip();
+        });
+        trigger.addEventListener('focus', () => {
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            const markerEntry = markersByOfferId.get(offerId);
+            markerEntry?.marker.openTooltip();
+        });
+        trigger.addEventListener('blur', () => {
+            const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
+            const markerEntry = markersByOfferId.get(offerId);
+            markerEntry?.marker.closeTooltip();
         });
     });
 
@@ -507,6 +542,9 @@
     updateActionStates();
     map.invalidateSize();
     window.setTimeout(() => map.invalidateSize(), 200);
+    if (selectedOfferId > 0) {
+        window.setTimeout(() => focusOfferOnMap(selectedOfferId, true), 260);
+    }
     window.addEventListener('resize', () => map.invalidateSize());
 
     window.setInterval(refreshAllCountdowns, 1000);

@@ -111,6 +111,7 @@ class PublicCatalogService
                     'tiktok_url' => $offer['business_tiktok_url'],
                     'website_url' => $offer['business_website_url'],
                     'logo_url' => $offer['business_logo_url'],
+                    'cover_image_url' => $offer['image_url'],
                     'active_publications' => [],
                 ];
             }
@@ -131,6 +132,7 @@ class PublicCatalogService
                 'location' => $offer['location'],
                 'expires_at' => $offer['expires_at'],
                 'expires_label' => $offer['expires_label'],
+                'image_url' => $offer['image_url'],
             ];
         }
 

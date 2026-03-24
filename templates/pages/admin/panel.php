@@ -349,10 +349,6 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
 
     // Mapa Leaflet
     (() => {
-        if (!window.L) {
-            return;
-        }
-
         const mapContainer = document.getElementById('panel-offer-map');
         const latInput = document.getElementById('panel-offer-lat');
         const lonInput = document.getElementById('panel-offer-lon');
@@ -364,30 +360,6 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
         if (!mapContainer || !latInput || !lonInput) {
             return;
         }
-
-        const parsedLat = Number.parseFloat(latInput.value);
-        const parsedLon = Number.parseFloat(lonInput.value);
-        const hasInitialCoordinates = Number.isFinite(parsedLat) && Number.isFinite(parsedLon);
-        const defaultCenter = hasInitialCoordinates ? [parsedLat, parsedLon] : [-34.6037, -58.3816];
-
-        // Z-index ajustado internamente por leaflet, pero el contenedor base se previene de solapar elementos en Tailwind con z-0
-        const map = window.L.map(mapContainer).setView(defaultCenter, hasInitialCoordinates ? 14 : 12);
-        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-        const redMarkerIcon = window.L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41],
-        });
-
-        const marker = window.L.marker(defaultCenter, {
-            draggable: true,
-            icon: redMarkerIcon,
-        }).addTo(map);
 
         const setLocationFeedback = (message, type = 'neutral') => {
             if (!locationFeedback) {
@@ -412,12 +384,6 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
         const syncFields = (latLng) => {
             latInput.value = Number(latLng.lat).toFixed(6);
             lonInput.value = Number(latLng.lng).toFixed(6);
-        };
-
-        const updateMarkerAndCoordinates = (lat, lon, zoom = 15) => {
-            marker.setLatLng([lat, lon]);
-            syncFields({ lat, lng: lon });
-            map.setView([lat, lon], zoom, { animate: true });
         };
 
         const geocodeLocation = async (query) => {
@@ -457,100 +423,167 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
             };
         };
 
-        const handleSearchLocation = async () => {
-            if (!locationSearchInput) {
-                return;
+        const initLeafletMap = () => {
+            if (!window.L) {
+                setLocationFeedback('El mapa todavía se está cargando. Esperá un instante.', 'error');
+                return null;
             }
 
-            const query = locationSearchInput.value.trim();
-            if (query === '') {
-                setLocationFeedback('Escribe una dirección antes de buscar.', 'error');
-                return;
-            }
+            const parsedLat = Number.parseFloat(latInput.value);
+            const parsedLon = Number.parseFloat(lonInput.value);
+            const hasInitialCoordinates = Number.isFinite(parsedLat) && Number.isFinite(parsedLon);
+            const defaultCenter = hasInitialCoordinates ? [parsedLat, parsedLon] : [-34.6037, -58.3816];
 
-            locationSearchButton?.setAttribute('disabled', 'disabled');
-            locationSearchButton?.classList.add('opacity-70', 'cursor-not-allowed');
-            setLocationFeedback('Buscando dirección en el mapa...', 'neutral');
+            const map = window.L.map(mapContainer).setView(defaultCenter, hasInitialCoordinates ? 14 : 12);
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+            }).addTo(map);
+            const redMarkerIcon = window.L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+            });
 
-            try {
-                const result = await geocodeLocation(query);
-                updateMarkerAndCoordinates(result.lat, result.lon);
-                setLocationFeedback(`Dirección encontrada: ${result.label}`, 'success');
-            } catch (error) {
-                setLocationFeedback(error instanceof Error ? error.message : 'No pudimos completar la búsqueda.', 'error');
-            } finally {
-                locationSearchButton?.removeAttribute('disabled');
-                locationSearchButton?.classList.remove('opacity-70', 'cursor-not-allowed');
-            }
+            const marker = window.L.marker(defaultCenter, {
+                draggable: true,
+                icon: redMarkerIcon,
+            }).addTo(map);
+
+            return { map, marker, hasInitialCoordinates, parsedLat, parsedLon };
         };
 
-        if (hasInitialCoordinates) {
-            syncFields({ lat: parsedLat, lng: parsedLon });
-            setLocationFeedback('Se cargaron las coordenadas actuales de tu oferta.', 'neutral');
-        } else {
-            setLocationFeedback('Define la ubicación con el mapa, búsqueda o geolocalización.', 'neutral');
-        }
-
-        marker.on('dragend', () => {
-            syncFields(marker.getLatLng());
-            setLocationFeedback('Ubicación actualizada moviendo el marcador.', 'success');
-        });
-
-        map.on('click', (event) => {
-            marker.setLatLng(event.latlng);
-            syncFields(event.latlng);
-            setLocationFeedback('Ubicación actualizada desde el mapa.', 'success');
-        });
-
-        locationSearchButton?.addEventListener('click', () => {
-            void handleSearchLocation();
-        });
-        locationSearchInput?.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                void handleSearchLocation();
-            }
-        });
-
-        useMyLocationButton?.addEventListener('click', () => {
-            if (!navigator.geolocation) {
-                setLocationFeedback('Tu navegador no permite geolocalización.', 'error');
+        const bootMap = () => {
+            const mapContext = initLeafletMap();
+            if (!mapContext) {
                 return;
             }
 
-            setLocationFeedback('Detectando tu ubicación actual...', 'neutral');
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    updateMarkerAndCoordinates(latitude, longitude);
-                    setLocationFeedback('Ubicación detectada correctamente con GPS del navegador.', 'success');
-                },
-                (error) => {
-                    let message = 'No pudimos acceder a tu ubicación.';
-                    if (error.code === 1) {
-                        message = 'Permiso de ubicación denegado. Habilítalo en tu navegador.';
-                    } else if (error.code === 2) {
-                        message = 'No se pudo determinar tu ubicación actual.';
-                    } else if (error.code === 3) {
-                        message = 'La solicitud de ubicación tardó demasiado tiempo.';
-                    }
+            const { map, marker, hasInitialCoordinates, parsedLat, parsedLon } = mapContext;
 
-                    setLocationFeedback(message, 'error');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 12000,
-                    maximumAge: 0,
+            const updateMarkerAndCoordinates = (lat, lon, zoom = 15) => {
+                marker.setLatLng([lat, lon]);
+                syncFields({ lat, lng: lon });
+                map.setView([lat, lon], zoom, { animate: true });
+            };
+
+            const handleSearchLocation = async () => {
+                if (!locationSearchInput) {
+                    return;
                 }
-            );
-        });
 
-        window.setTimeout(() => map.invalidateSize(), 180);
-        window.addEventListener('resize', () => map.invalidateSize());
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                map.invalidateSize();
+                const query = locationSearchInput.value.trim();
+                if (query === '') {
+                    setLocationFeedback('Escribe una dirección antes de buscar.', 'error');
+                    return;
+                }
+
+                locationSearchButton?.setAttribute('disabled', 'disabled');
+                locationSearchButton?.classList.add('opacity-70', 'cursor-not-allowed');
+                setLocationFeedback('Buscando dirección en el mapa...', 'neutral');
+
+                try {
+                    const result = await geocodeLocation(query);
+                    updateMarkerAndCoordinates(result.lat, result.lon);
+                    setLocationFeedback(`Dirección encontrada: ${result.label}`, 'success');
+                } catch (error) {
+                    setLocationFeedback(error instanceof Error ? error.message : 'No pudimos completar la búsqueda.', 'error');
+                } finally {
+                    locationSearchButton?.removeAttribute('disabled');
+                    locationSearchButton?.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+            };
+
+            if (hasInitialCoordinates) {
+                syncFields({ lat: parsedLat, lng: parsedLon });
+                setLocationFeedback('Se cargaron las coordenadas actuales de tu oferta.', 'neutral');
+            } else {
+                setLocationFeedback('Define la ubicación con el mapa, búsqueda o geolocalización.', 'neutral');
             }
-        });
+
+            marker.on('dragend', () => {
+                syncFields(marker.getLatLng());
+                setLocationFeedback('Ubicación actualizada moviendo el marcador.', 'success');
+            });
+
+            map.on('click', (event) => {
+                marker.setLatLng(event.latlng);
+                syncFields(event.latlng);
+                setLocationFeedback('Ubicación actualizada desde el mapa.', 'success');
+            });
+
+            locationSearchButton?.addEventListener('click', () => {
+                void handleSearchLocation();
+            });
+            locationSearchInput?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void handleSearchLocation();
+                }
+            });
+
+            useMyLocationButton?.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    setLocationFeedback('Tu navegador no permite geolocalización.', 'error');
+                    return;
+                }
+
+                setLocationFeedback('Detectando tu ubicación actual...', 'neutral');
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        updateMarkerAndCoordinates(latitude, longitude);
+                        setLocationFeedback('Ubicación detectada correctamente con GPS del navegador.', 'success');
+                    },
+                    (error) => {
+                        let message = 'No pudimos acceder a tu ubicación.';
+                        if (error.code === 1) {
+                            message = 'Permiso de ubicación denegado. Habilítalo en tu navegador.';
+                        } else if (error.code === 2) {
+                            message = 'No se pudo determinar tu ubicación actual.';
+                        } else if (error.code === 3) {
+                            message = 'La solicitud de ubicación tardó demasiado tiempo.';
+                        }
+
+                        setLocationFeedback(message, 'error');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 12000,
+                        maximumAge: 0,
+                    }
+                );
+            });
+
+            window.setTimeout(() => map.invalidateSize(), 180);
+            window.addEventListener('resize', () => map.invalidateSize());
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    map.invalidateSize();
+                }
+            });
+        };
+
+        const waitForLeaflet = (attempt = 0) => {
+            if (window.L) {
+                bootMap();
+                return;
+            }
+
+            if (attempt >= 30) {
+                setLocationFeedback('No se pudo cargar el mapa. Recargá la página e intentá nuevamente.', 'error');
+                return;
+            }
+
+            window.setTimeout(() => waitForLeaflet(attempt + 1), 120);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => waitForLeaflet(), { once: true });
+        } else {
+            waitForLeaflet();
+        }
     })();
 </script>
