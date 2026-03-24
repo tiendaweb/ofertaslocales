@@ -178,9 +178,18 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                     maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors',
                 }).addTo(map);
+                const redMarkerIcon = window.L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41],
+                });
 
                 const marker = window.L.marker([Number(this.lat), Number(this.lon)], {
                     draggable: true,
+                    icon: redMarkerIcon,
                 }).addTo(map);
 
                 marker.on('dragend', () => {
@@ -196,6 +205,11 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 });
 
                 setTimeout(() => map.invalidateSize(), 250);
+                this.$watch('role', (nextRole) => {
+                    if (nextRole === 'business') {
+                        setTimeout(() => map.invalidateSize(), 150);
+                    }
+                });
             },
         };
     }

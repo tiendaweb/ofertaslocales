@@ -91,6 +91,14 @@
 
     const defaultCoordinates = pageData.defaultCenter || [-34.636, -58.536];
     const map = window.L.map(mapContainer).setView(defaultCoordinates, 13);
+    const redMarkerIcon = window.L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+    });
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
@@ -277,6 +285,7 @@
         userLocationMarker = window.L.marker([lat, lon], {
             title: 'Tu ubicación',
             riseOnHover: true,
+            icon: redMarkerIcon,
         }).addTo(map);
         userLocationMarker.bindTooltip('Tu ubicación', {
             direction: 'top',
@@ -366,7 +375,7 @@
         offer.lat = lat;
         offer.lon = lon;
 
-        const marker = window.L.marker([lat, lon]).addTo(map);
+        const marker = window.L.marker([lat, lon], { icon: redMarkerIcon }).addTo(map);
         marker.bindTooltip(`
             <div class="w-48">
                 <img src="${offer.image_url}" alt="${offer.title}" class="w-full h-24 object-cover rounded-xl mb-2">
