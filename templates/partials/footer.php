@@ -11,11 +11,13 @@ $siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo
         <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-2 text-white font-bold text-xl">
                 <?php if ($siteLogoUrl !== '') : ?>
-                    <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-8 w-8 rounded-lg object-cover">
+                    <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-8 w-auto max-w-[180px] object-contain">
                 <?php else : ?>
                     <i data-lucide="map-pin" class="text-red-500 w-6 h-6"></i>
                 <?php endif; ?>
-                <span>OfertasLocales</span>
+                <?php if ($siteLogoUrl === '') : ?>
+                    <span>OfertasLocales</span>
+                <?php endif; ?>
             </div>
             <div class="text-sm">
                 <p>© <?= htmlspecialchars((string) $currentYear, ENT_QUOTES, 'UTF-8') ?> Ofertas Locales | Generador de clientes locales</p>

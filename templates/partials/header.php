@@ -22,11 +22,13 @@ $siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo
             <div class="flex items-center gap-8">
                 <a href="/" class="flex items-center gap-2 text-red-600 font-bold text-xl tracking-tight">
                     <?php if ($siteLogoUrl !== '') : ?>
-                        <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-8 w-8 rounded-lg object-cover">
+                        <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-8 w-auto max-w-[180px] object-contain">
                     <?php else : ?>
                         <i data-lucide="map-pin" class="w-6 h-6"></i>
                     <?php endif; ?>
-                    <span>OfertasLocales</span>
+                    <?php if ($siteLogoUrl === '') : ?>
+                        <span>OfertasLocales</span>
+                    <?php endif; ?>
                 </a>
 
                 <div class="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-600">
@@ -83,9 +85,11 @@ $siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo
                     <?php endif; ?>
                 </div>
                 <div>
-                    <p class="text-[10px] uppercase tracking-[0.25em] font-bold <?= $isAdminRoute ? 'text-red-500' : 'text-gray-400' ?>">
-                        OfertasLocales
-                    </p>
+                    <?php if ($siteLogoUrl === '') : ?>
+                        <p class="text-[10px] uppercase tracking-[0.25em] font-bold <?= $isAdminRoute ? 'text-red-500' : 'text-gray-400' ?>">
+                            OfertasLocales
+                        </p>
+                    <?php endif; ?>
                     <h1 class="text-base md:text-lg font-bold text-gray-900">
                         <?= $currentUser && ($currentUser['role'] === 'admin') ? 'Administración' : 'Panel de Control' ?>
                     </h1>

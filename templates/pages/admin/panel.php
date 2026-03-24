@@ -375,9 +375,18 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(map);
+        const redMarkerIcon = window.L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+        });
 
         const marker = window.L.marker(defaultCenter, {
             draggable: true,
+            icon: redMarkerIcon,
         }).addTo(map);
 
         const setLocationFeedback = (message, type = 'neutral') => {
@@ -538,5 +547,10 @@ $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtoti
 
         window.setTimeout(() => map.invalidateSize(), 180);
         window.addEventListener('resize', () => map.invalidateSize());
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                map.invalidateSize();
+            }
+        });
     })();
 </script>
