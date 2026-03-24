@@ -8,7 +8,7 @@ declare(strict_types=1);
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.3em] text-red-500">Panel administrador</p>
-                <h2 class="mt-2 text-3xl font-black text-gray-900">Control de OfertasCerca</h2>
+                <h2 class="mt-2 text-3xl font-black text-gray-900">Control de OfertasLocales</h2>
                 <p class="mt-1 text-sm text-gray-600">Todo tu flujo de revisión y configuración en una sola vista.</p>
             </div>
             <div class="grid grid-cols-2 gap-2 md:w-auto">
@@ -101,6 +101,23 @@ declare(strict_types=1);
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
             <h3 class="mb-5 text-xl font-black text-gray-900">Textos principales del sitio</h3>
             <form action="/admin/settings" method="post" class="grid gap-4">
+                <div class="rounded-2xl border border-red-100 bg-red-50/40 p-4">
+                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-red-500">Logo general del sitio</p>
+                    <input id="admin-site-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="mb-3 block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-red-500">
+                    <div class="grid gap-3 md:grid-cols-[180px_1fr] md:items-center">
+                        <canvas id="admin-site-logo-crop-preview" width="180" height="180" class="h-[180px] w-[180px] rounded-2xl border border-red-100 bg-white object-cover"></canvas>
+                        <div>
+                            <label for="admin-site-logo-zoom" class="mb-2 block text-xs font-semibold text-gray-600">Zoom del recorte</label>
+                            <input id="admin-site-logo-zoom" type="range" min="1" max="3" step="0.01" value="1" class="w-full accent-red-600">
+                            <p class="mt-2 text-xs text-gray-500">Si no seleccionas imagen, se mantiene el logo actual.</p>
+                            <?php if (trim((string) ($settings['site_logo_url'] ?? '')) !== '') : ?>
+                                <p class="mt-2 text-xs text-gray-500">Logo actual: <?= htmlspecialchars((string) $settings['site_logo_url'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <input id="admin-site-logo-image" type="hidden" name="site_logo_image" value="">
+                    <input type="hidden" name="site_logo_url" value="<?= htmlspecialchars((string) ($settings['site_logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
                 <?php
                 $labels = [
                     'site_name' => 'Nombre del Sitio',
@@ -155,11 +172,24 @@ declare(strict_types=1);
     <div x-show="tab === 'usuarios'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
             <h3 class="mb-4 text-xl font-black text-gray-900">Crear usuario</h3>
-            <form action="/admin/users" method="post" class="grid gap-3 md:grid-cols-2">
+            <form id="admin-create-user-form" action="/admin/users" method="post" class="grid gap-3 md:grid-cols-2">
                 <input type="email" name="email" placeholder="correo@ejemplo.com" required class="rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                 <input type="password" name="password" placeholder="Contraseña inicial (mín. 8)" required class="rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                 <input type="text" name="business_name" placeholder="Nombre comercial (opcional)" class="rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                 <input type="text" name="whatsapp" placeholder="WhatsApp (opcional)" class="rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                <div class="md:col-span-2 rounded-2xl border border-red-100 bg-red-50/40 p-4">
+                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-red-500">Logo del negocio</p>
+                    <input id="admin-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="mb-3 block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-red-500">
+                    <div class="grid gap-3 md:grid-cols-[220px_1fr] md:items-center">
+                        <canvas id="admin-logo-crop-preview" width="220" height="220" class="h-[220px] w-[220px] rounded-2xl border border-red-100 bg-white object-cover"></canvas>
+                        <div>
+                            <label for="admin-logo-zoom" class="mb-2 block text-xs font-semibold text-gray-600">Zoom del recorte</label>
+                            <input id="admin-logo-zoom" type="range" min="1" max="3" step="0.01" value="1" class="w-full accent-red-600">
+                            <p class="mt-2 text-xs text-gray-500">El recorte es cuadrado para encajar con las tarjetas del sitio.</p>
+                        </div>
+                    </div>
+                    <input id="admin-logo-image" type="hidden" name="logo_image" value="">
+                </div>
                 <select name="role" class="rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                     <option value="user">Usuario</option>
                     <option value="business">Negocio</option>
@@ -269,3 +299,88 @@ declare(strict_types=1);
         </ul>
     </nav>
 </section>
+
+<script>
+    (() => {
+        const initCropper = ({ fileInputId, zoomInputId, canvasId, hiddenInputId }) => {
+            const fileInput = document.getElementById(fileInputId);
+            const zoomInput = document.getElementById(zoomInputId);
+            const canvas = document.getElementById(canvasId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            if (!fileInput || !zoomInput || !canvas || !hiddenInput) {
+                return;
+            }
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            const image = new Image();
+            let zoom = 1;
+
+            const drawPlaceholder = () => {
+                context.fillStyle = '#fff1f2';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#be123c';
+                context.font = 'bold 14px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('Logo', canvas.width / 2, canvas.height / 2 - 4);
+                context.font = '12px sans-serif';
+                context.fillText('Selecciona una imagen', canvas.width / 2, canvas.height / 2 + 18);
+                hiddenInput.value = '';
+            };
+
+            const redraw = () => {
+                if (!image.src) {
+                    drawPlaceholder();
+                    return;
+                }
+
+                const cropSize = Math.min(image.naturalWidth, image.naturalHeight);
+                const scaledCrop = cropSize / zoom;
+                const sx = Math.max(0, (image.naturalWidth - scaledCrop) / 2);
+                const sy = Math.max(0, (image.naturalHeight - scaledCrop) / 2);
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(image, sx, sy, scaledCrop, scaledCrop, 0, 0, canvas.width, canvas.height);
+                hiddenInput.value = canvas.toDataURL('image/png', 0.92);
+            };
+
+            image.addEventListener('load', redraw);
+            zoomInput.addEventListener('input', () => {
+                zoom = Number(zoomInput.value || 1);
+                redraw();
+            });
+
+            fileInput.addEventListener('change', (event) => {
+                const [file] = event.target.files || [];
+                if (!file) {
+                    drawPlaceholder();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (loadEvent) => {
+                    image.src = String(loadEvent.target?.result || '');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            drawPlaceholder();
+        };
+
+        initCropper({
+            fileInputId: 'admin-logo-file',
+            zoomInputId: 'admin-logo-zoom',
+            canvasId: 'admin-logo-crop-preview',
+            hiddenInputId: 'admin-logo-image',
+        });
+        initCropper({
+            fileInputId: 'admin-site-logo-file',
+            zoomInputId: 'admin-site-logo-zoom',
+            canvasId: 'admin-site-logo-crop-preview',
+            hiddenInputId: 'admin-site-logo-image',
+        });
+    })();
+</script>

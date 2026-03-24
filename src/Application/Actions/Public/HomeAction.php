@@ -33,6 +33,7 @@ class HomeAction extends PageAction
             'hero_description',
             'hero_primary_cta',
             'hero_primary_cta_url',
+            'site_logo_url',
             'merchant_badge',
             'merchant_title',
             'merchant_description',
@@ -45,7 +46,7 @@ class HomeAction extends PageAction
         $seo = $this->seoRepository->findByPage('home') ?? [];
 
         return $this->renderPage($response, 'pages/index.php', [
-            'pageTitle' => $seo['title'] ?? 'Ofertas Cerca | Ahorra hoy',
+            'pageTitle' => $seo['title'] ?? 'Ofertas Locales | Ahorra hoy',
             'currentRoute' => 'inicio',
             'metaDescription' => $seo['meta_description'] ?? null,
             'ogImage' => $seo['og_image'] ?? null,

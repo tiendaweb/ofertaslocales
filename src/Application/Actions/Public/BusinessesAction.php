@@ -33,6 +33,7 @@ class BusinessesAction extends PageAction
             'hero_description',
             'hero_primary_cta',
             'hero_primary_cta_url',
+            'site_logo_url',
             'merchant_badge',
             'merchant_title',
             'merchant_description',
@@ -45,7 +46,7 @@ class BusinessesAction extends PageAction
         $seo = $this->seoRepository->findByPage('negocios') ?? [];
 
         return $this->renderPage($response, 'pages/negocios.php', [
-            'pageTitle' => $seo['title'] ?? 'Negocios registrados | OfertasCerca',
+            'pageTitle' => $seo['title'] ?? 'Negocios registrados | OfertasLocales',
             'metaDescription' => $seo['meta_description'] ?? null,
             'ogImage' => $seo['og_image'] ?? null,
             'currentRoute' => 'negocios',

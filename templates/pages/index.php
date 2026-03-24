@@ -159,8 +159,7 @@ declare(strict_types=1);
                         <span class="text-xs bg-red-50 text-red-600 font-semibold px-3 py-1 rounded-full">Paso visual</span>
                     </div>
 
-                    <form id="offerForm" class="space-y-4" action="/register" method="get">
-                        <input type="hidden" name="role" value="business">
+                    <form id="offerForm" class="space-y-4" action="/publicar" method="post" enctype="multipart/form-data">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del negocio</label>
@@ -194,7 +193,7 @@ declare(strict_types=1);
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Foto atractiva (Atrae 3x más clicks)</label>
                             <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative cursor-pointer">
-                                <input type="file" id="inputImage" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <input type="file" id="inputImage" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                 <div id="imagePreviewContainer" class="hidden h-32 w-full rounded-lg overflow-hidden">
                                     <img id="imagePreview" src="" alt="Vista previa de la imagen seleccionada" class="w-full h-full object-cover">
                                 </div>

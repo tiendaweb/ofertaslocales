@@ -20,7 +20,7 @@ class LoginPageAction extends PageAction
         }
 
         return $this->renderPage($response, 'pages/auth/login.php', [
-            'pageTitle' => 'Ingresar | OfertasCerca',
+            'pageTitle' => 'Ingresar | OfertasLocales',
             'currentRoute' => 'login',
         ]);
     }

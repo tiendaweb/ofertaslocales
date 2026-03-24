@@ -20,7 +20,7 @@ $flash = $flash ?? [];
     <?php if (($ogImage ?? null) !== null) : ?>
         <meta property="og:image" content="<?= htmlspecialchars((string) $ogImage, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
-    <title><?= htmlspecialchars($pageTitle ?? 'Ofertas Cerca | Ahorra hoy', ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($pageTitle ?? 'Ofertas Locales | Ahorra hoy', ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>

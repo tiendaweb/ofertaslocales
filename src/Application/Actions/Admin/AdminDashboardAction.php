@@ -32,7 +32,7 @@ class AdminDashboardAction extends PageAction
         $perPage = max(1, min(30, (int) ($queryParams['per_page'] ?? 10)));
 
         return $this->renderPage($response, 'pages/admin/admin.php', [
-            'pageTitle' => 'Administración | OfertasCerca',
+            'pageTitle' => 'Administración | OfertasLocales',
             'currentRoute' => 'admin',
             'activeTab' => (string) ($queryParams['tab'] ?? 'moderacion'),
             'pendingOffers' => $this->offerRepository->countPendingOffers(),

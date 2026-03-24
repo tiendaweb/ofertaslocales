@@ -12,7 +12,14 @@ declare(strict_types=1);
     <?php foreach ($businesses as $business): ?>
         <article class="glass rounded-3xl p-6 space-y-3">
             <div class="flex items-center justify-between gap-3">
-                <h3 class="text-xl font-semibold text-white"><?= htmlspecialchars($business['business_name'] ?: 'Sin nombre comercial', ENT_QUOTES, 'UTF-8') ?></h3>
+                <div class="flex items-center gap-3 min-w-0">
+                    <img
+                        src="<?= htmlspecialchars((string) ($business['logo_url'] ?: 'https://placehold.co/96x96/111827/e5e7eb?text=Logo'), ENT_QUOTES, 'UTF-8') ?>"
+                        alt="Logo de <?= htmlspecialchars($business['business_name'] ?: 'Negocio', ENT_QUOTES, 'UTF-8') ?>"
+                        class="h-12 w-12 rounded-xl object-cover border border-white/10 shrink-0"
+                    >
+                    <h3 class="text-xl font-semibold text-white truncate"><?= htmlspecialchars($business['business_name'] ?: 'Sin nombre comercial', ENT_QUOTES, 'UTF-8') ?></h3>
+                </div>
                 <span class="chip rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em]"><?= htmlspecialchars($business['role'], ENT_QUOTES, 'UTF-8') ?></span>
             </div>
             <p class="text-slate-400 text-sm"><?= htmlspecialchars($business['email'], ENT_QUOTES, 'UTF-8') ?></p>

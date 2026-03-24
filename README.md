@@ -68,7 +68,7 @@ sirve public/ui.html
 
 define /api/tasks
 
-public/ui.html no corresponde a OfertasCerca; es una UI de “Task Manager”.
+public/ui.html no corresponde a OfertasLocales; es una UI de “Task Manager”.
 
 database/app.sqlite actualmente solo tiene:
 
@@ -587,7 +587,7 @@ login negocio/admin
 Ese enfoque reduce riesgo porque primero clavás la experiencia visual y de navegación, y después conectás persistencia sin romper la UI.
 
 Resumen ejecutivo
-Hoy el repo está en estado de skeleton/demo, no en estado “OfertasCerca”.
+Hoy el repo está en estado de skeleton/demo, no en estado “OfertasLocales”.
 La estrategia correcta para lo que necesitás es:
 
 Tomar OBJETIVO.html como fuente visual exacta

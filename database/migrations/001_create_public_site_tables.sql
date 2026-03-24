@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS seo (
 );
 
 INSERT OR IGNORE INTO settings (key, value) VALUES
-    ('site_name', 'OfertasCerca'),
+    ('site_name', 'OfertasLocales'),
+    ('site_logo_url', ''),
     ('hero_badge', '📍 Descubrí tu zona'),
     ('hero_title', 'Ofertas cerca tuyo que te hacen ahorrar HOY'),
     ('hero_description', 'Encontrá descuentos reales, contactá directo al vendedor por WhatsApp y asegurá tu precio antes de que el reloj llegue a cero.'),
@@ -58,13 +59,13 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
     ('approval_mode', 'manual');
 
 INSERT OR IGNORE INTO seo (page_name, title, meta_description, og_image) VALUES
-    ('home', 'OfertasCerca | Inicio', 'Ofertas locales activas por 24 horas con contacto directo por WhatsApp.', '/uploads/og-home.png'),
-    ('ofertas', 'OfertasCerca | Ofertas', 'Listado público de ofertas activas visibles solo mientras no expiren.', '/uploads/og-ofertas.png'),
-    ('negocios', 'OfertasCerca | Negocios', 'Negocios con ofertas activas disponibles en este momento.', '/uploads/og-negocios.png'),
-    ('mapa', 'OfertasCerca | Mapa', 'Mapa con negocios que tienen ofertas activas cerca tuyo.', '/uploads/og-mapa.png');
+    ('home', 'OfertasLocales | Inicio', 'Ofertas locales activas por 24 horas con contacto directo por WhatsApp.', '/uploads/og-home.png'),
+    ('ofertas', 'OfertasLocales | Ofertas', 'Listado público de ofertas activas visibles solo mientras no expiren.', '/uploads/og-ofertas.png'),
+    ('negocios', 'OfertasLocales | Negocios', 'Negocios con ofertas activas disponibles en este momento.', '/uploads/og-negocios.png'),
+    ('mapa', 'OfertasLocales | Mapa', 'Mapa con negocios que tienen ofertas activas cerca tuyo.', '/uploads/og-mapa.png');
 
 INSERT OR IGNORE INTO users (id, email, password, role, business_name, whatsapp, created_at) VALUES
-    (1, 'admin@ofertascerca.test', '$2y$12$q6GfPIC2Tn9wbZ34ozGIG.wWdEwvPh8KSX95WV91Q0ahY7Y.XLX9e', 'admin', 'OfertasCerca Admin', '+54 9 11 0000 0000', '2026-03-23 08:00:00'),
+    (1, 'admin@admin.com', '$2y$12$3RyD9WbPkEpMtUXPUI9dRuCJE1Bd2NMRnn3QzOkofdY1.jh0z8g8G', 'admin', 'OfertasLocales Admin', '+54 9 11 0000 0000', '2026-03-23 08:00:00'),
     (2, 'panaderia@barrio.test', '$2y$12$nhQstU3bHuRg/PuxuHEZE.Z0S8ntc.gu17XL1w48Na2AQEuJcC0D.', 'business', 'Panadería del Barrio', '+54 9 11 1234 5678', '2026-03-23 09:00:00'),
     (3, 'deportes@centro.test', '$2y$12$Ely.rCI6kJgxXeLnlZlpRe00S0ZXSQJR0aQKGpnJY74hv4AjQA9mK', 'business', 'Deportes Centro', '+54 9 11 2222 3333', '2026-03-23 10:30:00'),
     (4, 'visitante@ofertascerca.test', '$2y$12$ja9qkoTw7XzN0I70tyoPBu8AwFooQ6MJrhnJ3hL4l1rud0MDP5rPO', 'user', NULL, NULL, '2026-03-23 11:00:00');

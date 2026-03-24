@@ -34,6 +34,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
         <input type="hidden" name="draft_location" value="<?= htmlspecialchars((string) ($old['location'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="draft_whatsapp" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="draft_description" value="<?= htmlspecialchars((string) ($old['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="draft_image_url" value="<?= htmlspecialchars((string) ($old['image_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
         <fieldset class="md:col-span-2">
             <legend class="block text-sm text-gray-700 mb-2">Tipo de cuenta</legend>

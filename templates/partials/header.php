@@ -13,6 +13,7 @@ $isAdminRoute = ($currentRoute ?? '') === 'admin';
 $publishHref = ($currentRoute ?? '') === 'inicio' ? '#publicar' : '/#publicar';
 $currentUser = $currentUser ?? null;
 $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
+$siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo_url'] ?? ''))));
 ?>
 
 <?php if ($isPublicRoute) : ?>
@@ -20,8 +21,12 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-8">
                 <a href="/" class="flex items-center gap-2 text-red-600 font-bold text-xl tracking-tight">
-                    <i data-lucide="map-pin" class="w-6 h-6"></i>
-                    <span>OfertasCerca</span>
+                    <?php if ($siteLogoUrl !== '') : ?>
+                        <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-8 w-8 rounded-lg object-cover">
+                    <?php else : ?>
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                    <?php endif; ?>
+                    <span>OfertasLocales</span>
                 </a>
 
                 <div class="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-600">
@@ -69,13 +74,17 @@ $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
         <div class="max-w-6xl mx-auto px-4 py-3 md:px-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             
             <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl flex items-center justify-center transition-colors <?= $isAdminRoute ? 'bg-red-50 border border-red-100' : 'bg-gray-50 border border-gray-100' ?>">
-                    <i data-lucide="<?= $isAdminRoute ? 'shield-check' : 'layout-dashboard' ?>" 
-                       class="w-5 h-5 <?= $isAdminRoute ? 'text-red-500' : 'text-gray-500' ?>"></i>
+                <div class="h-10 w-10 rounded-xl flex items-center justify-center overflow-hidden transition-colors <?= $isAdminRoute ? 'bg-red-50 border border-red-100' : 'bg-gray-50 border border-gray-100' ?>">
+                    <?php if ($siteLogoUrl !== '') : ?>
+                        <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de OfertasLocales" class="h-full w-full object-cover">
+                    <?php else : ?>
+                        <i data-lucide="<?= $isAdminRoute ? 'shield-check' : 'layout-dashboard' ?>" 
+                           class="w-5 h-5 <?= $isAdminRoute ? 'text-red-500' : 'text-gray-500' ?>"></i>
+                    <?php endif; ?>
                 </div>
                 <div>
                     <p class="text-[10px] uppercase tracking-[0.25em] font-bold <?= $isAdminRoute ? 'text-red-500' : 'text-gray-400' ?>">
-                        OfertasCerca
+                        OfertasLocales
                     </p>
                     <h1 class="text-base md:text-lg font-bold text-gray-900">
                         <?= $currentUser && ($currentUser['role'] === 'admin') ? 'Administración' : 'Panel de Control' ?>

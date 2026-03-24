@@ -33,7 +33,7 @@ class BusinessDashboardAction extends PageAction
         unset($_SESSION['offer_draft']);
 
         return $this->renderPage($response, 'pages/admin/panel.php', [
-            'pageTitle' => 'Panel del negocio | OfertasCerca',
+            'pageTitle' => 'Panel del negocio | OfertasLocales',
             'currentRoute' => 'panel',
             'offers' => $offers,
             'approvalMode' => $settings['approval_mode'] ?? 'manual',
