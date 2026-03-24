@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
+use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -14,7 +15,8 @@ class UpdateBusinessOfferAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly OfferRepository $offerRepository
+        private readonly OfferRepository $offerRepository,
+        private readonly CategoryRepository $categoryRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -51,12 +53,18 @@ class UpdateBusinessOfferAction extends PageAction
             'location' => trim((string) ($data['location'] ?? '')),
         ];
 
-        foreach ($payload as $field => $value) {
-            if ($value === '') {
+        foreach (['title', 'description', 'category', 'whatsapp'] as $requiredField) {
+            if ($payload[$requiredField] === '') {
                 $this->flash('error', 'Todos los campos de edición son obligatorios.');
 
                 return $this->redirect($response, '/panel');
             }
+        }
+
+        if (!$this->categoryRepository->isApproved($payload['category'])) {
+            $this->flash('error', 'La categoría seleccionada no está aprobada por administración.');
+
+            return $this->redirect($response, '/panel');
         }
 
         $updated = $this->offerRepository->updateForUser($offerId, $userId, $payload);

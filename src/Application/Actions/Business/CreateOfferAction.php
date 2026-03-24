@@ -7,8 +7,10 @@ namespace App\Application\Actions\Business;
 use App\Application\Actions\PageAction;
 use App\Application\Service\OfferPublishPolicy;
 use App\Application\Settings\SettingsInterface;
+use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Site\SettingsRepository;
+use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
@@ -21,7 +23,9 @@ class CreateOfferAction extends PageAction
         private readonly OfferRepository $offerRepository,
         private readonly SettingsRepository $settingsRepository,
         private readonly SettingsInterface $settings,
-        private readonly OfferPublishPolicy $offerPublishPolicy
+        private readonly OfferPublishPolicy $offerPublishPolicy,
+        private readonly CategoryRepository $categoryRepository,
+        private readonly AccountRepository $accountRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -34,12 +38,10 @@ class CreateOfferAction extends PageAction
 
         $payload = [
             'category' => trim((string) ($data['category'] ?? '')),
+            'requested_category' => trim((string) ($data['requested_category'] ?? '')),
             'title' => trim((string) ($data['title'] ?? '')),
             'description' => trim((string) ($data['description'] ?? '')),
             'whatsapp' => trim((string) ($data['whatsapp'] ?? ($user['whatsapp'] ?? ''))),
-            'location' => trim((string) ($data['location'] ?? '')),
-            'lat' => $this->normalizeCoordinate($data['lat'] ?? null),
-            'lon' => $this->normalizeCoordinate($data['lon'] ?? null),
             'expires_at' => trim((string) ($data['expires_at'] ?? '')),
         ];
 
@@ -49,16 +51,11 @@ class CreateOfferAction extends PageAction
                 'title' => 'título',
                 'description' => 'descripción',
                 'whatsapp' => 'WhatsApp',
-                'location' => 'ubicación',
             ] as $field => $label
         ) {
             if ($payload[$field] === '') {
                 $errors[$field] = sprintf('La %s es obligatoria.', $label);
             }
-        }
-
-        if ($payload['lat'] === null xor $payload['lon'] === null) {
-            $errors['coordinates'] = 'Debes completar ambas coordenadas o dejarlas vacías.';
         }
 
         if ($payload['expires_at'] === '') {
@@ -70,6 +67,23 @@ class CreateOfferAction extends PageAction
             $errors['expires_at'] = 'Ingresa una fecha de expiración válida.';
         } elseif ($expiresAt <= new \DateTimeImmutable('now')) {
             $errors['expires_at'] = 'La fecha de expiración debe ser futura.';
+        }
+
+        if (!$this->categoryRepository->isApproved($payload['category'])) {
+            $errors['category'] = 'Selecciona una categoría aprobada por administración.';
+        }
+
+        $businessProfile = $this->accountRepository->findById((int) ($user['id'] ?? 0));
+        $location = $this->buildBusinessLocation($businessProfile ?? []);
+        $lat = $businessProfile !== null && $businessProfile['address_lat'] !== null ? (float) $businessProfile['address_lat'] : null;
+        $lon = $businessProfile !== null && $businessProfile['address_lon'] !== null ? (float) $businessProfile['address_lon'] : null;
+
+        if ($location === '') {
+            $errors['location'] = 'Tu negocio debe tener una dirección registrada para publicar ofertas.';
+        }
+
+        if ($lat === null || $lon === null) {
+            $errors['coordinates'] = 'Tu negocio necesita coordenadas registradas. Completa tu perfil comercial.';
         }
 
         $imageUrl = null;
@@ -86,6 +100,11 @@ class CreateOfferAction extends PageAction
         }
 
         if ($errors !== []) {
+            if ($payload['requested_category'] !== '') {
+                $this->categoryRepository->requestCategory($payload['requested_category'], (int) ($user['id'] ?? 0));
+                $this->flash('success', 'La nueva categoría fue enviada para aprobación del administrador.');
+            }
+
             $this->flashFormErrors($errors, $payload);
 
             return $this->redirect($response, '/panel');
@@ -108,9 +127,9 @@ class CreateOfferAction extends PageAction
             'description' => $payload['description'],
             'image_url' => $imageUrl,
             'whatsapp' => $payload['whatsapp'],
-            'location' => $payload['location'],
-            'lat' => $payload['lat'],
-            'lon' => $payload['lon'],
+            'location' => $location,
+            'lat' => $lat,
+            'lon' => $lon,
             'status' => $status,
             'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
         ]);
@@ -122,14 +141,20 @@ class CreateOfferAction extends PageAction
         return $this->redirect($response, '/panel');
     }
 
-    private function normalizeCoordinate(mixed $value): ?float
+    private function buildBusinessLocation(array $profile): string
     {
-        $stringValue = trim((string) $value);
-        if ($stringValue === '') {
-            return null;
-        }
+        $street = trim((string) ($profile['street'] ?? ''));
+        $streetNumber = trim((string) ($profile['street_number'] ?? ''));
+        $city = trim((string) ($profile['city'] ?? ''));
+        $province = trim((string) ($profile['province'] ?? ''));
 
-        return is_numeric($stringValue) ? (float) $stringValue : null;
+        $segments = array_filter([
+            trim($street . ' ' . $streetNumber),
+            $city,
+            $province,
+        ], static fn (string $segment): bool => $segment !== '');
+
+        return implode(', ', $segments);
     }
 
     private function storeImage(UploadedFileInterface $image): array

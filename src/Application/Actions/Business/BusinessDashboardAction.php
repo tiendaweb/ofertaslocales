@@ -6,7 +6,9 @@ namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
 use App\Application\Service\OfferPublishPolicy;
+use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
+use App\Domain\User\AccountRepository;
 use App\Domain\Site\SettingsRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -18,7 +20,9 @@ class BusinessDashboardAction extends PageAction
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly OfferRepository $offerRepository,
         private readonly SettingsRepository $settingsRepository,
-        private readonly OfferPublishPolicy $offerPublishPolicy
+        private readonly OfferPublishPolicy $offerPublishPolicy,
+        private readonly CategoryRepository $categoryRepository,
+        private readonly AccountRepository $accountRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -32,6 +36,8 @@ class BusinessDashboardAction extends PageAction
         $offerDraft = is_array($_SESSION['offer_draft'] ?? null) ? $_SESSION['offer_draft'] : [];
         unset($_SESSION['offer_draft']);
 
+        $businessProfile = $this->accountRepository->findById((int) $user['id']) ?? [];
+
         return $this->renderPage($response, 'pages/admin/panel.php', [
             'pageTitle' => 'Panel del negocio | OfertasLocales',
             'currentRoute' => 'panel',
@@ -40,6 +46,8 @@ class BusinessDashboardAction extends PageAction
             'defaultUserPublishMode' => $settings['default_user_publish_mode'] ?? 'review',
             'publishPolicy' => $publishPolicy,
             'offerDraft' => $offerDraft,
+            'approvedCategories' => $this->categoryRepository->findApprovedNames(),
+            'businessProfile' => $businessProfile,
         ]);
     }
 }

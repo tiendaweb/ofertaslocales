@@ -43,7 +43,9 @@ class UpdateSettingsAction extends PageAction
         $payload = [];
 
         foreach (self::EDITABLE_KEYS as $key) {
-            $payload[$key] = trim((string) ($data[$key] ?? ''));
+            if (array_key_exists($key, $data)) {
+                $payload[$key] = trim((string) $data[$key]);
+            }
         }
 
         $siteLogoImage = trim((string) ($data['site_logo_image'] ?? ''));
@@ -58,11 +60,14 @@ class UpdateSettingsAction extends PageAction
             $payload['site_logo_url'] = $savedLogo;
         }
 
-        if (!in_array($payload['default_user_publish_mode'], self::ALLOWED_USER_PUBLISH_MODES, true)) {
+        if (array_key_exists('default_user_publish_mode', $payload)
+            && !in_array($payload['default_user_publish_mode'], self::ALLOWED_USER_PUBLISH_MODES, true)) {
             $payload['default_user_publish_mode'] = 'review';
         }
 
-        $this->settingsRepository->updateMany($payload);
+        if ($payload !== []) {
+            $this->settingsRepository->updateMany($payload);
+        }
         $this->flash('success', 'Los textos y reglas de publicación fueron actualizados.');
 
         return $this->redirect($response, '/admin');

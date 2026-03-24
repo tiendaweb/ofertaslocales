@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Admin;
 
 use App\Application\Actions\PageAction;
+use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Site\SeoRepository;
 use App\Domain\Site\SettingsRepository;
@@ -20,7 +21,8 @@ class AdminDashboardAction extends PageAction
         private readonly OfferRepository $offerRepository,
         private readonly AccountRepository $accountRepository,
         private readonly SettingsRepository $settingsRepository,
-        private readonly SeoRepository $seoRepository
+        private readonly SeoRepository $seoRepository,
+        private readonly CategoryRepository $categoryRepository
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -42,6 +44,8 @@ class AdminDashboardAction extends PageAction
             'settings' => $this->settingsRepository->findAll(),
             'seoPages' => $this->seoRepository->findAll(),
             'usersPagination' => $this->accountRepository->findAllPaginated($page, $perPage),
+            'categories' => $this->categoryRepository->findAll(),
+            'pendingCategories' => $this->categoryRepository->findPending(),
         ]);
     }
 }

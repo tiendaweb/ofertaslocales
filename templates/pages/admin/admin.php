@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 ?>
-<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
+<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
 <section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-5 pb-28">
     <div class="rounded-[2.2rem] border border-red-100 bg-white/95 p-4 shadow-[0_24px_80px_rgba(239,68,68,0.12)] md:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -23,10 +23,12 @@ declare(strict_types=1);
             </div>
         </div>
 
-        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
+                'logo' => ['label' => 'Logo', 'icon' => 'image'],
+                'categorias' => ['label' => 'Categorías', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
             ] as $tabKey => $tabItem) : ?>
@@ -101,23 +103,6 @@ declare(strict_types=1);
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
             <h3 class="mb-5 text-xl font-black text-gray-900">Textos principales del sitio</h3>
             <form action="/admin/settings" method="post" class="grid gap-4">
-                <div class="rounded-2xl border border-red-100 bg-red-50/40 p-4">
-                    <p class="mb-2 text-xs font-bold uppercase tracking-wider text-red-500">Logo general del sitio</p>
-                    <input id="admin-site-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="mb-3 block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-red-500">
-                    <div class="grid gap-3 md:grid-cols-[180px_1fr] md:items-center">
-                        <canvas id="admin-site-logo-crop-preview" width="180" height="180" class="h-[180px] w-[180px] rounded-2xl border border-red-100 bg-white object-cover"></canvas>
-                        <div>
-                            <label for="admin-site-logo-zoom" class="mb-2 block text-xs font-semibold text-gray-600">Zoom del recorte</label>
-                            <input id="admin-site-logo-zoom" type="range" min="1" max="3" step="0.01" value="1" class="w-full accent-red-600">
-                            <p class="mt-2 text-xs text-gray-500">Si no seleccionas imagen, se mantiene el logo actual.</p>
-                            <?php if (trim((string) ($settings['site_logo_url'] ?? '')) !== '') : ?>
-                                <p class="mt-2 text-xs text-gray-500">Logo actual: <?= htmlspecialchars((string) $settings['site_logo_url'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <input id="admin-site-logo-image" type="hidden" name="site_logo_image" value="">
-                    <input type="hidden" name="site_logo_url" value="<?= htmlspecialchars((string) ($settings['site_logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-                </div>
                 <?php
                 $labels = [
                     'site_name' => 'Nombre del Sitio',
@@ -143,6 +128,66 @@ declare(strict_types=1);
                 </div>
                 <button type="submit" class="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Aplicar cambios</button>
             </form>
+        </div>
+    </div>
+
+    <div x-show="tab === 'logo'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h3 class="mb-5 text-xl font-black text-gray-900">Logo general del sitio</h3>
+            <form action="/admin/settings" method="post" class="grid gap-4">
+                <div class="rounded-2xl border border-red-100 bg-red-50/40 p-4">
+                    <input id="admin-site-logo-file" type="file" accept="image/png,image/jpeg,image/webp" class="mb-3 block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-red-500">
+                    <div class="grid gap-3 md:grid-cols-[180px_1fr] md:items-center">
+                        <canvas id="admin-site-logo-crop-preview" width="180" height="180" class="h-[180px] w-[180px] rounded-2xl border border-red-100 bg-white object-cover"></canvas>
+                        <div>
+                            <label for="admin-site-logo-zoom" class="mb-2 block text-xs font-semibold text-gray-600">Zoom del recorte</label>
+                            <input id="admin-site-logo-zoom" type="range" min="1" max="3" step="0.01" value="1" class="w-full accent-red-600">
+                            <?php if (trim((string) ($settings['site_logo_url'] ?? '')) !== '') : ?>
+                                <p class="mt-2 text-xs text-gray-500">Logo actual: <?= htmlspecialchars((string) $settings['site_logo_url'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <input id="admin-site-logo-image" type="hidden" name="site_logo_image" value="">
+                    <input type="hidden" name="site_logo_url" value="<?= htmlspecialchars((string) ($settings['site_logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+                <button type="submit" class="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar logo</button>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="tab === 'categorias'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h3 class="mb-4 text-xl font-black text-gray-900">Gestionar categorías</h3>
+            <form action="/admin/categories" method="post" class="flex flex-col gap-3 md:flex-row">
+                <input type="text" name="name" required placeholder="Nueva categoría" class="flex-1 rounded-xl border border-red-100 bg-red-50/40 p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                <button type="submit" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Agregar y aprobar</button>
+            </form>
+        </div>
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h4 class="mb-3 text-lg font-bold text-gray-900">Solicitudes pendientes</h4>
+            <div class="space-y-3">
+                <?php foreach (($pendingCategories ?? []) as $category) : ?>
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                        <div>
+                            <p class="font-semibold text-gray-900"><?= htmlspecialchars((string) $category['name'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p class="text-xs text-gray-500">Solicitada el <?= htmlspecialchars((string) $category['created_at'], ENT_QUOTES, 'UTF-8') ?></p>
+                        </div>
+                        <div class="flex gap-2">
+                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
+                                <input type="hidden" name="status" value="approved">
+                                <button class="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white">Aprobar</button>
+                            </form>
+                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
+                                <input type="hidden" name="status" value="rejected">
+                                <button class="rounded-lg bg-gray-200 px-3 py-2 text-xs font-bold text-gray-700">Rechazar</button>
+                            </form>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <?php if (($pendingCategories ?? []) === []) : ?>
+                    <p class="text-sm text-gray-500">No hay categorías pendientes.</p>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -277,10 +322,12 @@ declare(strict_types=1);
     </div>
 
     <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-red-100 bg-white/95 px-3 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <ul class="mx-auto grid max-w-5xl grid-cols-4 gap-2">
+        <ul class="mx-auto grid max-w-5xl grid-cols-6 gap-2">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderar', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
+                'logo' => ['label' => 'Logo', 'icon' => 'image'],
+                'categorias' => ['label' => 'Categorias', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
             ] as $tabKey => $tabItem) : ?>
