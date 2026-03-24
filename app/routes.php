@@ -29,6 +29,7 @@ use App\Application\Actions\Public\BusinessDetailAction;
 use App\Application\Actions\Public\HomeAction;
 use App\Application\Actions\Public\MapAction;
 use App\Application\Actions\Public\OffersAction;
+use App\Application\Actions\Public\SubmitPublicOfferAction;
 use App\Application\Actions\User\ListUsersAction;
 use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\Auth\RequireAdminMiddleware;
@@ -50,6 +51,7 @@ return function (App $app) {
     $app->get('/negocios', BusinessesAction::class)->setName('negocios');
     $app->get('/negocios/{id:[0-9]+}', BusinessDetailAction::class)->setName('negocios.detalle');
     $app->get('/mapa', MapAction::class)->setName('mapa');
+    $app->post('/publicar', SubmitPublicOfferAction::class)->setName('publicar');
 
     $app->get('/login', LoginPageAction::class)->setName('login');
     $app->post('/login', LoginSubmitAction::class);

@@ -20,14 +20,16 @@ class RegisterPageAction extends PageAction
         }
 
         $query = $request->getQueryParams();
+        $sessionDraft = is_array($_SESSION['offer_draft'] ?? null) ? $_SESSION['offer_draft'] : [];
         $prefillOld = [
-            'role' => 'user',
-            'business_name' => trim((string) ($query['business_name'] ?? '')),
-            'category' => trim((string) ($query['category'] ?? '')),
-            'title' => trim((string) ($query['title'] ?? '')),
-            'location' => trim((string) ($query['location'] ?? '')),
-            'whatsapp' => trim((string) ($query['whatsapp'] ?? '')),
-            'description' => trim((string) ($query['description'] ?? '')),
+            'role' => $sessionDraft !== [] ? 'business' : 'user',
+            'business_name' => trim((string) ($query['business_name'] ?? ($sessionDraft['business_name'] ?? ''))),
+            'category' => trim((string) ($query['category'] ?? ($sessionDraft['category'] ?? ''))),
+            'title' => trim((string) ($query['title'] ?? ($sessionDraft['title'] ?? ''))),
+            'location' => trim((string) ($query['location'] ?? ($sessionDraft['location'] ?? ''))),
+            'whatsapp' => trim((string) ($query['whatsapp'] ?? ($sessionDraft['whatsapp'] ?? ''))),
+            'description' => trim((string) ($query['description'] ?? ($sessionDraft['description'] ?? ''))),
+            'image_url' => trim((string) ($sessionDraft['image_url'] ?? '')),
         ];
 
         if (($query['role'] ?? null) !== null && in_array((string) $query['role'], ['user', 'business'], true)) {
@@ -67,7 +69,7 @@ class RegisterPageAction extends PageAction
         }
 
         return $this->renderPage($response, 'pages/auth/register.php', [
-            'pageTitle' => 'Crear cuenta | OfertasCerca',
+            'pageTitle' => 'Crear cuenta | OfertasLocales',
             'currentRoute' => 'registro',
             'prefillOld' => $prefillOld,
         ]);

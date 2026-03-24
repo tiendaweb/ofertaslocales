@@ -6,7 +6,10 @@ namespace App\Application\Actions\Auth;
 
 use App\Application\Actions\PageAction;
 use App\Application\Auth\AuthService;
+use App\Application\Service\OfferPublishPolicy;
 use App\Domain\User\AccountRepository;
+use App\Domain\Offer\OfferRepository;
+use App\Domain\Site\SettingsRepository;
 use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -17,7 +20,10 @@ class RegisterSubmitAction extends PageAction
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly AccountRepository $accountRepository,
-        private readonly AuthService $authService
+        private readonly AuthService $authService,
+        private readonly OfferRepository $offerRepository,
+        private readonly SettingsRepository $settingsRepository,
+        private readonly OfferPublishPolicy $offerPublishPolicy
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -52,6 +58,7 @@ class RegisterSubmitAction extends PageAction
             'whatsapp' => trim((string) ($data['draft_whatsapp'] ?? '')),
             'location' => trim((string) ($data['draft_location'] ?? ($data['location'] ?? ''))),
             'business_name' => $businessName,
+            'image_url' => trim((string) ($data['draft_image_url'] ?? '')),
         ];
 
         if (!in_array($role, ['business', 'user'], true)) {
@@ -194,8 +201,18 @@ class RegisterSubmitAction extends PageAction
 
         $this->authService->login($account);
         if ($role === 'business') {
-            $_SESSION['offer_draft'] = $offerDraft;
-            $this->flash('success', 'Tu cuenta de negocio ya está lista. Completamos tu oferta en el panel para que solo la revises y publiques.');
+            $offerDraft = $this->hydrateOfferDraftFromSession($offerDraft);
+            $publishedFromDraft = $this->publishDraftOffer((int) $account['id'], $account, $offerDraft);
+
+            if (!$publishedFromDraft) {
+                $_SESSION['offer_draft'] = $offerDraft;
+                $this->flash('success', 'Tu cuenta de negocio ya está lista. Completamos tu oferta en el panel para que solo la revises y publiques.');
+
+                return $this->redirect($response, '/panel');
+            }
+
+            unset($_SESSION['offer_draft']);
+            $this->flash('success', 'Tu cuenta de negocio y tu primera oferta quedaron registradas correctamente.');
 
             return $this->redirect($response, '/panel');
         }
@@ -230,5 +247,51 @@ class RegisterSubmitAction extends PageAction
         }
 
         return $normalized;
+    }
+
+    private function hydrateOfferDraftFromSession(array $offerDraft): array
+    {
+        $sessionDraft = is_array($_SESSION['offer_draft'] ?? null) ? $_SESSION['offer_draft'] : [];
+        if ($sessionDraft === []) {
+            return $offerDraft;
+        }
+
+        foreach (['category', 'title', 'description', 'whatsapp', 'location', 'business_name', 'image_url'] as $field) {
+            if (($offerDraft[$field] ?? '') === '' && isset($sessionDraft[$field])) {
+                $offerDraft[$field] = trim((string) $sessionDraft[$field]);
+            }
+        }
+
+        return $offerDraft;
+    }
+
+    private function publishDraftOffer(int $userId, array $account, array $offerDraft): bool
+    {
+        foreach (['category', 'title', 'description', 'whatsapp', 'location'] as $field) {
+            if (trim((string) ($offerDraft[$field] ?? '')) === '') {
+                return false;
+            }
+        }
+
+        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $policy = $this->offerPublishPolicy->resolve($account, $settings);
+        if (($policy['can_publish'] ?? false) !== true) {
+            return false;
+        }
+
+        $this->offerRepository->createForUser($userId, [
+            'category' => trim((string) $offerDraft['category']),
+            'title' => trim((string) $offerDraft['title']),
+            'description' => trim((string) $offerDraft['description']),
+            'image_url' => trim((string) ($offerDraft['image_url'] ?? '')) ?: null,
+            'whatsapp' => trim((string) $offerDraft['whatsapp']),
+            'location' => trim((string) $offerDraft['location']),
+            'lat' => null,
+            'lon' => null,
+            'status' => (string) ($policy['status'] ?? 'pending'),
+            'expires_at' => gmdate('Y-m-d H:i:s', strtotime('+24 hours')),
+        ]);
+
+        return true;
     }
 }

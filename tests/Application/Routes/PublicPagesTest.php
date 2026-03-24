@@ -54,7 +54,7 @@ class PublicPagesTest extends TestCase
                 'auth' => [
                     'user' => [
                         'id' => 1,
-                        'email' => 'admin@ofertascerca.test',
+                        'email' => 'admin@admin.com',
                         'role' => 'admin',
                         'business_name' => 'OfertasCerca Admin',
                         'whatsapp' => '+54 9 11 0000 0000',

@@ -24,7 +24,7 @@ class PanelAction extends PageAction
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         return $this->renderPage($response, 'pages/admin/panel.php', [
-            'pageTitle' => 'Panel del negocio | OfertasCerca',
+            'pageTitle' => 'Panel del negocio | OfertasLocales',
             'currentRoute' => 'panel',
             'pendingOffers' => $this->offerRepository->countPendingOffers(),
             'businesses' => $this->accountRepository->findBusinessAccounts(),

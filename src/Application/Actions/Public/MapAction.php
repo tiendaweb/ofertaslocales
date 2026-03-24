@@ -33,6 +33,7 @@ class MapAction extends PageAction
             'hero_description',
             'hero_primary_cta',
             'hero_primary_cta_url',
+            'site_logo_url',
             'merchant_badge',
             'merchant_title',
             'merchant_description',
@@ -45,7 +46,7 @@ class MapAction extends PageAction
         $seo = $this->seoRepository->findByPage('mapa') ?? [];
 
         return $this->renderPage($response, 'pages/mapa.php', [
-            'pageTitle' => $seo['title'] ?? 'Mapa de ofertas | OfertasCerca',
+            'pageTitle' => $seo['title'] ?? 'Mapa de ofertas | OfertasLocales',
             'metaDescription' => $seo['meta_description'] ?? null,
             'ogImage' => $seo['og_image'] ?? null,
             'currentRoute' => 'mapa',

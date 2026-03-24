@@ -16,7 +16,7 @@ class SqliteBusinessDirectoryRepository implements BusinessDirectoryRepository
     public function findBusinessesWithActiveOffers(): array
     {
         $statement = $this->pdo->query(
-            "SELECT users.id, users.email, users.role, users.business_name, users.whatsapp, users.created_at,
+            "SELECT users.id, users.email, users.role, users.business_name, users.whatsapp, users.logo_url, users.created_at,
                     COUNT(offers.id) AS active_offers,
                     MIN(offers.expires_at) AS next_expiration
              FROM users
@@ -24,7 +24,7 @@ class SqliteBusinessDirectoryRepository implements BusinessDirectoryRepository
              WHERE users.role = 'business'
                AND offers.status = 'active'
                AND datetime(offers.expires_at) > datetime('now')
-             GROUP BY users.id, users.email, users.role, users.business_name, users.whatsapp, users.created_at
+             GROUP BY users.id, users.email, users.role, users.business_name, users.whatsapp, users.logo_url, users.created_at
              ORDER BY active_offers DESC, users.business_name ASC"
         );
 

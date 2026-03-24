@@ -24,7 +24,7 @@
 
     const buildWhatsAppLink = (offer) => {
         const message = encodeURIComponent(
-            `Hola! Vi su oferta de '${offer.title}' en OfertasCerca. Sigue disponible?`
+            `Hola! Vi su oferta de '${offer.title}' en OfertasLocales. Sigue disponible?`
         );
 
         return `https://wa.me/${offer.whatsapp}?text=${message}`;
@@ -57,7 +57,9 @@
                 ${offers.map((item) => `
                     <article class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
                         <div class="relative h-48 overflow-hidden bg-gray-200">
-                            <img src="${item.image_url}" alt="${item.business_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <a href="/mapa" class="block h-full w-full" aria-label="Ver oferta en el mapa">
+                                <img src="${item.image_url}" alt="${item.business_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            </a>
                             <div class="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
                                 ${item.badge}
                             </div>
@@ -88,6 +90,10 @@
                                 <a href="${buildWhatsAppLink(item)}" target="_blank" rel="noreferrer" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
                                     <i data-lucide="message-circle" class="w-5 h-5"></i>
                                     Quiero esta oferta
+                                </a>
+                                <a href="/mapa" class="w-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                    <i data-lucide="map" class="w-5 h-5"></i>
+                                    Ver en el mapa
                                 </a>
                             </div>
                         </div>

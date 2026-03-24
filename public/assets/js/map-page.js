@@ -154,7 +154,7 @@
         modalLocation.textContent = offer.location;
         modalExpiration.textContent = offer.expires_label;
         refreshModalCountdown();
-        modalWhatsapp.href = `https://wa.me/${offer.whatsapp}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasCerca. Sigue disponible?`)}`;
+        modalWhatsapp.href = `https://wa.me/${offer.whatsapp}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasLocales. Sigue disponible?`)}`;
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
 

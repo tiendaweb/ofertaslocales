@@ -42,6 +42,7 @@ class OffersAction extends PageAction
             'hero_description',
             'hero_primary_cta',
             'hero_primary_cta_url',
+            'site_logo_url',
             'merchant_badge',
             'merchant_title',
             'merchant_description',
@@ -54,7 +55,7 @@ class OffersAction extends PageAction
         $seo = $this->seoRepository->findByPage('ofertas') ?? [];
 
         return $this->renderPage($response, 'pages/ofertas.php', [
-            'pageTitle' => $seo['title'] ?? 'Ofertas activas | OfertasCerca',
+            'pageTitle' => $seo['title'] ?? 'Ofertas activas | OfertasLocales',
             'metaDescription' => $seo['meta_description'] ?? null,
             'ogImage' => $seo['og_image'] ?? null,
             'currentRoute' => 'ofertas',

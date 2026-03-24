@@ -81,7 +81,7 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
             <div class="space-y-3">
                 <div class="flex flex-col">
                     <span class="text-[10px] text-gray-400 font-bold uppercase">Administrador</span>
-                    <code class="text-xs text-gray-700">admin@ofertascerca.test / 12345</code>
+                    <code class="text-xs text-gray-700">admin@admin.com / admin@admin.com</code>
                 </div>
                 <div class="flex flex-col border-t border-gray-100 pt-2">
                     <span class="text-[10px] text-gray-400 font-bold uppercase">Negocio</span>
