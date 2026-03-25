@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 ?>
-<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
+<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'aplicacion', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
 <section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-5 pb-28">
     <div class="rounded-[2.2rem] border border-red-100 bg-white/95 p-4 shadow-[0_24px_80px_rgba(239,68,68,0.12)] md:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -28,6 +28,7 @@ declare(strict_types=1);
                 'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
                 'logo' => ['label' => 'Logo', 'icon' => 'image'],
+                'aplicacion' => ['label' => 'Aplicación', 'icon' => 'smartphone'],
                 'categorias' => ['label' => 'Categorías', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
@@ -160,6 +161,53 @@ declare(strict_types=1);
                     <input type="hidden" name="site_logo_url" value="<?= htmlspecialchars((string) ($settings['site_logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <button type="submit" class="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar logo</button>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="tab === 'aplicacion'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h3 class="mb-5 text-xl font-black text-gray-900">Aplicación (PWA)</h3>
+            <form action="/admin/settings" method="post" class="grid gap-4 md:grid-cols-2">
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Nombre de la app</span>
+                    <input type="text" name="app_name" value="<?= htmlspecialchars((string) ($settings['app_name'] ?? 'OfertasLocales'), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Nombre corto</span>
+                    <input type="text" name="short_name" value="<?= htmlspecialchars((string) ($settings['short_name'] ?? 'Ofertas'), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Color de tema</span>
+                    <input type="text" name="theme_color" value="<?= htmlspecialchars((string) ($settings['theme_color'] ?? '#dc2626'), ENT_QUOTES, 'UTF-8') ?>" placeholder="#dc2626" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Color de fondo</span>
+                    <input type="text" name="background_color" value="<?= htmlspecialchars((string) ($settings['background_color'] ?? '#ffffff'), ENT_QUOTES, 'UTF-8') ?>" placeholder="#ffffff" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">URL de inicio</span>
+                    <input type="text" name="start_url" value="<?= htmlspecialchars((string) ($settings['start_url'] ?? '/'), ENT_QUOTES, 'UTF-8') ?>" placeholder="/" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Modo de visualización</span>
+                    <select name="display" class="w-full rounded-xl border border-red-100 bg-white p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                        <?php foreach (['standalone', 'fullscreen', 'minimal-ui', 'browser'] as $displayOption) : ?>
+                            <option value="<?= $displayOption ?>" <?= (($settings['display'] ?? 'standalone') === $displayOption) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($displayOption, ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Ícono 192x192</span>
+                    <input type="text" name="icon_192" value="<?= htmlspecialchars((string) ($settings['icon_192'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="/uploads/icon-192.png o https://..." class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Ícono 512x512</span>
+                    <input type="text" name="icon_512" value="<?= htmlspecialchars((string) ($settings['icon_512'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="/uploads/icon-512.png o https://..." class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <button type="submit" class="md:col-span-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar configuración de la app</button>
             </form>
         </div>
     </div>

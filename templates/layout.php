@@ -8,6 +8,27 @@ $pageDataJson = isset($pageData)
     ? json_encode($pageData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)
     : null;
 $flash = $flash ?? [];
+$manifestPath = dirname(__DIR__) . '/public/manifest.webmanifest';
+$manifest = [];
+if (is_file($manifestPath)) {
+    $manifestContent = file_get_contents($manifestPath);
+    $decodedManifest = is_string($manifestContent) ? json_decode($manifestContent, true) : null;
+    if (is_array($decodedManifest)) {
+        $manifest = $decodedManifest;
+    }
+}
+$pwaName = trim((string) ($manifest['name'] ?? 'OfertasLocales'));
+$pwaShortName = trim((string) ($manifest['short_name'] ?? 'Ofertas'));
+$pwaThemeColor = trim((string) ($manifest['theme_color'] ?? '#dc2626'));
+$pwaIcon192 = '';
+if (isset($manifest['icons']) && is_array($manifest['icons'])) {
+    foreach ($manifest['icons'] as $icon) {
+        if (is_array($icon) && (($icon['sizes'] ?? '') === '192x192')) {
+            $pwaIcon192 = (string) ($icon['src'] ?? $pwaIcon192);
+            break;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -19,6 +40,14 @@ $flash = $flash ?? [];
     <?php endif; ?>
     <?php if (($ogImage ?? null) !== null) : ?>
         <meta property="og:image" content="<?= htmlspecialchars((string) $ogImage, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
+    <meta name="application-name" content="<?= htmlspecialchars($pwaName, ENT_QUOTES, 'UTF-8') ?>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="<?= htmlspecialchars($pwaShortName, ENT_QUOTES, 'UTF-8') ?>">
+    <meta name="theme-color" content="<?= htmlspecialchars($pwaThemeColor, ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <?php if ($pwaIcon192 !== '') : ?>
+        <link rel="apple-touch-icon" sizes="192x192" href="<?= htmlspecialchars($pwaIcon192, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
     <title><?= htmlspecialchars($pageTitle ?? 'Ofertas Locales | Ahorra hoy', ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -122,6 +151,14 @@ $flash = $flash ?? [];
                 window.lucide.createIcons();
             }
         });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    console.warn('No se pudo registrar el Service Worker.');
+                });
+            });
+        }
     </script>
 </body>
 </html>

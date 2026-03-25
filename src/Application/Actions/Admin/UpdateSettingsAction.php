@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Admin;
 
 use App\Application\Actions\PageAction;
+use App\Application\Service\PwaManifestManager;
 use App\Application\Settings\SettingsInterface;
 use App\Domain\Site\SettingsRepository;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -24,15 +25,25 @@ class UpdateSettingsAction extends PageAction
         'merchant_description',
         'footer_tagline',
         'default_user_publish_mode',
+        'app_name',
+        'short_name',
+        'theme_color',
+        'background_color',
+        'start_url',
+        'display',
+        'icon_192',
+        'icon_512',
     ];
 
     private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
+    private const ALLOWED_PWA_DISPLAY = ['standalone', 'fullscreen', 'minimal-ui', 'browser'];
 
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly SettingsRepository $settingsRepository,
-        private readonly SettingsInterface $settings
+        private readonly SettingsInterface $settings,
+        private readonly PwaManifestManager $pwaManifestManager
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -64,11 +75,32 @@ class UpdateSettingsAction extends PageAction
             && !in_array($payload['default_user_publish_mode'], self::ALLOWED_USER_PUBLISH_MODES, true)) {
             $payload['default_user_publish_mode'] = 'review';
         }
+        if (array_key_exists('display', $payload) && !in_array($payload['display'], self::ALLOWED_PWA_DISPLAY, true)) {
+            $payload['display'] = 'standalone';
+        }
+        if (array_key_exists('theme_color', $payload) && preg_match('/^#[0-9a-fA-F]{6}$/', $payload['theme_color']) !== 1) {
+            $payload['theme_color'] = '#dc2626';
+        }
+        if (array_key_exists('background_color', $payload) && preg_match('/^#[0-9a-fA-F]{6}$/', $payload['background_color']) !== 1) {
+            $payload['background_color'] = '#ffffff';
+        }
+        if (array_key_exists('start_url', $payload) && str_starts_with($payload['start_url'], '/')) {
+            // válido
+        } elseif (array_key_exists('start_url', $payload)) {
+            $payload['start_url'] = '/' . ltrim($payload['start_url'], '/');
+        }
 
         if ($payload !== []) {
             $this->settingsRepository->updateMany($payload);
+            try {
+                $this->pwaManifestManager->generateFromSettings();
+            } catch (\RuntimeException) {
+                $this->flash('error', 'Los ajustes se guardaron, pero no se pudo regenerar el manifest de la app.');
+
+                return $this->redirect($response, '/admin?tab=aplicacion');
+            }
         }
-        $this->flash('success', 'Los textos y reglas de publicación fueron actualizados.');
+        $this->flash('success', 'Los ajustes del sitio fueron actualizados.');
 
         return $this->redirect($response, '/admin');
     }
