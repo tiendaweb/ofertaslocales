@@ -243,6 +243,11 @@ declare(strict_types=1);
                             <span class="mb-1 block text-xs font-semibold text-gray-700">Meta descripción</span>
                             <textarea name="meta_description" rows="3" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) $seo['meta_description']) ?></textarea>
                         </label>
+                        <label class="mt-3">
+                            <span class="mb-1 block text-xs font-semibold text-gray-700">Imagen OpenGraph (URL)</span>
+                            <input type="url" name="og_image" value="<?= htmlspecialchars((string) ($seo['og_image'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="https://..." class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                            <span class="mt-1 block text-[11px] text-gray-500">Se conserva la imagen actual si no se modifica este campo.</span>
+                        </label>
                         <button class="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500">Guardar metadatos</button>
                     </form>
                 <?php endforeach; ?>

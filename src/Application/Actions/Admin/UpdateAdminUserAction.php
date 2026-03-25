@@ -50,9 +50,15 @@ class UpdateAdminUserAction extends PageAction
         $payload = [
             'email' => $email,
             'role' => $role,
-            'business_name' => trim((string) ($data['business_name'] ?? '')),
-            'whatsapp' => trim((string) ($data['whatsapp'] ?? '')),
         ];
+
+        if (array_key_exists('business_name', $data)) {
+            $payload['business_name'] = trim((string) $data['business_name']);
+        }
+
+        if (array_key_exists('whatsapp', $data)) {
+            $payload['whatsapp'] = trim((string) $data['whatsapp']);
+        }
 
         if ($logoImage !== '') {
             $savedLogo = $this->storeLogoImage($logoImage);
