@@ -54,10 +54,16 @@ $businessLon = $businessProfile['address_lon'] ?? null;
                     <p class="text-xs font-bold uppercase tracking-widest text-red-500">Perfil público</p>
                     <p class="text-sm text-gray-600">Gestiona tus ofertas y revisa cómo ve tu negocio la audiencia.</p>
                 </div>
-                <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/30">
-                    <i data-lucide="store" class="h-4 w-4"></i>
-                    Mi Negocio
-                </a>
+                <div class="flex flex-wrap gap-2">
+                    <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/30">
+                        <i data-lucide="store" class="h-4 w-4"></i>
+                        Mi Negocio
+                    </a>
+                    <a href="/panel/negocio/editar" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gray-500/20">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                        Editar Negocio
+                    </a>
+                </div>
             </div>
         </article>
     <?php endif; ?>
@@ -336,7 +342,7 @@ $businessLon = $businessProfile['address_lon'] ?? null;
 </section>
 
 <script>
-    // Inicializar iconos de Lucide (Asegúrate de tener importada la librería en tu layout general: <script src="https://unpkg.com/lucide@latest"></script>)
+    // Inicializar iconos de Lucide (asegúrate de incluir la librería lucide en el layout general).
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }

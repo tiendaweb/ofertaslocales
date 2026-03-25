@@ -25,7 +25,9 @@ use App\Application\Actions\Auth\StopImpersonationAction;
 use App\Application\Actions\Business\BusinessDashboardAction;
 use App\Application\Actions\Business\CreateOfferAction;
 use App\Application\Actions\Business\DeleteBusinessOfferAction;
+use App\Application\Actions\Business\EditBusinessProfilePageAction;
 use App\Application\Actions\Business\UpdateBusinessOfferAction;
+use App\Application\Actions\Business\UpdateBusinessProfileAction;
 use App\Application\Actions\Public\BusinessesAction;
 use App\Application\Actions\Public\BusinessDetailAction;
 use App\Application\Actions\Public\HomeAction;
@@ -71,6 +73,8 @@ return function (App $app) {
             ->setName('panel.ofertas.crear');
         $group->post('/ofertas/{id}', UpdateBusinessOfferAction::class)->setName('panel.ofertas.actualizar');
         $group->post('/ofertas/{id}/eliminar', DeleteBusinessOfferAction::class)->setName('panel.ofertas.eliminar');
+        $group->get('/negocio/editar', EditBusinessProfilePageAction::class)->setName('panel.negocio.editar');
+        $group->post('/negocio/editar', UpdateBusinessProfileAction::class)->setName('panel.negocio.actualizar');
     })->add(RequireBusinessMiddleware::class)->add(RequireAuthenticationMiddleware::class);
 
     $app->group('/admin', function (Group $group) {
