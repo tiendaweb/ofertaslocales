@@ -22,10 +22,21 @@ class RequireAdminMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $_SESSION['flash']['error'] = 'Solo los administradores pueden acceder a esta sección.';
+        $redirectTo = '/login';
+        if ($this->authService->isAuthenticated()) {
+            if ($this->authService->isImpersonating()) {
+                $_SESSION['flash']['error'] = 'Estás navegando como otro usuario. Sal de la impersonación para volver al admin.';
+            } else {
+                $_SESSION['flash']['error'] = 'Solo los administradores pueden acceder a esta sección.';
+            }
+
+            $redirectTo = '/panel';
+        } else {
+            $_SESSION['flash']['error'] = 'Debes iniciar sesión para acceder al panel administrador.';
+        }
 
         $response = new \Slim\Psr7\Response();
 
-        return $response->withHeader('Location', '/login')->withStatus(302);
+        return $response->withHeader('Location', $redirectTo)->withStatus(302);
     }
 }
