@@ -49,6 +49,7 @@ class UpdateBusinessProfileAction extends PageAction
             'tiktok_url' => ['label' => 'TikTok', 'value' => trim((string) ($data['tiktok_url'] ?? ''))],
             'website_url' => ['label' => 'sitio web', 'value' => trim((string) ($data['website_url'] ?? ''))],
             'logo_url' => ['label' => 'logo', 'value' => trim((string) ($data['logo_url'] ?? ''))],
+            'cover_url' => ['label' => 'portada', 'value' => trim((string) ($data['cover_url'] ?? ''))],
         ];
 
         $errors = [];
@@ -113,6 +114,7 @@ class UpdateBusinessProfileAction extends PageAction
             'tiktok_url' => $socialUrlMap['tiktok_url']['value'],
             'website_url' => $socialUrlMap['website_url']['value'],
             'logo_url' => $socialUrlMap['logo_url']['value'],
+            'cover_url' => $socialUrlMap['cover_url']['value'],
         ];
 
         if ($errors !== []) {
@@ -138,6 +140,7 @@ class UpdateBusinessProfileAction extends PageAction
             'tiktok_url' => $sanitizedUrls['tiktok_url'] ?? null,
             'website_url' => $sanitizedUrls['website_url'] ?? null,
             'logo_url' => $sanitizedUrls['logo_url'] ?? null,
+            'cover_url' => $sanitizedUrls['cover_url'] ?? null,
         ]);
 
         if ($updated === null) {

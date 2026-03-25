@@ -11,9 +11,12 @@ declare(strict_types=1);
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($businesses as $business) : ?>
             <?php
-            $businessImage = (string) ($business['logo_url'] ?? '');
+            $businessImage = (string) ($business['cover_url'] ?? '');
             if ($businessImage === '' && isset($business['cover_image_url'])) {
                 $businessImage = (string) $business['cover_image_url'];
+            }
+            if ($businessImage === '') {
+                $businessImage = (string) ($business['logo_url'] ?? '');
             }
             if ($businessImage === '' && isset($business['active_publications'][0]['image_url'])) {
                 $businessImage = (string) $business['active_publications'][0]['image_url'];

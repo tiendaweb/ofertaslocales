@@ -51,6 +51,7 @@ class RegisterSubmitAction extends PageAction
         $tiktokUrl = trim((string) ($data['tiktok_url'] ?? ''));
         $websiteUrl = trim((string) ($data['website_url'] ?? ''));
         $logoUrl = trim((string) ($data['logo_url'] ?? ''));
+        $coverUrl = trim((string) ($data['cover_url'] ?? ''));
         $offerDraft = [
             'category' => trim((string) ($data['draft_category'] ?? ($data['category'] ?? ''))),
             'title' => trim((string) ($data['draft_title'] ?? ($data['title'] ?? ''))),
@@ -126,6 +127,7 @@ class RegisterSubmitAction extends PageAction
             'tiktok_url' => ['label' => 'TikTok', 'value' => $tiktokUrl],
             'website_url' => ['label' => 'sitio web', 'value' => $websiteUrl],
             'logo_url' => ['label' => 'logo', 'value' => $logoUrl],
+            'cover_url' => ['label' => 'portada', 'value' => $coverUrl],
         ];
         $sanitizedUrls = [];
         foreach ($socialUrlMap as $field => $config) {
@@ -157,6 +159,7 @@ class RegisterSubmitAction extends PageAction
             'tiktok_url' => $tiktokUrl,
             'website_url' => $websiteUrl,
             'logo_url' => $logoUrl,
+            'cover_url' => $coverUrl,
             'category' => $offerDraft['category'],
             'title' => $offerDraft['title'],
             'description' => $offerDraft['description'],
@@ -190,6 +193,7 @@ class RegisterSubmitAction extends PageAction
                 'tiktok_url' => $sanitizedUrls['tiktok_url'] ?? null,
                 'website_url' => $sanitizedUrls['website_url'] ?? null,
                 'logo_url' => $sanitizedUrls['logo_url'] ?? null,
+                'cover_url' => $sanitizedUrls['cover_url'] ?? null,
             ]);
         } catch (PDOException) {
             $this->flashFormErrors([
@@ -202,24 +206,53 @@ class RegisterSubmitAction extends PageAction
         $this->authService->login($account);
         if ($role === 'business') {
             $offerDraft = $this->hydrateOfferDraftFromSession($offerDraft);
-            $publishedFromDraft = $this->publishDraftOffer((int) $account['id'], $account, $offerDraft);
-
-            if (!$publishedFromDraft) {
+            if (!$this->isPublishableDraft($offerDraft)) {
                 $_SESSION['offer_draft'] = $offerDraft;
-                $this->flash('success', 'Tu cuenta de negocio ya está lista. Completamos tu oferta en el panel para que solo la revises y publiques.');
+                $this->flash('success', 'Tu cuenta de negocio ya está lista. Completa tu oferta en el asistente del panel.');
 
-                return $this->redirect($response, '/panel');
+                return $this->redirect($response, '/panel?open_offer_wizard=1');
             }
 
-            unset($_SESSION['offer_draft']);
-            $this->flash('success', 'Tu cuenta de negocio y tu primera oferta quedaron registradas correctamente.');
+            $_SESSION['offer_draft'] = $offerDraft;
+            $this->flash('success', 'Tu cuenta de negocio se creó correctamente. Revisa y publica la oferta en el asistente.');
 
-            return $this->redirect($response, '/panel');
+            return $this->redirect($response, '/panel?open_offer_wizard=1');
+        }
+
+        $offerDraft = $this->hydrateOfferDraftFromSession($offerDraft);
+        if ($this->isPublishableDraft($offerDraft)) {
+            $publishedFromDraft = $this->publishDraftOffer((int) $account['id'], $account, $offerDraft);
+
+            if ($publishedFromDraft) {
+                unset($_SESSION['offer_draft']);
+                $this->flash('success', 'Tu cuenta de usuario y tu oferta se registraron correctamente.');
+
+                return $this->redirect($response, '/');
+            }
+
+            $_SESSION['offer_draft'] = $offerDraft;
+            $this->flash(
+                'info',
+                'Tu cuenta está creada, pero para publicar esta oferta debes completar tu perfil primero.'
+            );
+
+            return $this->redirect($response, '/');
         }
 
         $this->flash('success', 'Tu cuenta de usuario se creó correctamente. Puedes explorar ofertas desde el inicio.');
 
         return $this->redirect($response, '/');
+    }
+
+    private function isPublishableDraft(array $offerDraft): bool
+    {
+        foreach (['category', 'title', 'description', 'whatsapp', 'location'] as $field) {
+            if (trim((string) ($offerDraft[$field] ?? '')) === '') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function normalizeUrl(string $url): string|false|null
@@ -267,12 +300,6 @@ class RegisterSubmitAction extends PageAction
 
     private function publishDraftOffer(int $userId, array $account, array $offerDraft): bool
     {
-        foreach (['category', 'title', 'description', 'whatsapp', 'location'] as $field) {
-            if (trim((string) ($offerDraft[$field] ?? '')) === '') {
-                return false;
-            }
-        }
-
         $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
         $policy = $this->offerPublishPolicy->resolve($account, $settings);
         if (($policy['can_publish'] ?? false) !== true) {

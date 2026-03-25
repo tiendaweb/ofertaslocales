@@ -16,7 +16,7 @@ declare(strict_types=1);
                     <img
                         src="<?= htmlspecialchars((string) ($business['logo_url'] ?: 'https://placehold.co/96x96/111827/e5e7eb?text=Logo'), ENT_QUOTES, 'UTF-8') ?>"
                         alt="Logo de <?= htmlspecialchars($business['business_name'] ?: 'Negocio', ENT_QUOTES, 'UTF-8') ?>"
-                        class="h-12 w-12 rounded-xl object-cover border border-white/10 shrink-0"
+                        class="h-12 w-12 rounded-xl object-contain bg-slate-100 border border-white/10 shrink-0"
                     >
                     <h3 class="text-xl font-semibold text-white truncate"><?= htmlspecialchars($business['business_name'] ?: 'Sin nombre comercial', ENT_QUOTES, 'UTF-8') ?></h3>
                 </div>

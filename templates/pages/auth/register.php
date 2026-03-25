@@ -199,6 +199,11 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                             <input name="logo_url" type="text" value="<?= htmlspecialchars((string) ($old['logo_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="https://..." class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
                             <?php if (($formErrors['logo_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['logo_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </label>
+                        <label class="block md:col-span-2">
+                            <span class="block text-sm text-gray-700 mb-2">Portada (URL)</span>
+                            <input name="cover_url" type="text" value="<?= htmlspecialchars((string) ($old['cover_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="https://..." class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                            <?php if (($formErrors['cover_url'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['cover_url'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+                        </label>
                     </div>
 
                     <div class="mt-8 flex flex-wrap justify-between gap-2 border-t border-gray-100 pt-4">
