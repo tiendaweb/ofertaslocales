@@ -16,6 +16,7 @@ return function (ContainerBuilder $containerBuilder) {
                 'logErrorDetails' => false,
                 'paths' => [
                     'templates' => __DIR__ . '/../templates',
+                    'public' => __DIR__ . '/../public',
                     'database' => __DIR__ . '/../database/app.sqlite',
                     'databaseMigrations' => __DIR__ . '/../database/migrations',
                     'uploads' => __DIR__ . '/../public/uploads',

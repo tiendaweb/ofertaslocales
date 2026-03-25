@@ -1,0 +1,10 @@
+{
+    "name": "OfertasLocales",
+    "short_name": "Ofertas",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#dc2626",
+    "background_color": "#ffffff",
+    "lang": "es-AR",
+    "icons": []
+}
