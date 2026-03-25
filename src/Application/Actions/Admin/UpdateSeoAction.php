@@ -29,11 +29,25 @@ class UpdateSeoAction extends PageAction
         }
 
         $data = (array) $request->getParsedBody();
-        $this->seoRepository->updatePage($pageName, [
-            'title' => trim((string) ($data['title'] ?? '')),
-            'meta_description' => trim((string) ($data['meta_description'] ?? '')),
-            'og_image' => trim((string) ($data['og_image'] ?? '')),
-        ]);
+        $currentSeo = $this->seoRepository->findByPage($pageName) ?? [
+            'title' => '',
+            'meta_description' => '',
+            'og_image' => '',
+        ];
+
+        $payload = [
+            'title' => (string) ($currentSeo['title'] ?? ''),
+            'meta_description' => (string) ($currentSeo['meta_description'] ?? ''),
+            'og_image' => (string) ($currentSeo['og_image'] ?? ''),
+        ];
+
+        foreach (['title', 'meta_description', 'og_image'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $payload[$field] = trim((string) $data[$field]);
+            }
+        }
+
+        $this->seoRepository->updatePage($pageName, $payload);
 
         $this->flash('success', 'La configuración SEO fue actualizada.');
 
