@@ -52,14 +52,23 @@ declare(strict_types=1);
                 <?php foreach ($offers as $offer) : ?>
                     <div class="rounded-3xl border border-red-100 bg-red-50/60 p-4 md:p-5">
                         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                            <div class="min-w-0 flex-1">
-                                <div class="mb-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-red-500">
-                                    <span><?= htmlspecialchars((string) $offer['business_name']) ?></span>
-                                    <span class="h-1 w-1 rounded-full bg-red-300"></span>
-                                    <span><?= htmlspecialchars((string) $offer['category']) ?></span>
+                            <div class="flex min-w-0 flex-1 items-start gap-4">
+                                <div class="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-red-100 bg-white">
+                                    <?php if (trim((string) ($offer['image_url'] ?? '')) !== '') : ?>
+                                        <img src="<?= htmlspecialchars((string) $offer['image_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Miniatura de oferta" class="h-full w-full object-cover">
+                                    <?php else : ?>
+                                        <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-100 to-rose-100 text-[10px] font-bold uppercase tracking-widest text-red-500">Sin imagen</div>
+                                    <?php endif; ?>
                                 </div>
-                                <h4 class="truncate text-lg font-bold text-gray-900"><?= htmlspecialchars((string) $offer['title']) ?></h4>
-                                <p class="line-clamp-2 text-sm text-gray-600"><?= htmlspecialchars((string) $offer['description']) ?></p>
+                                <div class="min-w-0 flex-1">
+                                    <div class="mb-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-red-500">
+                                        <span><?= htmlspecialchars((string) $offer['business_name']) ?></span>
+                                        <span class="h-1 w-1 rounded-full bg-red-300"></span>
+                                        <span><?= htmlspecialchars((string) $offer['category']) ?></span>
+                                    </div>
+                                    <h4 class="truncate text-lg font-bold text-gray-900"><?= htmlspecialchars((string) $offer['title']) ?></h4>
+                                    <p class="line-clamp-2 text-sm text-gray-600"><?= htmlspecialchars((string) $offer['description']) ?></p>
+                                </div>
                             </div>
                             <form action="/admin/offers/<?= (int) $offer['id'] ?>/status" method="post" class="flex shrink-0 items-center gap-2 rounded-2xl border border-red-100 bg-white p-2">
                                 <button name="status" value="active" title="Aprobar oferta" class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors">
@@ -164,30 +173,57 @@ declare(strict_types=1);
             </form>
         </div>
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
-            <h4 class="mb-3 text-lg font-bold text-gray-900">Solicitudes pendientes</h4>
-            <div class="space-y-3">
-                <?php foreach (($pendingCategories ?? []) as $category) : ?>
-                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50/50 p-3">
-                        <div>
-                            <p class="font-semibold text-gray-900"><?= htmlspecialchars((string) $category['name'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p class="text-xs text-gray-500">Solicitada el <?= htmlspecialchars((string) $category['created_at'], ENT_QUOTES, 'UTF-8') ?></p>
-                        </div>
-                        <div class="flex gap-2">
-                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
-                                <input type="hidden" name="status" value="approved">
-                                <button class="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white">Aprobar</button>
-                            </form>
-                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
-                                <input type="hidden" name="status" value="rejected">
-                                <button class="rounded-lg bg-gray-200 px-3 py-2 text-xs font-bold text-gray-700">Rechazar</button>
-                            </form>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-                <?php if (($pendingCategories ?? []) === []) : ?>
-                    <p class="text-sm text-gray-500">No hay categorías pendientes.</p>
-                <?php endif; ?>
+            <h4 class="mb-3 text-lg font-bold text-gray-900">Listado completo de categorías</h4>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-red-100">
+                    <thead class="bg-red-50/60">
+                        <tr class="text-left text-[11px] font-bold uppercase tracking-widest text-red-500">
+                            <th class="px-3 py-3">Nombre</th>
+                            <th class="px-3 py-3">Estado</th>
+                            <th class="px-3 py-3">Creada</th>
+                            <th class="px-3 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-red-100 bg-white">
+                        <?php foreach (($categories ?? []) as $category) : ?>
+                            <tr class="align-top">
+                                <td class="px-3 py-3">
+                                    <form action="/admin/categories/<?= (int) $category['id'] ?>/update" method="post" class="flex items-center gap-2">
+                                        <input type="text" name="name" value="<?= htmlspecialchars((string) $category['name'], ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-lg border border-red-100 bg-red-50/40 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none" required>
+                                        <button type="submit" class="rounded-lg bg-white px-3 py-2 text-xs font-bold text-red-600 ring-1 ring-red-200 hover:bg-red-50">Guardar</button>
+                                    </form>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider <?= (string) $category['status'] === 'approved' ? 'bg-emerald-100 text-emerald-700' : ((string) $category['status'] === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-700') ?>">
+                                        <?= htmlspecialchars((string) $category['status'], ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
+                                </td>
+                                <td class="px-3 py-3 text-xs text-gray-500"><?= htmlspecialchars((string) $category['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td class="px-3 py-3">
+                                    <div class="flex flex-wrap justify-end gap-2">
+                                        <?php if ((string) $category['status'] === 'pending') : ?>
+                                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
+                                                <input type="hidden" name="status" value="approved">
+                                                <button class="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white">Aprobar</button>
+                                            </form>
+                                            <form action="/admin/categories/<?= (int) $category['id'] ?>/status" method="post">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button class="rounded-lg bg-gray-200 px-3 py-2 text-xs font-bold text-gray-700">Rechazar</button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form action="/admin/categories/<?= (int) $category['id'] ?>/delete" method="post">
+                                            <button class="rounded-lg bg-rose-600 px-3 py-2 text-xs font-bold text-white">Borrar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
+            <?php if (($categories ?? []) === []) : ?>
+                <p class="mt-4 text-sm text-gray-500">No hay categorías cargadas todavía.</p>
+            <?php endif; ?>
         </div>
     </div>
 

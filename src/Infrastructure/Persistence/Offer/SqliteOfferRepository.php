@@ -72,7 +72,7 @@ class SqliteOfferRepository implements OfferRepository
     public function findForModeration(): array
     {
         $statement = $this->pdo->query(
-            "SELECT offers.id, offers.category, offers.title, offers.description, offers.image_url, offers.whatsapp,
+            "SELECT offers.id, offers.category, offers.title, offers.description, COALESCE(offers.image_url, '') AS image_url, offers.whatsapp,
                     offers.location, offers.lat, offers.lon, offers.status, offers.created_at, offers.expires_at,
                     users.business_name, users.email
              FROM offers

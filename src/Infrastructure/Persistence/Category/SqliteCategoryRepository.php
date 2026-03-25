@@ -77,6 +77,58 @@ class SqliteCategoryRepository implements CategoryRepository
         ]);
     }
 
+
+    public function updateName(int $id, string $name, int $adminId): bool
+    {
+        $trimmedName = trim($name);
+        if ($id <= 0 || $trimmedName === '') {
+            return false;
+        }
+
+        $normalizedName = $this->normalize($trimmedName);
+        $conflict = $this->pdo->prepare(
+            'SELECT 1 FROM offer_categories WHERE normalized_name = :normalized_name AND id <> :id LIMIT 1'
+        );
+        $conflict->execute([
+            'normalized_name' => $normalizedName,
+            'id' => $id,
+        ]);
+
+        if ($conflict->fetchColumn() !== false) {
+            return false;
+        }
+
+        $statement = $this->pdo->prepare(
+            'UPDATE offer_categories
+             SET name = :name,
+                 normalized_name = :normalized_name,
+                 reviewed_at = :reviewed_at,
+                 reviewed_by_user_id = :reviewed_by_user_id
+             WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $id,
+            'name' => $trimmedName,
+            'normalized_name' => $normalizedName,
+            'reviewed_at' => gmdate('Y-m-d H:i:s'),
+            'reviewed_by_user_id' => $adminId,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function delete(int $id): bool
+    {
+        if ($id <= 0) {
+            return false;
+        }
+
+        $statement = $this->pdo->prepare('DELETE FROM offer_categories WHERE id = :id');
+        $statement->execute(['id' => $id]);
+
+        return $statement->rowCount() > 0;
+    }
+
     public function isApproved(string $name): bool
     {
         $statement = $this->pdo->prepare(
