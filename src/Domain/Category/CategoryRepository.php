@@ -18,5 +18,9 @@ interface CategoryRepository
 
     public function updateStatus(int $categoryId, string $status, int $adminUserId): bool;
 
+    public function updateName(int $id, string $name, int $adminId): bool;
+
+    public function delete(int $id): bool;
+
     public function isApproved(string $name): bool;
 }
