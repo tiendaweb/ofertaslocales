@@ -144,6 +144,14 @@ class SqliteAccountRepository implements AccountRepository
                  tiktok_url = :tiktok_url,
                  website_url = :website_url,
                  logo_url = :logo_url,
+                 street = :street,
+                 street_number = :street_number,
+                 postal_code = :postal_code,
+                 city = :city,
+                 municipality = :municipality,
+                 province = :province,
+                 address_lat = :address_lat,
+                 address_lon = :address_lon,
                  updated_at = :updated_at
              WHERE id = :id'
         );
@@ -160,6 +168,14 @@ class SqliteAccountRepository implements AccountRepository
             'tiktok_url' => $data['tiktok_url'] ?? $existing['tiktok_url'],
             'website_url' => $data['website_url'] ?? $existing['website_url'],
             'logo_url' => $data['logo_url'] ?? $existing['logo_url'],
+            'street' => $data['street'] ?? $existing['street'],
+            'street_number' => $data['street_number'] ?? $existing['street_number'],
+            'postal_code' => $data['postal_code'] ?? $existing['postal_code'],
+            'city' => $data['city'] ?? $existing['city'],
+            'municipality' => $data['municipality'] ?? $existing['municipality'],
+            'province' => $data['province'] ?? $existing['province'],
+            'address_lat' => array_key_exists('address_lat', $data) ? $data['address_lat'] : $existing['address_lat'],
+            'address_lon' => array_key_exists('address_lon', $data) ? $data['address_lon'] : $existing['address_lon'],
             'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
