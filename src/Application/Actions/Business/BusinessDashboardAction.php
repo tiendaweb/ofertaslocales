@@ -34,7 +34,8 @@ class BusinessDashboardAction extends PageAction
         $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
         $publishPolicy = $this->offerPublishPolicy->resolve($user, $settings);
         $offerDraft = is_array($_SESSION['offer_draft'] ?? null) ? $_SESSION['offer_draft'] : [];
-        unset($_SESSION['offer_draft']);
+        $query = $request->getQueryParams();
+        $openOfferWizard = (($query['open_offer_wizard'] ?? null) === '1');
 
         $businessProfile = $this->accountRepository->findById((int) $user['id']) ?? [];
 
@@ -46,6 +47,7 @@ class BusinessDashboardAction extends PageAction
             'defaultUserPublishMode' => $settings['default_user_publish_mode'] ?? 'review',
             'publishPolicy' => $publishPolicy,
             'offerDraft' => $offerDraft,
+            'openOfferWizard' => $openOfferWizard,
             'approvedCategories' => $this->categoryRepository->findApprovedNames(),
             'businessProfile' => $businessProfile,
         ]);

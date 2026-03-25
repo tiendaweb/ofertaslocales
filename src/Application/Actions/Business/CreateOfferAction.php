@@ -100,6 +100,13 @@ class CreateOfferAction extends PageAction
         }
 
         if ($errors !== []) {
+            $_SESSION['offer_draft'] = [
+                'category' => $payload['category'],
+                'title' => $payload['title'],
+                'description' => $payload['description'],
+                'whatsapp' => $payload['whatsapp'],
+            ];
+
             if ($payload['requested_category'] !== '') {
                 $this->categoryRepository->requestCategory($payload['requested_category'], (int) ($user['id'] ?? 0));
                 $this->flash('success', 'La nueva categoría fue enviada para aprobación del administrador.');
@@ -137,6 +144,7 @@ class CreateOfferAction extends PageAction
         $this->flash('success', $status === 'active'
             ? 'La oferta fue publicada y ya está visible.'
             : 'La oferta fue creada y quedó pendiente de revisión.');
+        unset($_SESSION['offer_draft']);
 
         return $this->redirect($response, '/panel');
     }

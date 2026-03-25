@@ -47,7 +47,7 @@ $socialButtons = array_values(array_filter([
 
         <header class="relative h-56 shrink-0">
             <img
-                src="<?= htmlspecialchars((string) ($business['logo_url'] ?: 'https://placehold.co/1200x500/fca5a5/7f1d1d?text=Negocio+Local'), ENT_QUOTES, 'UTF-8') ?>"
+                src="<?= htmlspecialchars((string) (($business['cover_url'] ?? '') ?: 'https://placehold.co/1200x500/fca5a5/7f1d1d?text=Portada+Negocio'), ENT_QUOTES, 'UTF-8') ?>"
                 class="w-full h-full object-cover"
                 alt="Banner del negocio"
             >
@@ -56,7 +56,7 @@ $socialButtons = array_values(array_filter([
             <div class="absolute -bottom-6 left-6 p-1 bg-white rounded-2xl shadow-lg">
                 <img
                     src="<?= htmlspecialchars((string) ($business['logo_url'] ?: 'https://placehold.co/200x200/f3f4f6/1f2937?text=Logo'), ENT_QUOTES, 'UTF-8') ?>"
-                    class="w-20 h-20 rounded-xl object-cover"
+                    class="w-20 h-20 rounded-xl bg-gray-100 object-contain"
                     alt="Logo del negocio"
                 >
             </div>

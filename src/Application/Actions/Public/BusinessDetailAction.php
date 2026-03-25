@@ -47,6 +47,7 @@ class BusinessDetailAction extends PageAction
             'active_offers' => $selectedBusiness['active_offers'] ?? 0,
             'bio' => $selectedBusiness['bio'] ?? ($account['bio'] ?? null),
             'logo_url' => $selectedBusiness['logo_url'] ?? ($account['logo_url'] ?? null),
+            'cover_url' => $selectedBusiness['cover_url'] ?? ($account['cover_url'] ?? null),
             'instagram_url' => $selectedBusiness['instagram_url'] ?? ($account['instagram_url'] ?? null),
             'facebook_url' => $selectedBusiness['facebook_url'] ?? ($account['facebook_url'] ?? null),
             'tiktok_url' => $selectedBusiness['tiktok_url'] ?? ($account['tiktok_url'] ?? null),

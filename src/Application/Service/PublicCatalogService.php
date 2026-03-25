@@ -77,6 +77,7 @@ class PublicCatalogService
             'business_tiktok_url' => $offer['tiktok_url'] !== null ? (string) $offer['tiktok_url'] : null,
             'business_website_url' => $offer['website_url'] !== null ? (string) $offer['website_url'] : null,
             'business_logo_url' => $offer['logo_url'] !== null ? (string) $offer['logo_url'] : null,
+            'business_cover_url' => $offer['cover_url'] !== null ? (string) $offer['cover_url'] : null,
         ];
     }
 
@@ -118,7 +119,8 @@ class PublicCatalogService
                     'tiktok_url' => $offer['business_tiktok_url'],
                     'website_url' => $offer['business_website_url'],
                     'logo_url' => $offer['business_logo_url'],
-                    'cover_image_url' => $offer['image_url'],
+                    'cover_url' => $offer['business_cover_url'],
+                    'cover_image_url' => $offer['business_cover_url'] ?: $offer['image_url'],
                     'active_publications' => [],
                 ];
             }

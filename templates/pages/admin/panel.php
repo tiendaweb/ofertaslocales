@@ -34,6 +34,7 @@ $old = $flashOld !== [] ? $flashOld : [
 ];
 $defaultWhatsapp = (string) ($old['whatsapp'] ?? ($currentUser['whatsapp'] ?? ''));
 $defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtotime('+24 hours')));
+$openOfferWizard = ($openOfferWizard ?? false) === true;
 $approvedCategories = is_array($approvedCategories ?? null) ? $approvedCategories : [];
 $businessProfile = is_array($businessProfile ?? null) ? $businessProfile : [];
 $businessAddressParts = array_filter([
@@ -135,13 +136,38 @@ $businessLon = $businessProfile['address_lon'] ?? null;
             </div>
         <?php endif; ?>
 
-        <form action="/panel/ofertas" method="post" enctype="multipart/form-data" class="grid gap-6 md:grid-cols-2">
+        <form
+            action="/panel/ofertas"
+            method="post"
+            enctype="multipart/form-data"
+            x-data="{
+                step: <?= $openOfferWizard ? 1 : 0 ?>,
+                labels: ['Categoría', 'Título', 'Descripción', 'Imagen', 'Vencimiento'],
+            }"
+            class="grid gap-6 md:grid-cols-2"
+        >
             <?php 
                 // Estilo base para inputs repetitivos
                 $inputClass = "w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black transition-all focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10 placeholder-gray-400";
             ?>
+
+            <div class="md:col-span-2 rounded-2xl border border-red-100 bg-red-50/60 p-4" x-show="step > 0" x-cloak>
+                <p class="text-xs font-bold uppercase tracking-widest text-red-600">Asistente multipaso</p>
+                <div class="mt-3 grid gap-2 md:grid-cols-5">
+                    <template x-for="(label, index) in labels" :key="label">
+                        <button
+                            type="button"
+                            @click="step = index + 1"
+                            class="rounded-xl border px-2 py-2 text-xs font-bold uppercase tracking-wider transition"
+                            :class="step === index + 1 ? 'border-red-600 bg-red-600 text-white' : 'border-red-200 bg-white text-red-700'"
+                        >
+                            <span x-text="index + 1"></span>. <span x-text="label"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
             
-            <div>
+            <div x-show="step === 0 || step === 1">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-category">
                     <i data-lucide="tag" class="h-4 w-4 text-gray-400"></i> Categoría
                 </label>
@@ -156,42 +182,42 @@ $businessLon = $businessProfile['address_lon'] ?? null;
                 <input type="text" name="requested_category" value="<?= htmlspecialchars((string) ($old['requested_category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> mt-2" placeholder="¿No existe? Propón una nueva categoría">
             </div>
             
-            <div>
+            <div x-show="step === 0 || step === 2">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-title">
                     <i data-lucide="type" class="h-4 w-4 text-gray-400"></i> Título de la oferta
                 </label>
                 <input id="panel-offer-title" name="title" required value="<?= htmlspecialchars((string) ($old['title'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="Ej: Combo desayuno con 25% OFF">
             </div>
             
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" x-show="step === 0 || step === 3">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-description">
                     <i data-lucide="align-left" class="h-4 w-4 text-gray-400"></i> Descripción
                 </label>
                 <textarea id="panel-offer-description" name="description" rows="3" required class="<?= $inputClass ?> resize-none" placeholder="Describe la promoción, stock y condiciones..."><?= htmlspecialchars((string) ($old['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
             </div>
             
-            <div>
+            <div x-show="step === 0 || step === 4">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-whatsapp">
                     <i data-lucide="message-circle" class="h-4 w-4 text-gray-400"></i> WhatsApp
                 </label>
                 <input id="panel-offer-whatsapp" name="whatsapp" required value="<?= htmlspecialchars($defaultWhatsapp, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="54911...">
             </div>
             
-            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4" x-show="step === 0 || step === 5">
                 <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Ubicación registrada del negocio</p>
                 <p class="mt-2 text-sm text-gray-700"><?= htmlspecialchars($businessAddress !== '' ? $businessAddress : 'Sin dirección registrada', ENT_QUOTES, 'UTF-8') ?></p>
                 <p class="mt-1 text-xs text-gray-500">Lat: <?= htmlspecialchars((string) $businessLat, ENT_QUOTES, 'UTF-8') ?> | Lon: <?= htmlspecialchars((string) $businessLon, ENT_QUOTES, 'UTF-8') ?></p>
                 <input type="hidden" name="location" value="<?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8') ?>">
             </div>
             
-            <div>
+            <div x-show="step === 0 || step === 5">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-expires-at">
                     <i data-lucide="calendar-clock" class="h-4 w-4 text-gray-400"></i> Vence el
                 </label>
                 <input id="panel-offer-expires-at" type="datetime-local" name="expires_at" required value="<?= htmlspecialchars($defaultExpiresAt, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>">
             </div>
             
-            <div>
+            <div x-show="step === 0 || step === 4">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-image">
                     <i data-lucide="image" class="h-4 w-4 text-gray-400"></i> Imagen (JPG/PNG/WEBP)
                 </label>
@@ -201,6 +227,11 @@ $businessLon = $businessProfile['address_lon'] ?? null;
             <input type="hidden" name="lat" value="<?= htmlspecialchars((string) $businessLat, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="lon" value="<?= htmlspecialchars((string) $businessLon, ENT_QUOTES, 'UTF-8') ?>">
             
+            <div class="md:col-span-2 mt-1 flex justify-between gap-3" x-show="step > 0" x-cloak>
+                <button type="button" class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700" @click="step = Math.max(1, step - 1)">Anterior</button>
+                <button type="button" class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-bold text-white" @click="step = Math.min(5, step + 1)" x-show="step < 5">Siguiente</button>
+            </div>
+
             <div class="md:col-span-2 mt-4">
                 <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-black px-8 py-4 text-sm font-bold text-white shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-600/20">
                     <i data-lucide="send" class="h-4 w-4"></i>
