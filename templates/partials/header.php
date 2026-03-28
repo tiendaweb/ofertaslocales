@@ -16,7 +16,7 @@ $currentUser = $currentUser ?? null;
 $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
 
 // Forzamos la ruta al logo solicitada
-$siteLogoUrl = '/logo.jpeg';
+$siteLogoUrl = '/public/logo.jpg';
 ?>
 
 <?php if ($isPublicRoute) : ?>
