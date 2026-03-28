@@ -42,7 +42,7 @@ class CreateOfferAction extends PageAction
             'title' => trim((string) ($data['title'] ?? '')),
             'description' => trim((string) ($data['description'] ?? '')),
             'whatsapp' => trim((string) ($data['whatsapp'] ?? ($user['whatsapp'] ?? ''))),
-            'expires_at' => trim((string) ($data['expires_at'] ?? '')),
+            'expires_at' => gmdate('Y-m-d\TH:i', strtotime('+24 hours')),
         ];
 
         foreach (
@@ -56,10 +56,6 @@ class CreateOfferAction extends PageAction
             if ($payload[$field] === '') {
                 $errors[$field] = sprintf('La %s es obligatoria.', $label);
             }
-        }
-
-        if ($payload['expires_at'] === '') {
-            $payload['expires_at'] = gmdate('Y-m-d\TH:i', strtotime('+24 hours'));
         }
 
         $expiresAt = date_create($payload['expires_at']);

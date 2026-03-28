@@ -16,6 +16,7 @@ use App\Application\Actions\Admin\UpdateAdminCategoryAction;
 use App\Application\Actions\Admin\UpdateApprovalModeAction;
 use App\Application\Actions\Admin\UpdateInlineContentAction;
 use App\Application\Actions\Admin\UpdateOfferStatusAction;
+use App\Application\Actions\Admin\UpdateAdminOfferAction;
 use App\Application\Actions\Admin\UpdateSeoAction;
 use App\Application\Actions\Admin\UpdateSettingsAction;
 use App\Application\Actions\Auth\LoginPageAction;
@@ -28,6 +29,8 @@ use App\Application\Actions\Business\BusinessDashboardAction;
 use App\Application\Actions\Business\CreateOfferAction;
 use App\Application\Actions\Business\DeleteBusinessOfferAction;
 use App\Application\Actions\Business\EditBusinessProfilePageAction;
+use App\Application\Actions\Business\UserProfilePageAction;
+use App\Application\Actions\Business\UpdateUserProfileAction;
 use App\Application\Actions\Business\UpdateBusinessOfferAction;
 use App\Application\Actions\Business\UpdateBusinessProfileAction;
 use App\Application\Actions\Public\BusinessesAction;
@@ -77,11 +80,14 @@ return function (App $app) {
         $group->post('/ofertas/{id}/eliminar', DeleteBusinessOfferAction::class)->setName('panel.ofertas.eliminar');
         $group->get('/negocio/editar', EditBusinessProfilePageAction::class)->setName('panel.negocio.editar');
         $group->post('/negocio/editar', UpdateBusinessProfileAction::class)->setName('panel.negocio.actualizar');
+        $group->get('/perfil', UserProfilePageAction::class)->setName('panel.perfil');
+        $group->post('/perfil', UpdateUserProfileAction::class)->setName('panel.perfil.actualizar');
     })->add(RequireBusinessMiddleware::class)->add(RequireAuthenticationMiddleware::class);
 
     $app->group('/admin', function (Group $group) {
         $group->get('', AdminDashboardAction::class)->setName('admin');
         $group->post('/offers/{id}/status', UpdateOfferStatusAction::class)->setName('admin.offers.status');
+        $group->post('/offers/{id}/update', UpdateAdminOfferAction::class)->setName('admin.offers.update');
         $group->post('/approval-mode', UpdateApprovalModeAction::class)->setName('admin.approval-mode');
         $group->post('/categories', CreateAdminCategoryAction::class)->setName('admin.categories.create');
         $group->post('/categories/{id:[0-9]+}/status', UpdateAdminCategoryStatusAction::class)->setName('admin.categories.status');

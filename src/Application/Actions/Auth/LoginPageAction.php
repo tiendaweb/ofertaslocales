@@ -14,7 +14,7 @@ class LoginPageAction extends PageAction
     {
         if ($this->currentUser() !== null) {
             $role = (string) ($this->currentUser()['role'] ?? 'user');
-            $redirectTo = $role === 'admin' ? '/admin' : ($role === 'business' ? '/panel' : '/');
+            $redirectTo = $role === 'admin' ? '/admin' : '/panel';
 
             return $this->redirect($response, $redirectTo);
         }

@@ -30,6 +30,10 @@ class BusinessDashboardAction extends PageAction
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $user = $this->currentUser();
+        if (($user['role'] ?? 'user') === 'user') {
+            return $this->redirect($response, '/panel/perfil');
+        }
+
         $offers = $this->offerRepository->findByUserId((int) $user['id']);
         $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
         $publishPolicy = $this->offerPublishPolicy->resolve($user, $settings);

@@ -33,7 +33,6 @@ $old = $flashOld !== [] ? $flashOld : [
     'whatsapp' => (string) ($offerDraft['whatsapp'] ?? ''),
 ];
 $defaultWhatsapp = (string) ($old['whatsapp'] ?? ($currentUser['whatsapp'] ?? ''));
-$defaultExpiresAt = (string) ($old['expires_at'] ?? gmdate('Y-m-d\TH:i', strtotime('+24 hours')));
 $openOfferWizard = ($openOfferWizard ?? false) === true;
 $approvedCategories = is_array($approvedCategories ?? null) ? $approvedCategories : [];
 $businessProfile = is_array($businessProfile ?? null) ? $businessProfile : [];
@@ -142,7 +141,7 @@ $businessLon = $businessProfile['address_lon'] ?? null;
             enctype="multipart/form-data"
             x-data="{
                 step: <?= $openOfferWizard ? 1 : 0 ?>,
-                labels: ['Categoría', 'Título', 'Descripción', 'Imagen', 'Vencimiento'],
+                labels: ['Categoría', 'Título', 'Descripción', 'Imagen', 'Ubicación'],
             }"
             class="grid gap-6 md:grid-cols-2"
         >
@@ -210,12 +209,7 @@ $businessLon = $businessProfile['address_lon'] ?? null;
                 <input type="hidden" name="location" value="<?= htmlspecialchars($businessAddress, ENT_QUOTES, 'UTF-8') ?>">
             </div>
             
-            <div x-show="step === 0 || step === 5">
-                <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-expires-at">
-                    <i data-lucide="calendar-clock" class="h-4 w-4 text-gray-400"></i> Vence el
-                </label>
-                <input id="panel-offer-expires-at" type="datetime-local" name="expires_at" required value="<?= htmlspecialchars($defaultExpiresAt, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>">
-            </div>
+            <input type="hidden" name="expires_at" value="<?= htmlspecialchars(gmdate('Y-m-d\TH:i', strtotime('+24 hours')), ENT_QUOTES, 'UTF-8') ?>">
             
             <div x-show="step === 0 || step === 4">
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-image">

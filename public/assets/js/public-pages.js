@@ -63,10 +63,6 @@
                             <div class="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-md shadow-sm">
                                 ${item.badge}
                             </div>
-                            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur text-gray-800 text-xs font-medium px-2 py-1 rounded-md shadow-sm flex items-center gap-1 max-w-[65%]">
-                                <i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>
-                                <span class="truncate">${item.location}</span>
-                            </div>
                         </div>
                         <div class="p-5 flex-grow flex flex-col">
                             <div class="flex items-center justify-between gap-3 mb-2">
@@ -85,6 +81,10 @@
                                         <i data-lucide="clock" class="text-red-500 w-[18px] h-[18px]"></i>
                                         <span class="font-medium text-gray-700">Termina en:</span>
                                         <span data-expiration="${item.expires_at}" class="text-red-600 font-bold ml-auto tabular-nums">${formatRemainingTime(item.expires_at)}</span>
+                                    </div>
+                                    <div class="mt-2 flex items-start gap-2">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+                                        <span class="text-xs text-gray-600 leading-5 line-clamp-2">${item.location}</span>
                                     </div>
                                 </div>
                                 <a href="${buildWhatsAppLink(item)}" target="_blank" rel="noreferrer" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
@@ -372,12 +372,12 @@
             const lon = Number(offer.lon);
             const marker = window.L.marker([lat, lon], { icon: redMarkerIcon }).addTo(map);
             marker.bindTooltip(`
-                <div class="w-48">
+                <div class="w-44 max-w-[11rem]">
                     <img src="${escapeHtml(offer.image_url)}" alt="${escapeHtml(offer.title)}" class="w-full h-20 object-cover rounded-lg mb-2">
-                    <p class="text-xs uppercase tracking-wider text-gray-500">${escapeHtml(offer.category)}</p>
-                    <p class="font-semibold text-gray-900">${escapeHtml(offer.business_name)}</p>
-                    <p class="text-red-600 font-semibold text-sm">${escapeHtml(offer.title)}</p>
-                    <p class="text-xs text-gray-500 mt-1">Tocá para abrir la oferta</p>
+                    <p class="text-xs uppercase tracking-wider text-gray-500 truncate">${escapeHtml(offer.category)}</p>
+                    <p class="font-semibold text-gray-900 truncate">${escapeHtml(offer.business_name)}</p>
+                    <p class="text-red-600 font-semibold text-sm line-clamp-2 leading-5 break-words">${escapeHtml(offer.title)}</p>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-4 break-words">${escapeHtml(offer.location)}</p>
                 </div>
             `, { direction: 'top', offset: [0, -10] });
 

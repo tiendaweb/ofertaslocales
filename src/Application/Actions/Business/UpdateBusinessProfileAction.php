@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
+use App\Application\Settings\SettingsInterface;
 use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\UploadedFileInterface;
 
 class UpdateBusinessProfileAction extends PageAction
 {
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly AccountRepository $accountRepository
+        private readonly AccountRepository $accountRepository,
+        private readonly SettingsInterface $settings
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -51,6 +54,26 @@ class UpdateBusinessProfileAction extends PageAction
             'logo_url' => ['label' => 'logo', 'value' => trim((string) ($data['logo_url'] ?? ''))],
             'cover_url' => ['label' => 'portada', 'value' => trim((string) ($data['cover_url'] ?? ''))],
         ];
+        $uploadedFiles = $request->getUploadedFiles();
+        $logoUpload = $uploadedFiles['logo_image'] ?? null;
+        if ($logoUpload instanceof UploadedFileInterface && $logoUpload->getError() !== UPLOAD_ERR_NO_FILE) {
+            $uploadResult = $this->storeImage($logoUpload, 'negocio-logo');
+            if (($uploadResult['error'] ?? null) !== null) {
+                $errors['logo_url'] = (string) $uploadResult['error'];
+            } else {
+                $socialUrlMap['logo_url']['value'] = (string) ($uploadResult['path'] ?? '');
+            }
+        }
+
+        $coverUpload = $uploadedFiles['cover_image'] ?? null;
+        if ($coverUpload instanceof UploadedFileInterface && $coverUpload->getError() !== UPLOAD_ERR_NO_FILE) {
+            $uploadResult = $this->storeImage($coverUpload, 'negocio-cover');
+            if (($uploadResult['error'] ?? null) !== null) {
+                $errors['cover_url'] = (string) $uploadResult['error'];
+            } else {
+                $socialUrlMap['cover_url']['value'] = (string) ($uploadResult['path'] ?? '');
+            }
+        }
 
         $errors = [];
         if ($businessName === '') {
@@ -182,5 +205,45 @@ class UpdateBusinessProfileAction extends PageAction
         }
 
         return $normalized;
+    }
+
+    private function storeImage(UploadedFileInterface $image, string $prefix): array
+    {
+        if ($image->getError() !== UPLOAD_ERR_OK) {
+            return ['error' => 'No se pudo subir la imagen seleccionada.'];
+        }
+
+        $mimeType = $image->getClientMediaType() ?? '';
+        $allowedExtensions = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+        ];
+
+        if (!isset($allowedExtensions[$mimeType])) {
+            return ['error' => 'La imagen debe estar en formato JPG, PNG o WEBP.'];
+        }
+
+        $uploadPath = $this->settings->get('paths')['uploads'];
+        if (!is_dir($uploadPath) && !mkdir($uploadPath, 0775, true) && !is_dir($uploadPath)) {
+            return ['error' => 'No se pudo preparar la carpeta de imágenes.'];
+        }
+
+        if (!is_writable($uploadPath)) {
+            return ['error' => 'La carpeta de imágenes no tiene permisos de escritura.'];
+        }
+
+        try {
+            $filename = sprintf('%s-%s.%s', $prefix, bin2hex(random_bytes(8)), $allowedExtensions[$mimeType]);
+            $image->moveTo($uploadPath . DIRECTORY_SEPARATOR . $filename);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Error al guardar imagen del perfil comercial.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            return ['error' => 'No se pudo guardar la imagen. Intenta nuevamente.'];
+        }
+
+        return ['path' => '/uploads/' . $filename];
     }
 }

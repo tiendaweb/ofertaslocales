@@ -10,7 +10,7 @@ use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class EditBusinessProfilePageAction extends PageAction
+class UserProfilePageAction extends PageAction
 {
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
@@ -25,23 +25,25 @@ class EditBusinessProfilePageAction extends PageAction
     {
         $user = $this->currentUser();
         if (!is_array($user) || !isset($user['id'])) {
-            $this->flash('error', 'Necesitas iniciar sesión para editar tu negocio.');
+            $this->flash('error', 'Debes iniciar sesión para ver tu perfil.');
 
             return $this->redirect($response, '/login');
         }
 
         $account = $this->accountRepository->findById((int) $user['id']);
         if ($account === null) {
-            $this->flash('error', 'No encontramos tu cuenta comercial.');
+            $this->flash('error', 'No se encontró tu cuenta.');
 
             return $this->redirect($response, '/panel');
         }
 
-        return $this->renderPage($response, 'pages/admin/business-edit.php', [
-            'pageTitle' => 'Editar negocio | OfertasLocales',
-            'currentRoute' => 'panel.negocio.editar',
+        $settings = $this->settingsRepository->findByKeys(['location_catalog_json']);
+
+        return $this->renderPage($response, 'pages/admin/user-profile.php', [
+            'pageTitle' => 'Mi perfil | OfertasLocales',
+            'currentRoute' => 'panel.perfil',
             'account' => $account,
-            'locationCatalog' => $this->decodeLocationCatalog((string) (($this->settingsRepository->findByKeys(['location_catalog_json']))['location_catalog_json'] ?? '')),
+            'locationCatalog' => $this->decodeLocationCatalog((string) ($settings['location_catalog_json'] ?? '')),
         ]);
     }
 

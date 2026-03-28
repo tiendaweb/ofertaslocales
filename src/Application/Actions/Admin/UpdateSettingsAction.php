@@ -33,6 +33,7 @@ class UpdateSettingsAction extends PageAction
         'display',
         'icon_192',
         'icon_512',
+        'location_catalog_json',
     ];
 
     private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
@@ -88,6 +89,14 @@ class UpdateSettingsAction extends PageAction
             // válido
         } elseif (array_key_exists('start_url', $payload)) {
             $payload['start_url'] = '/' . ltrim($payload['start_url'], '/');
+        }
+        if (array_key_exists('location_catalog_json', $payload) && trim($payload['location_catalog_json']) !== '') {
+            $decoded = json_decode($payload['location_catalog_json'], true);
+            if (!is_array($decoded) || !isset($decoded['provinces'], $decoded['municipalities'])) {
+                $this->flash('error', 'El catálogo de ubicaciones debe ser un JSON válido con provinces y municipalities.');
+
+                return $this->redirect($response, '/admin?tab=categorias');
+            }
         }
 
         if ($payload !== []) {

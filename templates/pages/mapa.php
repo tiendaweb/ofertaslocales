@@ -193,7 +193,9 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
     }
 
     .map-offer-tooltip {
-        width: 220px;
+        width: 180px;
+        max-width: 180px;
+        overflow: hidden;
         border-radius: 14px;
         background: #ffffff;
         border: 1px solid #fee2e2;
@@ -216,6 +218,9 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
         color: #111827;
         margin-bottom: 4px;
         letter-spacing: .04em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     .map-offer-tooltip__title {
@@ -224,11 +229,21 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
         line-height: 1.2;
         color: #dc2626;
         margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
     }
 
     .map-offer-tooltip__location {
         font-size: 12px;
         color: #6b7280;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
     }
 
     .custom-scrollbar::-webkit-scrollbar {

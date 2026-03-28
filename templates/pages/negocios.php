@@ -53,11 +53,11 @@ declare(strict_types=1);
                         <?= htmlspecialchars($business['location'], ENT_QUOTES, 'UTF-8') ?>
                     </p>
                     <p class="flex items-center gap-2">
-                        <i data-lucide="tag" class="w-4 h-4 text-yellow-500"></i>
+                        <i data-lucide="tag" class="w-4 h-4 text-red-500"></i>
                         <?= htmlspecialchars($business['category'], ENT_QUOTES, 'UTF-8') ?>
                     </p>
                     <p class="flex items-center gap-2">
-                        <i data-lucide="message-circle" class="w-4 h-4 text-green-500"></i>
+                        <i data-lucide="message-circle" class="w-4 h-4 text-red-500"></i>
                         <?= htmlspecialchars($business['whatsapp'], ENT_QUOTES, 'UTF-8') ?>
                     </p>
                 </div>
@@ -88,7 +88,7 @@ declare(strict_types=1);
                                 </p>
                                 <p class="font-semibold text-gray-900 mb-1 truncate"><?= htmlspecialchars($publication['title'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <div class="space-y-1 text-sm text-gray-500">
-                                    <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-yellow-500"></i><?= htmlspecialchars($publication['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
+                                    <p class="flex items-center gap-2"><i data-lucide="clock-3" class="w-4 h-4 text-red-500"></i><?= htmlspecialchars($publication['expires_label'], ENT_QUOTES, 'UTF-8') ?></p>
                                 </div>
                             </a>
                         <?php endforeach; ?>

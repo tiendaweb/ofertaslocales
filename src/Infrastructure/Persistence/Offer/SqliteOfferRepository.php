@@ -98,6 +98,30 @@ class SqliteOfferRepository implements OfferRepository
         ]);
     }
 
+    public function updateByAdmin(int $offerId, array $data): bool
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE offers
+             SET category = :category,
+                 title = :title,
+                 description = :description,
+                 whatsapp = :whatsapp,
+                 location = :location
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $offerId,
+            'category' => trim((string) $data['category']),
+            'title' => trim((string) $data['title']),
+            'description' => trim((string) $data['description']),
+            'whatsapp' => trim((string) $data['whatsapp']),
+            'location' => trim((string) $data['location']),
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
 
     public function updateForUser(int $offerId, int $userId, array $data): bool
     {
