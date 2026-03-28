@@ -98,6 +98,16 @@ class SqliteOfferRepository implements OfferRepository
         ]);
     }
 
+    public function deleteByAdmin(int $offerId): bool
+    {
+        $statement = $this->pdo->prepare('DELETE FROM offers WHERE id = :id');
+        $statement->execute([
+            'id' => $offerId,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
     public function updateByAdmin(int $offerId, array $data): bool
     {
         $statement = $this->pdo->prepare(

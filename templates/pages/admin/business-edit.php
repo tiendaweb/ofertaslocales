@@ -51,9 +51,10 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
 
         <h3 class="md:col-span-2 text-lg font-semibold text-gray-900 mt-2">Dirección y ubicación</h3>
 
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Calle</span><input name="street" required type="text" value="<?= htmlspecialchars((string) ($old['street'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php if (($formErrors['street'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['street'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Número</span><input name="street_number" required type="text" value="<?= htmlspecialchars((string) ($old['street_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php if (($formErrors['street_number'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['street_number'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Código postal</span><input name="postal_code" required type="text" value="<?= htmlspecialchars((string) ($old['postal_code'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php if (($formErrors['postal_code'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['postal_code'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
+        <label class="block md:col-span-2"><span class="block text-sm text-gray-700 mb-2">Dirección</span><input id="business-address-line" name="address" required type="text" value="<?= htmlspecialchars(trim((string) ($old['street'] ?? '') . ' ' . (string) ($old['street_number'] ?? '')), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: Av. Rivadavia 1234" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php if (($formErrors['street'] ?? null) !== null || ($formErrors['street_number'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600">La dirección es obligatoria.</span><?php endif; ?></label>
+        <input id="business-street-hidden" type="hidden" name="street" value="<?= htmlspecialchars((string) ($old['street'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+        <input id="business-street-number-hidden" type="hidden" name="street_number" value="<?= htmlspecialchars((string) ($old['street_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="postal_code" value="">
         <label class="block"><span class="block text-sm text-gray-700 mb-2">Municipio</span><select id="business-municipality-select" name="municipality" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php foreach (array_keys($municipalities) as $municipality): ?><option value="<?= htmlspecialchars((string) $municipality, ENT_QUOTES, 'UTF-8') ?>" <?= (string) ($old['municipality'] ?? '') === (string) $municipality ? 'selected' : '' ?>><?= htmlspecialchars((string) $municipality, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select><?php if (($formErrors['municipality'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['municipality'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
         <label class="block"><span class="block text-sm text-gray-700 mb-2">Barrio / zona</span><select id="business-city-select" name="city" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"></select><?php if (($formErrors['city'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['city'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
         <label class="block"><span class="block text-sm text-gray-700 mb-2">Provincia</span><select name="province" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20"><?php foreach (($locationCatalog['provinces'] ?? ['Buenos Aires']) as $province): ?><option value="<?= htmlspecialchars((string) $province, ENT_QUOTES, 'UTF-8') ?>" <?= (string) ($old['province'] ?? '') === (string) $province ? 'selected' : '' ?>><?= htmlspecialchars((string) $province, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select><?php if (($formErrors['province'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['province'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></label>
@@ -94,6 +95,20 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
         if (!mapElement || !latInput || !lonInput || !latText || !lonText) {
             return;
         }
+        const addressLineInput = document.getElementById('business-address-line');
+        const streetHiddenInput = document.getElementById('business-street-hidden');
+        const streetNumberHiddenInput = document.getElementById('business-street-number-hidden');
+        const syncAddressFields = () => {
+            if (!addressLineInput || !streetHiddenInput || !streetNumberHiddenInput) {
+                return;
+            }
+            const rawValue = addressLineInput.value.trim();
+            const match = rawValue.match(/^(.*?)(?:\s+(\d+\w*))?$/);
+            streetHiddenInput.value = (match?.[1] || '').trim();
+            streetNumberHiddenInput.value = (match?.[2] || '').trim();
+        };
+        addressLineInput?.addEventListener('input', syncAddressFields);
+        syncAddressFields();
 
         const syncCities = () => {
             if (!municipalitySelect || !citySelect) {

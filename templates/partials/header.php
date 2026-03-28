@@ -16,7 +16,7 @@ $currentUser = $currentUser ?? null;
 $isImpersonating = isset($_SESSION['auth']['impersonator_id']);
 
 // Forzamos la ruta al logo solicitada
-$siteLogoUrl = '/public/logo.jpeg'; 
+$siteLogoUrl = '/logo.jpeg';
 ?>
 
 <?php if ($isPublicRoute) : ?>
@@ -61,10 +61,15 @@ $siteLogoUrl = '/public/logo.jpeg';
                 </a>
                 
                 <?php if ($currentUser !== null) : ?>
-                    <a href="<?= ($currentUser['role'] === 'admin') ? '/admin' : '/panel' ?>"
-                       class="bg-gray-900 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-gray-800 transition shadow-sm">
-                        Mi panel
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="<?= ($currentUser['role'] === 'admin') ? '/admin' : '/panel' ?>"
+                           class="bg-gray-900 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-gray-800 transition shadow-sm">
+                            Mi panel
+                        </a>
+                        <form action="/logout" method="post">
+                            <button type="submit" class="hidden md:inline-flex rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">Salir</button>
+                        </form>
+                    </div>
                 <?php else : ?>
                     <div class="flex items-center gap-2">
                         <a href="/login" class="text-sm font-semibold text-gray-700 hover:text-gray-900 px-3">Ingresar</a>

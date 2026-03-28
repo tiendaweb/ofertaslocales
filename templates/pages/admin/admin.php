@@ -75,8 +75,19 @@ declare(strict_types=1);
                                 <button name="status" value="active" title="Aprobar oferta" class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors">
                                     <i data-lucide="check" class="h-5 w-5"></i>
                                 </button>
+                                <button name="status" value="pending" title="Volver a pendiente" class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors">
+                                    <i data-lucide="clock-4" class="h-5 w-5"></i>
+                                </button>
                                 <button name="status" value="rejected" title="Rechazar oferta" class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
                                     <i data-lucide="x" class="h-5 w-5"></i>
+                                </button>
+                                <button name="status" value="expired" title="Marcar expirada" class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+                                    <i data-lucide="archive-x" class="h-5 w-5"></i>
+                                </button>
+                            </form>
+                            <form action="/admin/offers/<?= (int) $offer['id'] ?>/delete" method="post" class="ml-2">
+                                <button type="submit" title="Eliminar oferta" class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-600 text-white hover:bg-rose-500 transition-colors">
+                                    <i data-lucide="trash-2" class="h-5 w-5"></i>
                                 </button>
                             </form>
                         </div>
@@ -297,12 +308,18 @@ declare(strict_types=1);
             <?php endif; ?>
         </div>
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
-            <h4 class="mb-3 text-lg font-bold text-gray-900">Provincias, municipios y barrios/zonas</h4>
-            <p class="mb-3 text-sm text-gray-600">Define el catálogo geográfico usado en registro y perfil de usuarios.</p>
+            <h4 class="mb-3 text-lg font-bold text-gray-900">Jerarquía geográfica (Provincia > Ciudad > Municipio)</h4>
+            <p class="mb-3 text-sm text-gray-600">Gestiona la jerarquía para alta/edición. Puedes agregar nuevas entradas cuando lo necesites.</p>
             <form action="/admin/settings" method="post" class="space-y-3">
                 <textarea name="location_catalog_json" rows="10" class="w-full rounded-xl border border-red-100 bg-red-50/40 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['location_catalog_json'] ?? json_encode([
                     'provinces' => ['Buenos Aires'],
                     'municipalities' => ['Tres de Febrero' => ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martín Coronado']],
+                    'hierarchy' => [
+                        'Buenos Aires' => [
+                            'Ciudadela' => ['Tres de Febrero'],
+                            'Caseros' => ['Tres de Febrero'],
+                        ],
+                    ],
                 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)), ENT_QUOTES, 'UTF-8') ?></textarea>
                 <button type="submit" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar catálogo de zonas</button>
             </form>
@@ -418,11 +435,26 @@ declare(strict_types=1);
                                     </button>
                                 </form>
 
-                                <button type="button" class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                    </svg>
-                                </button>
+                                <details class="relative">
+                                    <summary class="list-none cursor-pointer text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </summary>
+                                    <div class="absolute right-0 z-10 mt-2 w-[320px] rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
+                                        <form action="/admin/users/<?= (int) $user['id'] ?>" method="post" class="grid gap-2">
+                                            <input type="email" name="email" value="<?= htmlspecialchars((string) $user['email'], ENT_QUOTES, 'UTF-8') ?>" required class="rounded-lg border border-gray-200 px-3 py-2 text-xs">
+                                            <input type="text" name="business_name" value="<?= htmlspecialchars((string) ($user['business_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Nombre negocio" class="rounded-lg border border-gray-200 px-3 py-2 text-xs">
+                                            <input type="text" name="whatsapp" value="<?= htmlspecialchars((string) ($user['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="WhatsApp" class="rounded-lg border border-gray-200 px-3 py-2 text-xs">
+                                            <select name="role" class="rounded-lg border border-gray-200 px-3 py-2 text-xs">
+                                                <?php foreach (['user' => 'Usuario', 'business' => 'Negocio', 'admin' => 'Administrador'] as $roleValue => $roleLabel) : ?>
+                                                    <option value="<?= $roleValue ?>" <?= (string) $user['role'] === $roleValue ? 'selected' : '' ?>><?= $roleLabel ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <button type="submit" class="rounded-lg bg-gray-900 px-3 py-2 text-xs font-bold text-white">Guardar</button>
+                                        </form>
+                                    </div>
+                                </details>
 
                                 <?php if ($isSuspended) : ?>
                                     <form action="/admin/users/<?= (int) $user['id'] ?>/unsuspend" method="post">
@@ -442,6 +474,18 @@ declare(strict_types=1);
         </table>
     </div>
 </div>
+        <?php
+        $usersPage = (int) ($usersPagination['page'] ?? 1);
+        $usersTotalPages = (int) ($usersPagination['total_pages'] ?? 1);
+        $usersPerPage = (int) ($usersPagination['per_page'] ?? 10);
+        ?>
+        <?php if ($usersPage < $usersTotalPages) : ?>
+            <div class="px-6 pb-6">
+                <a href="/admin?tab=usuarios&page=<?= $usersPage + 1 ?>&per_page=<?= $usersPerPage ?>" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100">
+                    Cargar más usuarios
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-red-100 bg-white/95 px-3 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/80">

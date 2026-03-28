@@ -22,8 +22,9 @@ $defaultLon = is_numeric($account['address_lon'] ?? null) ? (float) $account['ad
     </div>
 
     <form class="grid gap-4 md:grid-cols-2" action="/panel/perfil" method="post">
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Calle</span><input name="street" type="text" value="<?= htmlspecialchars((string) ($account['street'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"></label>
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Número</span><input name="street_number" type="text" value="<?= htmlspecialchars((string) ($account['street_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"></label>
+        <label class="block md:col-span-2"><span class="block text-sm text-gray-700 mb-2">Dirección</span><input id="user-address-line" name="address" type="text" value="<?= htmlspecialchars(trim((string) ($account['street'] ?? '') . ' ' . (string) ($account['street_number'] ?? '')), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"></label>
+        <input id="user-street-hidden" type="hidden" name="street" value="<?= htmlspecialchars((string) ($account['street'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+        <input id="user-street-number-hidden" type="hidden" name="street_number" value="<?= htmlspecialchars((string) ($account['street_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
         <?php $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locationCatalog['municipalities'] : []; ?>
         <label class="block">
@@ -50,7 +51,7 @@ $defaultLon = is_numeric($account['address_lon'] ?? null) ? (float) $account['ad
                 <?php endforeach; ?>
             </select>
         </label>
-        <label class="block"><span class="block text-sm text-gray-700 mb-2">Código postal</span><input name="postal_code" type="text" value="<?= htmlspecialchars((string) ($account['postal_code'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"></label>
+        <input type="hidden" name="postal_code" value="">
 
         <div class="md:col-span-2">
             <p class="mb-2 text-sm font-semibold text-gray-700">Ubicación en el mapa</p>
@@ -85,6 +86,20 @@ function userProfileMap(config) {
             }
         },
         init() {
+            const addressLine = document.getElementById('user-address-line');
+            const streetHidden = document.getElementById('user-street-hidden');
+            const numberHidden = document.getElementById('user-street-number-hidden');
+            const syncAddress = () => {
+                if (!addressLine || !streetHidden || !numberHidden) {
+                    return;
+                }
+                const rawValue = addressLine.value.trim();
+                const match = rawValue.match(/^(.*?)(?:\s+(\d+\w*))?$/);
+                streetHidden.value = (match?.[1] || '').trim();
+                numberHidden.value = (match?.[2] || '').trim();
+            };
+            addressLine?.addEventListener('input', syncAddress);
+            syncAddress();
             this.syncNeighborhoods();
             if (!window.L) return;
             const map = window.L.map('user-profile-map').setView([Number(this.lat), Number(this.lon)], 15);
