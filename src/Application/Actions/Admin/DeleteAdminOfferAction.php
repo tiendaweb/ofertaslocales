@@ -9,7 +9,7 @@ use App\Domain\Offer\OfferRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class UpdateOfferStatusAction extends PageAction
+class DeleteAdminOfferAction extends PageAction
 {
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
@@ -21,23 +21,22 @@ class UpdateOfferStatusAction extends PageAction
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $status = (string) (((array) $request->getParsedBody())['status'] ?? '');
-        $allowedStatuses = ['pending', 'active', 'rejected', 'expired'];
-        if (!in_array($status, $allowedStatuses, true)) {
-            $this->flash('error', 'El estado seleccionado no es válido.');
-
-            return $this->redirect($response, '/admin?tab=moderacion');
-        }
-
         $offerId = isset($args['id']) ? (int) $args['id'] : 0;
         if ($offerId <= 0) {
-            $this->flash('error', 'No se encontró la oferta a moderar.');
+            $this->flash('error', 'No se encontró la oferta a eliminar.');
 
             return $this->redirect($response, '/admin?tab=moderacion');
         }
 
-        $this->offerRepository->updateStatus($offerId, $status);
-        $this->flash('success', 'El estado de la oferta fue actualizado.');
+        $deleted = $this->offerRepository->deleteByAdmin($offerId);
+
+        if (!$deleted) {
+            $this->flash('error', 'No fue posible eliminar la oferta seleccionada.');
+
+            return $this->redirect($response, '/admin?tab=moderacion');
+        }
+
+        $this->flash('success', 'La oferta se eliminó correctamente.');
 
         return $this->redirect($response, '/admin?tab=moderacion');
     }

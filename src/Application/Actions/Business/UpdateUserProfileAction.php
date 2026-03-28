@@ -37,7 +37,7 @@ class UpdateUserProfileAction extends PageAction
             'city' => trim((string) ($data['city'] ?? '')),
             'municipality' => trim((string) ($data['municipality'] ?? '')),
             'province' => trim((string) ($data['province'] ?? '')),
-            'postal_code' => trim((string) ($data['postal_code'] ?? '')),
+            'postal_code' => '',
             'address_lat' => is_numeric((string) ($data['address_lat'] ?? '')) ? (float) $data['address_lat'] : null,
             'address_lon' => is_numeric((string) ($data['address_lon'] ?? '')) ? (float) $data['address_lon'] : null,
             'saved_locations' => $savedLocations !== [] ? json_encode(array_values($savedLocations), JSON_UNESCAPED_UNICODE) : null,

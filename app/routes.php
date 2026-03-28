@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Application\Actions\Admin\AdminDashboardAction;
 use App\Application\Actions\Admin\CreateAdminUserAction;
+use App\Application\Actions\Admin\DeleteAdminOfferAction;
 use App\Application\Actions\Admin\CreateAdminCategoryAction;
 use App\Application\Actions\Admin\DeleteAdminCategoryAction;
 use App\Application\Actions\Admin\ImpersonateAdminUserAction;
@@ -88,6 +89,7 @@ return function (App $app) {
         $group->get('', AdminDashboardAction::class)->setName('admin');
         $group->post('/offers/{id}/status', UpdateOfferStatusAction::class)->setName('admin.offers.status');
         $group->post('/offers/{id}/update', UpdateAdminOfferAction::class)->setName('admin.offers.update');
+        $group->post('/offers/{id}/delete', DeleteAdminOfferAction::class)->setName('admin.offers.delete');
         $group->post('/approval-mode', UpdateApprovalModeAction::class)->setName('admin.approval-mode');
         $group->post('/categories', CreateAdminCategoryAction::class)->setName('admin.categories.create');
         $group->post('/categories/{id:[0-9]+}/status', UpdateAdminCategoryStatusAction::class)->setName('admin.categories.status');

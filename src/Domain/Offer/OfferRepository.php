@@ -16,6 +16,8 @@ interface OfferRepository
 
     public function updateStatus(int $offerId, string $status): void;
 
+    public function deleteByAdmin(int $offerId): bool;
+
     public function updateByAdmin(int $offerId, array $data): bool;
 
     public function updateForUser(int $offerId, int $userId, array $data): bool;

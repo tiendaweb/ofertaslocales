@@ -39,7 +39,7 @@ class UpdateBusinessProfileAction extends PageAction
         $bio = trim((string) ($data['bio'] ?? ''));
         $street = trim((string) ($data['street'] ?? ''));
         $streetNumber = trim((string) ($data['street_number'] ?? ''));
-        $postalCode = trim((string) ($data['postal_code'] ?? ''));
+        $postalCode = '';
         $city = trim((string) ($data['city'] ?? ''));
         $municipality = trim((string) ($data['municipality'] ?? ''));
         $province = trim((string) ($data['province'] ?? ''));
@@ -91,7 +91,6 @@ class UpdateBusinessProfileAction extends PageAction
         foreach ([
             'street' => ['value' => $street, 'label' => 'calle'],
             'street_number' => ['value' => $streetNumber, 'label' => 'número'],
-            'postal_code' => ['value' => $postalCode, 'label' => 'código postal'],
             'city' => ['value' => $city, 'label' => 'ciudad'],
             'municipality' => ['value' => $municipality, 'label' => 'municipio'],
             'province' => ['value' => $province, 'label' => 'provincia'],
