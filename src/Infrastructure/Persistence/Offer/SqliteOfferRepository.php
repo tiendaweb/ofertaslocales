@@ -173,7 +173,19 @@ class SqliteOfferRepository implements OfferRepository
             'status' => $status,
         ]);
 
-        return $statement->rowCount() > 0;
+        if ($statement->rowCount() > 0) {
+            return true;
+        }
+
+        $existsStatement = $this->pdo->prepare(
+            'SELECT 1 FROM offers WHERE id = :id AND user_id = :user_id LIMIT 1'
+        );
+        $existsStatement->execute([
+            'id' => $offerId,
+            'user_id' => $userId,
+        ]);
+
+        return $existsStatement->fetchColumn() !== false;
     }
 
     public function duplicateForUser(int $offerId, int $userId): ?int
@@ -224,11 +236,9 @@ class SqliteOfferRepository implements OfferRepository
     public function softDeleteForUser(int $offerId, int $userId): bool
     {
         $statement = $this->pdo->prepare(
-            "UPDATE offers
-             SET status = 'expired'
+            'DELETE FROM offers
              WHERE id = :id
-               AND user_id = :user_id
-               AND status <> 'expired'"
+               AND user_id = :user_id'
         );
         $statement->execute([
             'id' => $offerId,
