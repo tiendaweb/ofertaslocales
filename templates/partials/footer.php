@@ -5,6 +5,7 @@ declare(strict_types=1);
 $isPublicRoute = in_array($currentRoute ?? '', ['inicio', 'ofertas', 'negocios', 'mapa'], true);
 $isAdminRoute = ($currentRoute ?? '') === 'admin';
 $siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo_url'] ?? ''))));
+$currentUser = $currentUser ?? null;
 ?>
 <?php if ($isPublicRoute) : ?>
     <footer class="bg-gray-950 text-gray-400 py-12 text-center border-t border-gray-800">
@@ -25,7 +26,11 @@ $siteLogoUrl = trim((string) (($labels['site_logo_url'] ?? ($settings['site_logo
             </div>
             <div class="flex gap-4 text-sm">
                 <a href="<?= htmlspecialchars((string) ($labels['footer_link_publish_url'] ?? '/register'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_publish_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Publicar</a>
-                <a href="<?= htmlspecialchars((string) ($labels['footer_link_login_url'] ?? '/login'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_login_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Ingresar</a>
+                <?php if ($currentUser === null) : ?>
+                    <a href="<?= htmlspecialchars((string) ($labels['footer_link_login_url'] ?? '/login'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_login_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Ingresar</a>
+                <?php else : ?>
+                    <a href="<?= (($currentUser['role'] ?? '') === 'admin') ? '/admin' : '/panel' ?>" class="hover:text-white transition">Mi panel</a>
+                <?php endif; ?>
                 <a href="<?= htmlspecialchars((string) ($labels['footer_link_map_url'] ?? '/mapa'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_map_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Mapa</a>
             </div>
         </div>

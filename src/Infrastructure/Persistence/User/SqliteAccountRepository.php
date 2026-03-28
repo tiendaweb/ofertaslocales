@@ -63,7 +63,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findByEmail(string $email): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, created_at
+            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at
              FROM users
              WHERE email = :email
              LIMIT 1'
@@ -77,7 +77,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findById(int $id): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
+            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
              FROM users
              WHERE id = :id
              LIMIT 1'
@@ -91,8 +91,8 @@ class SqliteAccountRepository implements AccountRepository
     public function create(array $data): array
     {
         $statement = $this->pdo->prepare(
-            'INSERT INTO users (email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, status, is_suspended, created_at, updated_at)
-             VALUES (:email, :password, :role, :business_name, :whatsapp, :bio, :instagram_url, :facebook_url, :tiktok_url, :website_url, :logo_url, :cover_url, :street, :street_number, :postal_code, :city, :municipality, :province, :address_lat, :address_lon, :status, :is_suspended, :created_at, :updated_at)'
+            'INSERT INTO users (email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at, updated_at)
+             VALUES (:email, :password, :role, :business_name, :whatsapp, :bio, :instagram_url, :facebook_url, :tiktok_url, :website_url, :logo_url, :cover_url, :street, :street_number, :postal_code, :city, :municipality, :province, :address_lat, :address_lon, :saved_locations, :status, :is_suspended, :created_at, :updated_at)'
         );
 
         $createdAt = gmdate('Y-m-d H:i:s');
@@ -117,6 +117,7 @@ class SqliteAccountRepository implements AccountRepository
             'province' => isset($data['province']) ? trim((string) $data['province']) : null,
             'address_lat' => isset($data['address_lat']) ? (float) $data['address_lat'] : null,
             'address_lon' => isset($data['address_lon']) ? (float) $data['address_lon'] : null,
+            'saved_locations' => $data['saved_locations'] ?? null,
             'status' => $data['status'] ?? 'active',
             'is_suspended' => ($data['status'] ?? 'active') === 'suspended' ? 1 : 0,
             'created_at' => $createdAt,
@@ -154,6 +155,7 @@ class SqliteAccountRepository implements AccountRepository
                  province = :province,
                  address_lat = :address_lat,
                  address_lon = :address_lon,
+                 saved_locations = :saved_locations,
                  updated_at = :updated_at
              WHERE id = :id'
         );
@@ -179,6 +181,7 @@ class SqliteAccountRepository implements AccountRepository
             'province' => $data['province'] ?? $existing['province'],
             'address_lat' => array_key_exists('address_lat', $data) ? $data['address_lat'] : $existing['address_lat'],
             'address_lon' => array_key_exists('address_lon', $data) ? $data['address_lon'] : $existing['address_lon'],
+            'saved_locations' => array_key_exists('saved_locations', $data) ? $data['saved_locations'] : $existing['saved_locations'],
             'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
@@ -229,5 +232,21 @@ class SqliteAccountRepository implements AccountRepository
     public function createBusinessAccount(array $data): array
     {
         return $this->create($data);
+    }
+
+    public function updatePassword(int $id, string $passwordHash): bool
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE users
+             SET password = :password,
+                 updated_at = :updated_at
+             WHERE id = :id'
+        );
+
+        return $statement->execute([
+            'id' => $id,
+            'password' => $passwordHash,
+            'updated_at' => gmdate('Y-m-d H:i:s'),
+        ]);
     }
 }

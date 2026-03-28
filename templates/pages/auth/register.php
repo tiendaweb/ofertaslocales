@@ -7,6 +7,10 @@ $flashOld = is_array($flash['old'] ?? null) ? $flash['old'] : [];
 $prefillOld = is_array($prefillOld ?? null) ? $prefillOld : [];
 $old = $flashOld !== [] ? $flashOld : $prefillOld;
 $selectedRole = in_array(($old['role'] ?? 'user'), ['user', 'business'], true) ? (string) $old['role'] : 'user';
+$locationCatalog = is_array($locationCatalog ?? null) ? $locationCatalog : [
+    'provinces' => ['Buenos Aires'],
+    'municipalities' => ['Tres de Febrero' => ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martín Coronado']],
+];
 
 // Coordenadas por defecto: Ciudadela, Buenos Aires
 $defaultLat = is_numeric($old['address_lat'] ?? null) ? (float) $old['address_lat'] : -34.6416;
@@ -29,6 +33,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
         'lat' => $defaultLat,
         'lon' => $defaultLon,
         'startOpen' => $selectedRole === 'business',
+        'locationCatalog' => $locationCatalog,
     ], JSON_THROW_ON_ERROR), ENT_QUOTES, 'UTF-8') ?>)"
     class="max-w-xl mx-auto rounded-[2rem] border border-gray-100 bg-white shadow-2xl shadow-gray-200/50 overflow-hidden relative"
 >
@@ -226,56 +231,43 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                     <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.street_number" :required="isBusiness" form="register-form" name="street_number" type="text" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                                 </div>
                             </div>
-                           <div x-data="{ 
-    addressData: {
-        municipality: 'Tres de Febrero',
-        city: 'Ciudadela'
-    },
-    neighborhoods: {
-        'Tres de Febrero': ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martin Coronado'],
-        'Moron': ['Morón Centro', 'Castelar', 'Haedo', 'El Palomar', 'Villa Sarmiento']
-    },
-    updateMapFromAddress() {
-        // Tu lógica existente para actualizar el mapa
-        console.log('Actualizando mapa para:', this.addressData.city, this.addressData.municipality);
-    }
-}">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Municipio</label>
+                                <select
+                                    x-model="addressData.municipality"
+                                    @change="onMunicipalityChange"
+                                    :required="isBusiness"
+                                    form="register-form"
+                                    name="municipality"
+                                    class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                                >
+                                    <template x-for="municipality in municipalityOptions" :key="municipality">
+                                        <option :value="municipality" x-text="municipality"></option>
+                                    </template>
+                                </select>
+                            </div>
 
-    <div>
-        <label class="block text-xs font-semibold text-gray-700 mb-1">Municipio</label>
-        <select 
-            x-model="addressData.municipality" 
-            @change="addressData.city = neighborhoods[addressData.municipality][0]; updateMapFromAddress()" 
-            :required="isBusiness" 
-            form="register-form" 
-            name="municipality" 
-            class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-        >
-            <option value="Tres de Febrero">Tres de Febrero</option>
-            <option value="Moron">Morón</option>
-        </select>
-    </div>
-
-    <div class="mt-4">
-        <label class="block text-xs font-semibold text-gray-700 mb-1">Barrio / Zona</label>
-        <select 
-            x-model="addressData.city" 
-            @change="updateMapFromAddress" 
-            :required="isBusiness" 
-            form="register-form" 
-            name="city" 
-            class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-        >
-            <template x-for="barrio in neighborhoods[addressData.municipality]" :key="barrio">
-                <option :value="barrio" x-text="barrio"></option>
-            </template>
-        </select>
-    </div>
-</div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Barrio / Zona</label>
+                                <select
+                                    x-model="addressData.city"
+                                    @change="updateMapFromAddress"
+                                    :required="isBusiness"
+                                    form="register-form"
+                                    name="city"
+                                    class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                                >
+                                    <template x-for="barrio in neighborhoodOptions" :key="barrio">
+                                        <option :value="barrio" x-text="barrio"></option>
+                                    </template>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Provincia</label>
                                 <select @change="updateMapFromAddress" x-model="addressData.province" :required="isBusiness" form="register-form" name="province" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
-                                    <option value="Buenos Aires">Buenos Aires</option>
+                                    <template x-for="province in provinceOptions" :key="province">
+                                        <option :value="province" x-text="province"></option>
+                                    </template>
                                 </select>
                             </div>
                             
@@ -380,6 +372,10 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
             lon: Number(config.lon).toFixed(6),
             map: null,
             marker: null,
+            provinceOptions: Array.isArray(config.locationCatalog?.provinces) ? config.locationCatalog.provinces : ['Buenos Aires'],
+            neighborhoodsByMunicipality: (config.locationCatalog && typeof config.locationCatalog.municipalities === 'object') ? config.locationCatalog.municipalities : {'Tres de Febrero': ['Ciudadela']},
+            municipalityOptions: [],
+            neighborhoodOptions: [],
             // Estado de la dirección para geocodificación
             addressData: {
                 street: "<?= htmlspecialchars((string) ($old['street'] ?? '')) ?>",
@@ -389,6 +385,15 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 province: "<?= htmlspecialchars((string) ($old['province'] ?? 'Buenos Aires')) ?>"
             },
             init() {
+                this.municipalityOptions = Object.keys(this.neighborhoodsByMunicipality);
+                if (!this.municipalityOptions.includes(this.addressData.municipality)) {
+                    this.addressData.municipality = this.municipalityOptions[0] || '';
+                }
+                this.onMunicipalityChange(false);
+                if (!this.provinceOptions.includes(this.addressData.province)) {
+                    this.addressData.province = this.provinceOptions[0] || 'Buenos Aires';
+                }
+
                 this.$watch('isBusiness', (val) => {
                     if (!val) {
                         this.modalOpen = false;
@@ -420,6 +425,15 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
             },
             prevStep() {
                 this.currentStep = Math.max(1, this.currentStep - 1);
+            },
+            onMunicipalityChange(triggerMapUpdate = true) {
+                this.neighborhoodOptions = this.neighborhoodsByMunicipality[this.addressData.municipality] || [];
+                if (!this.neighborhoodOptions.includes(this.addressData.city)) {
+                    this.addressData.city = this.neighborhoodOptions[0] || '';
+                }
+                if (triggerMapUpdate) {
+                    this.updateMapFromAddress();
+                }
             },
             async updateMapFromAddress() {
                 const { street, street_number, city, municipality, province } = this.addressData;
@@ -470,7 +484,6 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                     popupAnchor: [1, -34],
                     shadowSize: [41, 41],
                 });
-bar
                 this.marker = window.L.marker([Number(this.lat), Number(this.lon)], {
                     draggable: true,
                     icon: redMarkerIcon,

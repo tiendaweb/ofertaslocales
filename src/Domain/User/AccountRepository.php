@@ -20,6 +20,8 @@ interface AccountRepository
 
     public function update(int $id, array $data): ?array;
 
+    public function updatePassword(int $id, string $passwordHash): bool;
+
     public function suspend(int $id, int $suspendedBy, ?string $reason = null): bool;
 
     public function unsuspend(int $id): bool;

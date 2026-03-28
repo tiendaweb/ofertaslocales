@@ -5,16 +5,25 @@ declare(strict_types=1);
 namespace App\Application\Actions\Auth;
 
 use App\Application\Actions\PageAction;
+use App\Domain\Site\SettingsRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class RegisterPageAction extends PageAction
 {
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger,
+        \App\Infrastructure\View\TemplateRendererInterface $renderer,
+        private readonly SettingsRepository $settingsRepository
+    ) {
+        parent::__construct($logger, $renderer);
+    }
+
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         if ($this->currentUser() !== null) {
             $role = (string) ($this->currentUser()['role'] ?? 'user');
-            $redirectTo = $role === 'admin' ? '/admin' : ($role === 'business' ? '/panel' : '/');
+            $redirectTo = $role === 'admin' ? '/admin' : '/panel';
 
             return $this->redirect($response, $redirectTo);
         }
@@ -72,6 +81,22 @@ class RegisterPageAction extends PageAction
             'pageTitle' => 'Crear cuenta | OfertasLocales',
             'currentRoute' => 'registro',
             'prefillOld' => $prefillOld,
+            'locationCatalog' => $this->decodeLocationCatalog((string) (($this->settingsRepository->findByKeys(['location_catalog_json']))['location_catalog_json'] ?? '')),
         ]);
+    }
+
+    private function decodeLocationCatalog(string $json): array
+    {
+        $decoded = json_decode($json, true);
+        if (!is_array($decoded) || !isset($decoded['provinces'], $decoded['municipalities'])) {
+            return [
+                'provinces' => ['Buenos Aires'],
+                'municipalities' => [
+                    'Tres de Febrero' => ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martín Coronado'],
+                ],
+            ];
+        }
+
+        return $decoded;
     }
 }

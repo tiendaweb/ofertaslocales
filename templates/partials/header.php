@@ -109,6 +109,11 @@ $siteLogoUrl = '/public/logo.jpeg';
                             Mi Negocio
                         </a>
                     <?php endif; ?>
+                    <?php if (($currentUser['role'] ?? null) === 'user') : ?>
+                        <a href="/panel/perfil" class="rounded-full bg-red-50 text-red-700 px-4 py-1.5 font-semibold hover:bg-red-100 transition-all border border-red-100">
+                            Mi Perfil
+                        </a>
+                    <?php endif; ?>
                 </nav>
 
                 <?php if ($currentUser !== null) : ?>

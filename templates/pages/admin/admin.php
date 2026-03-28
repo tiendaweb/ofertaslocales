@@ -80,6 +80,29 @@ declare(strict_types=1);
                                 </button>
                             </form>
                         </div>
+                        <details class="mt-3 rounded-2xl border border-red-100 bg-white p-3">
+                            <summary class="cursor-pointer text-sm font-bold text-red-600">Editar oferta</summary>
+                            <form action="/admin/offers/<?= (int) $offer['id'] ?>/update" method="post" class="mt-3 grid gap-3 md:grid-cols-2">
+                                <label class="text-xs font-semibold text-gray-600">Categoría
+                                    <input name="category" value="<?= htmlspecialchars((string) ($offer['category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required class="mt-1 w-full rounded-xl border border-red-100 bg-red-50/30 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                                </label>
+                                <label class="text-xs font-semibold text-gray-600">Título
+                                    <input name="title" value="<?= htmlspecialchars((string) ($offer['title'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required class="mt-1 w-full rounded-xl border border-red-100 bg-red-50/30 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                                </label>
+                                <label class="text-xs font-semibold text-gray-600">WhatsApp
+                                    <input name="whatsapp" value="<?= htmlspecialchars((string) ($offer['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required class="mt-1 w-full rounded-xl border border-red-100 bg-red-50/30 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                                </label>
+                                <label class="text-xs font-semibold text-gray-600">Ubicación
+                                    <input name="location" value="<?= htmlspecialchars((string) ($offer['location'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required class="mt-1 w-full rounded-xl border border-red-100 bg-red-50/30 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                                </label>
+                                <label class="md:col-span-2 text-xs font-semibold text-gray-600">Descripción
+                                    <textarea name="description" rows="2" required class="mt-1 w-full rounded-xl border border-red-100 bg-red-50/30 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($offer['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                                </label>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-bold text-white hover:bg-red-600">Guardar cambios</button>
+                                </div>
+                            </form>
+                        </details>
                     </div>
                 <?php endforeach; ?>
                 <?php if ($offers === []) : ?>
@@ -272,6 +295,17 @@ declare(strict_types=1);
             <?php if (($categories ?? []) === []) : ?>
                 <p class="mt-4 text-sm text-gray-500">No hay categorías cargadas todavía.</p>
             <?php endif; ?>
+        </div>
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h4 class="mb-3 text-lg font-bold text-gray-900">Provincias, municipios y barrios/zonas</h4>
+            <p class="mb-3 text-sm text-gray-600">Define el catálogo geográfico usado en registro y perfil de usuarios.</p>
+            <form action="/admin/settings" method="post" class="space-y-3">
+                <textarea name="location_catalog_json" rows="10" class="w-full rounded-xl border border-red-100 bg-red-50/40 px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['location_catalog_json'] ?? json_encode([
+                    'provinces' => ['Buenos Aires'],
+                    'municipalities' => ['Tres de Febrero' => ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martín Coronado']],
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)), ENT_QUOTES, 'UTF-8') ?></textarea>
+                <button type="submit" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar catálogo de zonas</button>
+            </form>
         </div>
     </div>
 

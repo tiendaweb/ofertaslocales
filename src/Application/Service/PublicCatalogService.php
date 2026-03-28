@@ -89,10 +89,6 @@ class PublicCatalogService
         )));
         sort($categories);
 
-        $approved = $this->categoryRepository->findApprovedNames();
-        $categories = array_values(array_unique(array_merge($approved, $categories)));
-        sort($categories);
-
         return $categories;
     }
 
