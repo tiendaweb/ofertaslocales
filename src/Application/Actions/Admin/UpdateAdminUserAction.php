@@ -24,6 +24,7 @@ class UpdateAdminUserAction extends PageAction
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $id = (int) ($args['id'] ?? 0);
+        $currentUserId = (int) (($this->currentUser()['id'] ?? 0));
         $data = (array) $request->getParsedBody();
         $email = strtolower(trim((string) ($data['email'] ?? '')));
         $role = trim((string) ($data['role'] ?? ''));
@@ -43,6 +44,12 @@ class UpdateAdminUserAction extends PageAction
 
         if (!in_array($role, ['admin', 'business', 'user'], true)) {
             $this->flash('error', 'El rol indicado no es válido.');
+
+            return $this->redirect($response, '/admin/users');
+        }
+
+        if ($currentUserId > 0 && $id === $currentUserId && $role !== 'admin') {
+            $this->flash('error', 'No puedes quitarte el rol administrador a tu propia cuenta.');
 
             return $this->redirect($response, '/admin/users');
         }
