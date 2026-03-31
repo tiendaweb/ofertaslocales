@@ -63,7 +63,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findByEmail(string $email): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at
+            'SELECT id, email, password, role, business_type, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, between_streets, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at
              FROM users
              WHERE email = :email
              LIMIT 1'
@@ -77,7 +77,7 @@ class SqliteAccountRepository implements AccountRepository
     public function findById(int $id): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
+            'SELECT id, email, password, role, business_type, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, between_streets, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, suspended_at, suspended_reason, suspended_by, created_at, updated_at
              FROM users
              WHERE id = :id
              LIMIT 1'
@@ -91,8 +91,8 @@ class SqliteAccountRepository implements AccountRepository
     public function create(array $data): array
     {
         $statement = $this->pdo->prepare(
-            'INSERT INTO users (email, password, role, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at, updated_at)
-             VALUES (:email, :password, :role, :business_name, :whatsapp, :bio, :instagram_url, :facebook_url, :tiktok_url, :website_url, :logo_url, :cover_url, :street, :street_number, :postal_code, :city, :municipality, :province, :address_lat, :address_lon, :saved_locations, :status, :is_suspended, :created_at, :updated_at)'
+            'INSERT INTO users (email, password, role, business_type, business_name, whatsapp, bio, instagram_url, facebook_url, tiktok_url, website_url, logo_url, cover_url, street, street_number, postal_code, between_streets, city, municipality, province, address_lat, address_lon, saved_locations, status, is_suspended, created_at, updated_at)
+             VALUES (:email, :password, :role, :business_type, :business_name, :whatsapp, :bio, :instagram_url, :facebook_url, :tiktok_url, :website_url, :logo_url, :cover_url, :street, :street_number, :postal_code, :between_streets, :city, :municipality, :province, :address_lat, :address_lon, :saved_locations, :status, :is_suspended, :created_at, :updated_at)'
         );
 
         $createdAt = gmdate('Y-m-d H:i:s');
@@ -100,6 +100,7 @@ class SqliteAccountRepository implements AccountRepository
             'email' => strtolower(trim((string) $data['email'])),
             'password' => (string) $data['password'],
             'role' => $data['role'] ?? 'business',
+            'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
             'business_name' => isset($data['business_name']) ? trim((string) $data['business_name']) : null,
             'whatsapp' => isset($data['whatsapp']) ? trim((string) $data['whatsapp']) : null,
             'bio' => isset($data['bio']) ? trim((string) $data['bio']) : null,
@@ -112,6 +113,7 @@ class SqliteAccountRepository implements AccountRepository
             'street' => isset($data['street']) ? trim((string) $data['street']) : null,
             'street_number' => isset($data['street_number']) ? trim((string) $data['street_number']) : null,
             'postal_code' => isset($data['postal_code']) ? trim((string) $data['postal_code']) : null,
+            'between_streets' => isset($data['between_streets']) ? trim((string) $data['between_streets']) : null,
             'city' => isset($data['city']) ? trim((string) $data['city']) : null,
             'municipality' => isset($data['municipality']) ? trim((string) $data['municipality']) : null,
             'province' => isset($data['province']) ? trim((string) $data['province']) : null,
@@ -138,6 +140,7 @@ class SqliteAccountRepository implements AccountRepository
             'UPDATE users
              SET email = :email,
                  role = :role,
+                 business_type = :business_type,
                  business_name = :business_name,
                  whatsapp = :whatsapp,
                  bio = :bio,
@@ -150,6 +153,7 @@ class SqliteAccountRepository implements AccountRepository
                  street = :street,
                  street_number = :street_number,
                  postal_code = :postal_code,
+                 between_streets = :between_streets,
                  city = :city,
                  municipality = :municipality,
                  province = :province,
@@ -164,6 +168,7 @@ class SqliteAccountRepository implements AccountRepository
             'id' => $id,
             'email' => strtolower(trim((string) ($data['email'] ?? $existing['email']))),
             'role' => $data['role'] ?? $existing['role'],
+            'business_type' => array_key_exists('business_type', $data) ? $data['business_type'] : $existing['business_type'],
             'business_name' => $data['business_name'] ?? $existing['business_name'],
             'whatsapp' => $data['whatsapp'] ?? $existing['whatsapp'],
             'bio' => $data['bio'] ?? $existing['bio'],
@@ -176,6 +181,7 @@ class SqliteAccountRepository implements AccountRepository
             'street' => $data['street'] ?? $existing['street'],
             'street_number' => $data['street_number'] ?? $existing['street_number'],
             'postal_code' => $data['postal_code'] ?? $existing['postal_code'],
+            'between_streets' => array_key_exists('between_streets', $data) ? $data['between_streets'] : $existing['between_streets'],
             'city' => $data['city'] ?? $existing['city'],
             'municipality' => $data['municipality'] ?? $existing['municipality'],
             'province' => $data['province'] ?? $existing['province'],

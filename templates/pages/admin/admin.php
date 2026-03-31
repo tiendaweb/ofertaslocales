@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 ?>
-<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'aplicacion', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
+<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'aplicacion', 'categorias', 'seo', 'usuarios', 'ajustes'], true) ? $activeTab : 'moderacion'; ?>
 <section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-5 pb-28">
     <div class="rounded-[2.2rem] border border-red-100 bg-white/95 p-4 shadow-[0_24px_80px_rgba(239,68,68,0.12)] md:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -23,7 +23,7 @@ declare(strict_types=1);
             </div>
         </div>
 
-        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-8">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
@@ -32,6 +32,7 @@ declare(strict_types=1);
                 'categorias' => ['label' => 'Categorías', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
+                'ajustes' => ['label' => 'Ajustes', 'icon' => 'settings'],
             ] as $tabKey => $tabItem) : ?>
                 <button
                     type="button"
@@ -409,7 +410,7 @@ declare(strict_types=1);
                                 <span class="font-medium text-gray-900"><?= htmlspecialchars((string) $user['email']) ?></span>
                                 <span class="text-xs text-gray-500"><?= htmlspecialchars((string) ($user['business_name'] ?? 'Sin nombre comercial')) ?></span>
                                 <?php if (!empty($user['whatsapp'])): ?>
-                                    <span class="text-[10px] text-emerald-600 font-medium mt-1">WA: <?= htmlspecialchars($user['whatsapp']) ?></span>
+                                    <span class="text-[10px] text-emerald-600 font-medium mt-1">WhatsApp: <?= htmlspecialchars($user['whatsapp']) ?></span>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -488,8 +489,87 @@ declare(strict_types=1);
         <?php endif; ?>
     </div>
 
+    <!-- TAB: AJUSTES -->
+    <div x-show="tab === 'ajustes'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h3 class="mb-6 text-xl font-black text-gray-900">Ajustes Generales</h3>
+            <form action="/admin/settings" method="post" class="space-y-8">
+
+                <!-- WhatsApp de Contacto -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-4 h-4 text-[#25D366]"></i> WhatsApp de Contacto
+                    </h4>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Número de WhatsApp del sitio (sin espacios, ej: 5491112345678)</label>
+                        <input type="text" name="contact_whatsapp" value="<?= htmlspecialchars((string) ($settings['contact_whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="5491112345678" class="block w-full max-w-sm rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                        <p class="mt-1 text-xs text-gray-400">Se usa como enlace de contacto general del sitio.</p>
+                    </div>
+                </div>
+
+                <!-- Modo Mantenimiento -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="wrench" class="w-4 h-4 text-amber-500"></i> Modo Mantenimiento
+                    </h4>
+                    <div class="flex items-center gap-3 mb-4" x-data="{ maintenance: '<?= htmlspecialchars((string) ($settings['maintenance_mode'] ?? '0'), ENT_QUOTES, 'UTF-8') ?>' === '1' }">
+                        <button type="button" @click="maintenance = !maintenance" :class="maintenance ? 'bg-red-600' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" role="switch">
+                            <span :class="maintenance ? 'translate-x-5' : 'translate-x-0'" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200"></span>
+                        </button>
+                        <input type="hidden" name="maintenance_mode" :value="maintenance ? '1' : '0'">
+                        <span class="text-sm font-semibold" :class="maintenance ? 'text-red-600' : 'text-gray-500'" x-text="maintenance ? 'Sitio en mantenimiento (público ve página 503)' : 'Sitio activo'">Sitio activo</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Mensaje de mantenimiento</label>
+                        <textarea name="maintenance_message" rows="2" class="block w-full max-w-lg rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-none"><?= htmlspecialchars((string) ($settings['maintenance_message'] ?? 'Estamos realizando mejoras. Volvemos pronto.'), ENT_QUOTES, 'UTF-8') ?></textarea>
+                    </div>
+                </div>
+
+                <!-- CSS y JS Personalizado - Frontend -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="code" class="w-4 h-4 text-purple-500"></i> CSS y JS Personalizado — Sitio Público
+                    </h4>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">CSS personalizado (sin etiqueta &lt;style&gt;)</label>
+                            <textarea name="custom_css_frontend" rows="6" placeholder=".mi-clase { color: red; }" class="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-y"><?= htmlspecialchars((string) ($settings['custom_css_frontend'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">JS personalizado (sin etiqueta &lt;script&gt;)</label>
+                            <textarea name="custom_js_frontend" rows="6" placeholder="console.log('Hola');" class="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-y"><?= htmlspecialchars((string) ($settings['custom_js_frontend'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CSS y JS Personalizado - Panel -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-500"></i> CSS y JS Personalizado — Panel de Usuarios
+                    </h4>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">CSS personalizado del panel</label>
+                            <textarea name="custom_css_panel" rows="6" placeholder=".mi-clase { color: red; }" class="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-y"><?= htmlspecialchars((string) ($settings['custom_css_panel'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">JS personalizado del panel</label>
+                            <textarea name="custom_js_panel" rows="6" placeholder="console.log('Panel');" class="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-y"><?= htmlspecialchars((string) ($settings['custom_js_panel'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="rounded-2xl bg-red-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-red-600/20 hover:bg-red-700 transition-colors">
+                        Guardar Ajustes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-red-100 bg-white/95 px-3 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <ul class="mx-auto grid max-w-5xl grid-cols-6 gap-2">
+        <ul class="mx-auto grid max-w-5xl grid-cols-7 gap-2">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderar', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
@@ -497,6 +577,7 @@ declare(strict_types=1);
                 'categorias' => ['label' => 'Categorias', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
+                'ajustes' => ['label' => 'Ajustes', 'icon' => 'settings'],
             ] as $tabKey => $tabItem) : ?>
                 <li>
                     <button

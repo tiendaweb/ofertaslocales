@@ -73,21 +73,5 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
             <a href="/register" class="font-bold text-red-600 hover:underline">Regístrate gratis</a>
         </p>
 
-        <div class="mt-8 rounded-2xl border border-gray-100 bg-gray-50/50 p-5">
-            <div class="flex items-center gap-2 mb-3 text-gray-400">
-                <i data-lucide="info" class="w-4 h-4 text-red-400"></i>
-                <span class="text-xs font-bold uppercase tracking-wider">Acceso Demo</span>
-            </div>
-            <div class="space-y-3">
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-gray-400 font-bold uppercase">Administrador</span>
-                    <code class="text-xs text-gray-700">admin@admin.com / admin@admin.com</code>
-                </div>
-                <div class="flex flex-col border-t border-gray-100 pt-2">
-                    <span class="text-[10px] text-gray-400 font-bold uppercase">Negocio</span>
-                    <code class="text-xs text-gray-700">panaderia@barrio.test / 123</code>
-                </div>
-            </div>
-        </div>
     </section>
 </div>

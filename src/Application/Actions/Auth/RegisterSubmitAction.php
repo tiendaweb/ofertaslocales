@@ -32,14 +32,16 @@ class RegisterSubmitAction extends PageAction
     {
         $data = (array) $request->getParsedBody();
         $email = strtolower(trim((string) ($data['email'] ?? '')));
-        $role = trim((string) ($data['role'] ?? 'user'));
+        $role = 'business';
+        $businessType = trim((string) ($data['business_type'] ?? 'comercio'));
         $businessName = trim((string) ($data['business_name'] ?? ''));
         $whatsapp = trim((string) ($data['whatsapp'] ?? ''));
         $password = (string) ($data['password'] ?? '');
         $passwordConfirmation = (string) ($data['password_confirmation'] ?? '');
         $street = trim((string) ($data['street'] ?? ''));
         $streetNumber = trim((string) ($data['street_number'] ?? ''));
-        $postalCode = '';
+        $postalCode = trim((string) ($data['postal_code'] ?? ''));
+        $betweenStreets = trim((string) ($data['between_streets'] ?? ''));
         $city = trim((string) ($data['city'] ?? ''));
         $municipality = trim((string) ($data['municipality'] ?? ''));
         $province = trim((string) ($data['province'] ?? ''));
@@ -62,17 +64,17 @@ class RegisterSubmitAction extends PageAction
             'image_url' => trim((string) ($data['draft_image_url'] ?? '')),
         ];
 
-        if (!in_array($role, ['business', 'user'], true)) {
-            $role = 'user';
+        if (!in_array($businessType, ['comercio', 'emprendedor', 'servicio'], true)) {
+            $businessType = 'comercio';
         }
 
         $errors = [];
 
-        if ($role === 'business' && $businessName === '') {
+        if ($businessName === '') {
             $errors['business_name'] = 'El nombre del local es obligatorio para registrar un negocio.';
         }
 
-        if ($role === 'business' && $whatsapp === '') {
+        if ($whatsapp === '') {
             $errors['whatsapp'] = 'El WhatsApp es obligatorio para registrar un negocio.';
         }
 
@@ -100,24 +102,22 @@ class RegisterSubmitAction extends PageAction
             'province' => ['value' => $province, 'label' => 'provincia'],
         ];
 
-        if ($role === 'business') {
-            foreach ($addressFields as $field => $config) {
-                if ($config['value'] === '') {
-                    $errors[$field] = sprintf('El campo %s es obligatorio para negocios.', $config['label']);
-                }
+        foreach ($addressFields as $field => $config) {
+            if ($config['value'] === '') {
+                $errors[$field] = sprintf('El campo %s es obligatorio para negocios.', $config['label']);
             }
+        }
 
-            if ($addressLat === '' || !is_numeric($addressLat)) {
-                $errors['address_lat'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
-            }
+        if ($addressLat === '' || !is_numeric($addressLat)) {
+            $errors['address_lat'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
+        }
 
-            if ($addressLon === '' || !is_numeric($addressLon)) {
-                $errors['address_lon'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
-            }
+        if ($addressLon === '' || !is_numeric($addressLon)) {
+            $errors['address_lon'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
+        }
 
-            if ($bio !== '' && mb_strlen($bio) > 280) {
-                $errors['bio'] = 'La bio corta no puede superar los 280 caracteres.';
-            }
+        if ($bio !== '' && mb_strlen($bio) > 280) {
+            $errors['bio'] = 'La bio corta no puede superar los 280 caracteres.';
         }
 
         $socialUrlMap = [
@@ -142,11 +142,13 @@ class RegisterSubmitAction extends PageAction
         $old = [
             'email' => $email,
             'role' => $role,
+            'business_type' => $businessType,
             'business_name' => $businessName,
             'whatsapp' => $whatsapp,
             'street' => $street,
             'street_number' => $streetNumber,
             'postal_code' => $postalCode,
+            'between_streets' => $betweenStreets,
             'city' => $city,
             'municipality' => $municipality,
             'province' => $province,
@@ -176,11 +178,13 @@ class RegisterSubmitAction extends PageAction
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
                 'role' => $role,
+                'business_type' => $businessType,
                 'business_name' => $businessName !== '' ? $businessName : null,
                 'whatsapp' => $whatsapp,
                 'street' => $street !== '' ? $street : null,
                 'street_number' => $streetNumber !== '' ? $streetNumber : null,
                 'postal_code' => $postalCode !== '' ? $postalCode : null,
+                'between_streets' => $betweenStreets !== '' ? $betweenStreets : null,
                 'city' => $city !== '' ? $city : null,
                 'municipality' => $municipality !== '' ? $municipality : null,
                 'province' => $province !== '' ? $province : null,
@@ -203,44 +207,11 @@ class RegisterSubmitAction extends PageAction
         }
 
         $this->authService->login($account);
-        if ($role === 'business') {
-            $offerDraft = $this->hydrateOfferDraftFromSession($offerDraft);
-            if (!$this->isPublishableDraft($offerDraft)) {
-                $_SESSION['offer_draft'] = $offerDraft;
-                $this->flash('success', 'Tu cuenta de negocio ya está lista. Completa tu oferta en el asistente del panel.');
-
-                return $this->redirect($response, '/panel?open_offer_wizard=1');
-            }
-
-            $_SESSION['offer_draft'] = $offerDraft;
-            $this->flash('success', 'Tu cuenta de negocio se creó correctamente. Revisa y publica la oferta en el asistente.');
-
-            return $this->redirect($response, '/panel?open_offer_wizard=1');
-        }
-
         $offerDraft = $this->hydrateOfferDraftFromSession($offerDraft);
-        if ($this->isPublishableDraft($offerDraft)) {
-            $publishedFromDraft = $this->publishDraftOffer((int) $account['id'], $account, $offerDraft);
+        $_SESSION['offer_draft'] = $offerDraft;
+        $this->flash('success', '¡Tu cuenta de negocio está lista! Ahora podés publicar tu primera oferta.');
 
-            if ($publishedFromDraft) {
-                unset($_SESSION['offer_draft']);
-                $this->flash('success', 'Tu cuenta de usuario y tu oferta se registraron correctamente.');
-
-                return $this->redirect($response, '/');
-            }
-
-            $_SESSION['offer_draft'] = $offerDraft;
-            $this->flash(
-                'info',
-                'Tu cuenta está creada, pero para publicar esta oferta debes completar tu perfil primero.'
-            );
-
-            return $this->redirect($response, '/');
-        }
-
-        $this->flash('success', 'Tu cuenta de usuario se creó correctamente. Puedes explorar ofertas desde el inicio.');
-
-        return $this->redirect($response, '/');
+        return $this->redirect($response, '/panel?open_offer_wizard=1');
     }
 
     private function isPublishableDraft(array $offerDraft): bool
