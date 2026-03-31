@@ -52,6 +52,7 @@ class BusinessDetailAction extends PageAction
             'facebook_url' => $selectedBusiness['facebook_url'] ?? ($account['facebook_url'] ?? null),
             'tiktok_url' => $selectedBusiness['tiktok_url'] ?? ($account['tiktok_url'] ?? null),
             'website_url' => $selectedBusiness['website_url'] ?? ($account['website_url'] ?? null),
+            'between_streets' => $account['between_streets'] ?? null,
         ];
 
         $seo = $this->seoRepository->findByPage('negocios') ?? [];
@@ -70,6 +71,8 @@ class BusinessDetailAction extends PageAction
     {
         $segments = [
             trim(sprintf('%s %s', (string) ($account['street'] ?? ''), (string) ($account['street_number'] ?? ''))),
+            trim((string) ($account['between_streets'] ?? '')) !== '' ? 'Entre ' . trim((string) $account['between_streets']) : '',
+            trim((string) ($account['postal_code'] ?? '')) !== '' ? 'CP ' . trim((string) $account['postal_code']) : '',
             (string) ($account['city'] ?? ''),
             (string) ($account['province'] ?? ''),
         ];

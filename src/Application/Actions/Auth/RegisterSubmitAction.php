@@ -39,7 +39,8 @@ class RegisterSubmitAction extends PageAction
         $passwordConfirmation = (string) ($data['password_confirmation'] ?? '');
         $street = trim((string) ($data['street'] ?? ''));
         $streetNumber = trim((string) ($data['street_number'] ?? ''));
-        $postalCode = '';
+        $postalCode = trim((string) ($data['postal_code'] ?? ''));
+        $betweenStreets = trim((string) ($data['between_streets'] ?? ''));
         $city = trim((string) ($data['city'] ?? ''));
         $municipality = trim((string) ($data['municipality'] ?? ''));
         $province = trim((string) ($data['province'] ?? ''));
@@ -95,6 +96,7 @@ class RegisterSubmitAction extends PageAction
         $addressFields = [
             'street' => ['value' => $street, 'label' => 'calle'],
             'street_number' => ['value' => $streetNumber, 'label' => 'número'],
+            'postal_code' => ['value' => $postalCode, 'label' => 'código postal'],
             'city' => ['value' => $city, 'label' => 'ciudad'],
             'municipality' => ['value' => $municipality, 'label' => 'municipio'],
             'province' => ['value' => $province, 'label' => 'provincia'],
@@ -147,6 +149,7 @@ class RegisterSubmitAction extends PageAction
             'street' => $street,
             'street_number' => $streetNumber,
             'postal_code' => $postalCode,
+            'between_streets' => $betweenStreets,
             'city' => $city,
             'municipality' => $municipality,
             'province' => $province,
@@ -181,6 +184,7 @@ class RegisterSubmitAction extends PageAction
                 'street' => $street !== '' ? $street : null,
                 'street_number' => $streetNumber !== '' ? $streetNumber : null,
                 'postal_code' => $postalCode !== '' ? $postalCode : null,
+                'between_streets' => $betweenStreets !== '' ? $betweenStreets : null,
                 'city' => $city !== '' ? $city : null,
                 'municipality' => $municipality !== '' ? $municipality : null,
                 'province' => $province !== '' ? $province : null,

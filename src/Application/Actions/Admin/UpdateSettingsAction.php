@@ -34,6 +34,13 @@ class UpdateSettingsAction extends PageAction
         'icon_192',
         'icon_512',
         'location_catalog_json',
+        'contact_whatsapp',
+        'maintenance_mode',
+        'maintenance_message',
+        'frontend_custom_css',
+        'frontend_custom_js',
+        'admin_custom_css',
+        'admin_custom_js',
     ];
 
     private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
@@ -57,6 +64,18 @@ class UpdateSettingsAction extends PageAction
         foreach (self::EDITABLE_KEYS as $key) {
             if (array_key_exists($key, $data)) {
                 $payload[$key] = trim((string) $data[$key]);
+            }
+        }
+
+        if (array_key_exists('maintenance_mode', $payload)) {
+            $payload['maintenance_mode'] = in_array($payload['maintenance_mode'], ['1', 'true', 'on'], true)
+                ? '1'
+                : '0';
+        }
+        if (array_key_exists('contact_whatsapp', $payload)) {
+            $phone = preg_replace('/\D+/', '', $payload['contact_whatsapp']);
+            if (is_string($phone) && $phone !== '') {
+                $payload['footer_whatsapp_url'] = 'https://wa.me/' . $phone;
             }
         }
 

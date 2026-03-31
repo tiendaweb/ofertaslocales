@@ -29,6 +29,25 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
         }
     }
 }
+$runtimeSettings = [];
+$databasePath = dirname(__DIR__) . '/database/app.sqlite';
+if (is_file($databasePath)) {
+    try {
+        $settingsPdo = new PDO('sqlite:' . $databasePath);
+        $settingsStatement = $settingsPdo->query('SELECT key, value FROM settings');
+        if ($settingsStatement !== false) {
+            foreach ($settingsStatement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $runtimeSettings[(string) $row['key']] = (string) $row['value'];
+            }
+        }
+    } catch (Throwable) {
+        $runtimeSettings = [];
+    }
+}
+$frontendCustomCss = trim((string) ($runtimeSettings['frontend_custom_css'] ?? ''));
+$frontendCustomJs = trim((string) ($runtimeSettings['frontend_custom_js'] ?? ''));
+$adminCustomCss = trim((string) ($runtimeSettings['admin_custom_css'] ?? ''));
+$adminCustomJs = trim((string) ($runtimeSettings['admin_custom_js'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -71,6 +90,12 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
         .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(18px); border: 1px solid rgba(148, 163, 184, 0.18); }
         .neon-ring { box-shadow: 0 0 24px rgba(59, 130, 246, 0.18); }
         .chip { border: 1px solid rgba(96, 165, 250, 0.25); background: rgba(30, 41, 59, 0.7); }
+        <?php endif; ?>
+        <?php if ($isPublicRoute && $frontendCustomCss !== '') : ?>
+        <?= $frontendCustomCss ?>
+        <?php endif; ?>
+        <?php if (!$isPublicRoute && $adminCustomCss !== '') : ?>
+        <?= $adminCustomCss ?>
         <?php endif; ?>
     </style>
 </head>
@@ -139,6 +164,9 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
             };
         </script>
         <script src="/assets/js/public-pages.js"></script>
+        <?php if ($frontendCustomJs !== '') : ?>
+            <script><?= $frontendCustomJs ?></script>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php if (($currentRoute ?? '') === 'mapa') : ?>
@@ -160,5 +188,8 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
             });
         }
     </script>
+    <?php if (!$isPublicRoute && $adminCustomJs !== '') : ?>
+        <script><?= $adminCustomJs ?></script>
+    <?php endif; ?>
 </body>
 </html>

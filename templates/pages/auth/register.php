@@ -232,6 +232,14 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                 </div>
                             </div>
                             <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Código Postal</label>
+                                <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.postal_code" :required="isBusiness" form="register-form" name="postal_code" type="text" placeholder="1702" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Entre calles</label>
+                                <input x-model="addressData.between_streets" form="register-form" name="between_streets" type="text" placeholder="Ej: Entre Av. Gaona y Rivadavia" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                            </div>
+                            <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Municipio</label>
                                 <select
                                     x-model="addressData.municipality"
@@ -270,9 +278,6 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                     </template>
                                 </select>
                             </div>
-                            
-                            <!-- Código Postal Oculto -->
-                            <input form="register-form" name="postal_code" type="hidden" value="<?= htmlspecialchars((string) ($old['postal_code'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             
                             <div class="md:col-span-2 mt-2">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -380,6 +385,8 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
             addressData: {
                 street: "<?= htmlspecialchars((string) ($old['street'] ?? '')) ?>",
                 street_number: "<?= htmlspecialchars((string) ($old['street_number'] ?? '')) ?>",
+                postal_code: "<?= htmlspecialchars((string) ($old['postal_code'] ?? '')) ?>",
+                between_streets: "<?= htmlspecialchars((string) ($old['between_streets'] ?? '')) ?>",
                 city: "<?= htmlspecialchars((string) ($old['city'] ?? '')) ?>",
                 municipality: "<?= htmlspecialchars((string) ($old['municipality'] ?? 'Tres de Febrero')) ?>",
                 province: "<?= htmlspecialchars((string) ($old['province'] ?? 'Buenos Aires')) ?>"
@@ -436,15 +443,19 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 }
             },
             async updateMapFromAddress() {
-                const { street, street_number, city, municipality, province } = this.addressData;
+                const { street, street_number, city, municipality, province, postal_code } = this.addressData;
                 
                 // Solo buscamos si tenemos calle y número
                 if (!street || !street_number) return;
 
-                const query = `${street} ${street_number}, ${city}, ${municipality}, ${province}, Argentina`;
+                const query = `${street} ${street_number}, ${city}, ${municipality}, ${province}, ${postal_code}, Argentina`;
                 
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=ar&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`, {
+                        headers: {
+                            'Accept-Language': 'es',
+                        }
+                    });
                     const data = await response.json();
 
                     if (data && data.length > 0) {

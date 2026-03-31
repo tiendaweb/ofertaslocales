@@ -327,11 +327,13 @@
 
     const geocodeLocation = async (query) => {
         const endpoint = new URL('https://nominatim.openstreetmap.org/search');
-        endpoint.searchParams.set('q', query);
+        const normalizedQuery = /argentina/i.test(query) ? query : `${query}, Argentina`;
+        endpoint.searchParams.set('q', normalizedQuery);
         endpoint.searchParams.set('format', 'jsonv2');
         endpoint.searchParams.set('limit', '1');
         endpoint.searchParams.set('addressdetails', '1');
         endpoint.searchParams.set('accept-language', 'es');
+        endpoint.searchParams.set('countrycodes', 'ar');
 
         const response = await fetch(endpoint.toString(), {
             headers: {

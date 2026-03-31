@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 ?>
-<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'aplicacion', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
+<?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'ajustes', 'aplicacion', 'categorias', 'seo', 'usuarios'], true) ? $activeTab : 'moderacion'; ?>
 <section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-5 pb-28">
     <div class="rounded-[2.2rem] border border-red-100 bg-white/95 p-4 shadow-[0_24px_80px_rgba(239,68,68,0.12)] md:p-6">
         <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -23,11 +23,12 @@ declare(strict_types=1);
             </div>
         </div>
 
-        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-7">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
                 'logo' => ['label' => 'Logo', 'icon' => 'image'],
+                'ajustes' => ['label' => 'Ajustes', 'icon' => 'sliders-horizontal'],
                 'aplicacion' => ['label' => 'Aplicación', 'icon' => 'smartphone'],
                 'categorias' => ['label' => 'Categorías', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
@@ -242,6 +243,51 @@ declare(strict_types=1);
                     <input type="text" name="icon_512" value="<?= htmlspecialchars((string) ($settings['icon_512'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="/uploads/icon-512.png o https://..." class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                 </label>
                 <button type="submit" class="md:col-span-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar configuración de la app</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div x-show="tab === 'ajustes'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+        <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
+            <h3 class="mb-5 text-xl font-black text-gray-900">Ajustes globales</h3>
+            <form action="/admin/settings" method="post" class="grid gap-4 md:grid-cols-2">
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Nombre del sitio</span>
+                    <input type="text" name="site_name" value="<?= htmlspecialchars((string) ($settings['site_name'] ?? 'OfertasLocales'), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">WhatsApp principal del sitio</span>
+                    <input type="text" name="contact_whatsapp" value="<?= htmlspecialchars((string) ($settings['contact_whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="+54 9 11..." class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-2 block text-[11px] font-bold uppercase tracking-widest text-red-500">Modo mantenimiento</span>
+                    <select name="maintenance_mode" class="w-full rounded-xl border border-red-100 bg-white p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
+                        <option value="0" <?= (($settings['maintenance_mode'] ?? '0') === '0') ? 'selected' : '' ?>>Desactivado</option>
+                        <option value="1" <?= (($settings['maintenance_mode'] ?? '0') === '1') ? 'selected' : '' ?>>Activado</option>
+                    </select>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">Mensaje de mantenimiento</span>
+                    <textarea name="maintenance_message" rows="3" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['maintenance_message'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">CSS personalizado (Frontend)</span>
+                    <textarea name="frontend_custom_css" rows="5" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 font-mono text-xs text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['frontend_custom_css'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">JS personalizado (Frontend)</span>
+                    <textarea name="frontend_custom_js" rows="5" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 font-mono text-xs text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['frontend_custom_js'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">CSS personalizado (Admin/Panel)</span>
+                    <textarea name="admin_custom_css" rows="5" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 font-mono text-xs text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['admin_custom_css'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </label>
+                <label class="rounded-2xl border border-red-100 bg-red-50/50 p-3 md:col-span-2">
+                    <span class="mb-1 block text-[11px] font-bold uppercase tracking-widest text-red-500">JS personalizado (Admin/Panel)</span>
+                    <textarea name="admin_custom_js" rows="5" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 font-mono text-xs text-gray-800 focus:border-red-400 focus:outline-none"><?= htmlspecialchars((string) ($settings['admin_custom_js'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                </label>
+                <button type="submit" class="md:col-span-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Guardar ajustes globales</button>
             </form>
         </div>
     </div>
@@ -489,11 +535,12 @@ declare(strict_types=1);
     </div>
 
     <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-red-100 bg-white/95 px-3 py-2 shadow-[0_-10px_35px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <ul class="mx-auto grid max-w-5xl grid-cols-6 gap-2">
+        <ul class="mx-auto grid max-w-5xl grid-cols-7 gap-2">
             <?php foreach ([
                 'moderacion' => ['label' => 'Moderar', 'icon' => 'shield-check'],
                 'textos' => ['label' => 'Textos', 'icon' => 'type'],
                 'logo' => ['label' => 'Logo', 'icon' => 'image'],
+                'ajustes' => ['label' => 'Ajustes', 'icon' => 'sliders-horizontal'],
                 'categorias' => ['label' => 'Categorias', 'icon' => 'tags'],
                 'seo' => ['label' => 'SEO', 'icon' => 'search'],
                 'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],

@@ -39,7 +39,8 @@ class UpdateBusinessProfileAction extends PageAction
         $bio = trim((string) ($data['bio'] ?? ''));
         $street = trim((string) ($data['street'] ?? ''));
         $streetNumber = trim((string) ($data['street_number'] ?? ''));
-        $postalCode = '';
+        $postalCode = trim((string) ($data['postal_code'] ?? ''));
+        $betweenStreets = trim((string) ($data['between_streets'] ?? ''));
         $city = trim((string) ($data['city'] ?? ''));
         $municipality = trim((string) ($data['municipality'] ?? ''));
         $province = trim((string) ($data['province'] ?? ''));
@@ -54,6 +55,7 @@ class UpdateBusinessProfileAction extends PageAction
             'logo_url' => ['label' => 'logo', 'value' => trim((string) ($data['logo_url'] ?? ''))],
             'cover_url' => ['label' => 'portada', 'value' => trim((string) ($data['cover_url'] ?? ''))],
         ];
+        $errors = [];
         $uploadedFiles = $request->getUploadedFiles();
         $logoUpload = $uploadedFiles['logo_image'] ?? null;
         if ($logoUpload instanceof UploadedFileInterface && $logoUpload->getError() !== UPLOAD_ERR_NO_FILE) {
@@ -75,7 +77,6 @@ class UpdateBusinessProfileAction extends PageAction
             }
         }
 
-        $errors = [];
         if ($businessName === '') {
             $errors['business_name'] = 'El nombre del negocio es obligatorio.';
         }
@@ -91,6 +92,7 @@ class UpdateBusinessProfileAction extends PageAction
         foreach ([
             'street' => ['value' => $street, 'label' => 'calle'],
             'street_number' => ['value' => $streetNumber, 'label' => 'número'],
+            'postal_code' => ['value' => $postalCode, 'label' => 'código postal'],
             'city' => ['value' => $city, 'label' => 'ciudad'],
             'municipality' => ['value' => $municipality, 'label' => 'municipio'],
             'province' => ['value' => $province, 'label' => 'provincia'],
@@ -126,6 +128,7 @@ class UpdateBusinessProfileAction extends PageAction
             'street' => $street,
             'street_number' => $streetNumber,
             'postal_code' => $postalCode,
+            'between_streets' => $betweenStreets,
             'city' => $city,
             'municipality' => $municipality,
             'province' => $province,
@@ -152,6 +155,7 @@ class UpdateBusinessProfileAction extends PageAction
             'street' => $street,
             'street_number' => $streetNumber,
             'postal_code' => $postalCode,
+            'between_streets' => $betweenStreets !== '' ? $betweenStreets : null,
             'city' => $city,
             'municipality' => $municipality,
             'province' => $province,

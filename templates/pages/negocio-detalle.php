@@ -15,6 +15,16 @@ $socialButtons = array_values(array_filter([
 
 $whatsappNumber = preg_replace('/\D+/', '', (string) ($business['whatsapp'] ?? ''));
 $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negocio Local'), ENT_QUOTES, 'UTF-8');
+$dominantCategory = 'General';
+if ($activeOffers !== []) {
+    $categoryCount = [];
+    foreach ($activeOffers as $offer) {
+        $category = (string) ($offer['category'] ?? 'General');
+        $categoryCount[$category] = ($categoryCount[$category] ?? 0) + 1;
+    }
+    arsort($categoryCount);
+    $dominantCategory = (string) array_key_first($categoryCount);
+}
 ?>
 
 <div class="bg-slate-50 min-h-screen font-sans antialiased text-slate-900">
@@ -49,6 +59,9 @@ $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negoci
                     </h1>
                     
                     <div class="flex flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-red-200 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                            Rubro: <?= htmlspecialchars($dominantCategory, ENT_QUOTES, 'UTF-8') ?>
+                        </span>
                         <?php if ($activeOffers !== []): ?>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
                                 <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
@@ -117,6 +130,13 @@ $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negoci
             <div class="grid gap-5">
                 <?php foreach ($activeOffers as $offer): ?>
                     <article class="bg-white border border-slate-100 rounded-[2.2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                        <div class="mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+                            <img
+                                src="<?= htmlspecialchars((string) (($offer['image_url'] ?? '') ?: 'https://placehold.co/1200x630/fee2e2/dc2626?text=Oferta'), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="<?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                class="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            >
+                        </div>
                         <div class="flex justify-between items-start gap-4 mb-4">
                             <div class="flex-1">
                                 <h3 class="text-xl font-extrabold text-slate-900 leading-tight group-hover:text-red-600 transition-colors">
