@@ -52,6 +52,8 @@ class BusinessDetailAction extends PageAction
             'facebook_url' => $selectedBusiness['facebook_url'] ?? ($account['facebook_url'] ?? null),
             'tiktok_url' => $selectedBusiness['tiktok_url'] ?? ($account['tiktok_url'] ?? null),
             'website_url' => $selectedBusiness['website_url'] ?? ($account['website_url'] ?? null),
+            'between_streets' => $account['between_streets'] ?? null,
+            'business_type' => $account['business_type'] ?? 'comercio',
         ];
 
         $seo = $this->seoRepository->findByPage('negocios') ?? [];
@@ -68,8 +70,12 @@ class BusinessDetailAction extends PageAction
 
     private function formatAddress(array $account): string
     {
+        $betweenStreets = trim((string) ($account['between_streets'] ?? ''));
+        $postalCode = trim((string) ($account['postal_code'] ?? ''));
         $segments = [
             trim(sprintf('%s %s', (string) ($account['street'] ?? ''), (string) ($account['street_number'] ?? ''))),
+            $betweenStreets !== '' ? 'Entre ' . $betweenStreets : '',
+            $postalCode !== '' ? 'CP ' . $postalCode : '',
             (string) ($account['city'] ?? ''),
             (string) ($account['province'] ?? ''),
         ];

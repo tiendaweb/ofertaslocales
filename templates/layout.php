@@ -29,6 +29,25 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
         }
     }
 }
+$runtimeSettings = [];
+$runtimeDbPath = dirname(__DIR__) . '/database/app.sqlite';
+if (is_file($runtimeDbPath)) {
+    try {
+        $runtimePdo = new PDO('sqlite:' . $runtimeDbPath);
+        $runtimeStmt = $runtimePdo->query('SELECT key, value FROM settings WHERE key IN (\'custom_css_frontend\', \'custom_js_frontend\', \'custom_css_panel\', \'custom_js_panel\')');
+        if ($runtimeStmt !== false) {
+            foreach ($runtimeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $runtimeSettings[(string) $row['key']] = (string) $row['value'];
+            }
+        }
+    } catch (Throwable) {
+        // ignore DB errors silently
+    }
+}
+$customCssFrontend = trim((string) ($runtimeSettings['custom_css_frontend'] ?? ''));
+$customJsFrontend  = trim((string) ($runtimeSettings['custom_js_frontend'] ?? ''));
+$customCssPanel    = trim((string) ($runtimeSettings['custom_css_panel'] ?? ''));
+$customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -71,6 +90,11 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
         .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(18px); border: 1px solid rgba(148, 163, 184, 0.18); }
         .neon-ring { box-shadow: 0 0 24px rgba(59, 130, 246, 0.18); }
         .chip { border: 1px solid rgba(96, 165, 250, 0.25); background: rgba(30, 41, 59, 0.7); }
+        <?php endif; ?>
+        <?php if ($isPublicRoute && $customCssFrontend !== '') : ?>
+        <?= $customCssFrontend ?>
+        <?php elseif (!$isPublicRoute && $customCssPanel !== '') : ?>
+        <?= $customCssPanel ?>
         <?php endif; ?>
     </style>
 </head>
@@ -160,5 +184,10 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
             });
         }
     </script>
+    <?php if ($isPublicRoute && $customJsFrontend !== '') : ?>
+        <script><?= $customJsFrontend ?></script>
+    <?php elseif (!$isPublicRoute && $customJsPanel !== '') : ?>
+        <script><?= $customJsPanel ?></script>
+    <?php endif; ?>
 </body>
 </html>

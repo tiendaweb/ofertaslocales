@@ -6,7 +6,7 @@ $formErrors = is_array($flash['form_errors'] ?? null) ? $flash['form_errors'] : 
 $flashOld = is_array($flash['old'] ?? null) ? $flash['old'] : [];
 $prefillOld = is_array($prefillOld ?? null) ? $prefillOld : [];
 $old = $flashOld !== [] ? $flashOld : $prefillOld;
-$selectedRole = in_array(($old['role'] ?? 'user'), ['user', 'business'], true) ? (string) $old['role'] : 'user';
+$selectedBusinessType = in_array(($old['business_type'] ?? 'comercio'), ['comercio', 'emprendedor', 'servicio'], true) ? (string) $old['business_type'] : 'comercio';
 $locationCatalog = is_array($locationCatalog ?? null) ? $locationCatalog : [
     'provinces' => ['Buenos Aires'],
     'municipalities' => ['Tres de Febrero' => ['Ciudadela', 'Caseros', 'Santos Lugares', 'Villa Bosch', 'Martín Coronado']],
@@ -29,10 +29,10 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
 
 <section
     x-data="registerFlow(<?= htmlspecialchars(json_encode([
-        'role' => $selectedRole,
+        'businessType' => $selectedBusinessType,
         'lat' => $defaultLat,
         'lon' => $defaultLon,
-        'startOpen' => $selectedRole === 'business',
+        'startOpen' => true,
         'locationCatalog' => $locationCatalog,
     ], JSON_THROW_ON_ERROR), ENT_QUOTES, 'UTF-8') ?>)"
     class="max-w-xl mx-auto rounded-[2rem] border border-gray-100 bg-white shadow-2xl shadow-gray-200/50 overflow-hidden relative"
@@ -60,7 +60,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 </div>
             <?php endif; ?>
 
-            <form action="/register" method="post" class="space-y-5">
+            <form id="register-form" action="/register" method="post" class="space-y-5">
                 <!-- Campos ocultos de draft -->
                 <input type="hidden" name="draft_category" value="<?= htmlspecialchars((string) ($old['category'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="draft_title" value="<?= htmlspecialchars((string) ($old['title'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
@@ -69,23 +69,27 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 <input type="hidden" name="draft_description" value="<?= htmlspecialchars((string) ($old['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="draft_image_url" value="<?= htmlspecialchars((string) ($old['image_url'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                 
-                <!-- Input de rol mapeado al toggle -->
-                <input type="hidden" name="role" :value="isBusiness ? 'business' : 'user'">
+                <!-- Inputs ocultos de rol y tipo -->
+                <input type="hidden" name="role" value="business">
+                <input type="hidden" name="business_type" :value="businessType">
 
-                <!-- Toggle Tipo de Cuenta (Usuario / Negocio) -->
-                <div class="group relative flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-red-200 cursor-pointer" @click="isBusiness = !isBusiness">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl transition-colors" :class="isBusiness ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-500'">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-900">Soy un Negocio / Local</span>
-                            <span class="block text-xs text-gray-500">Habilita opciones comerciales</span>
-                        </div>
+                <!-- Selector de Tipo de Negocio -->
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">¿Cómo querés registrarte?</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" @click="businessType = 'comercio'" :class="businessType === 'comercio' ? 'border-red-500 bg-red-50 text-red-700 ring-2 ring-red-500/20' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-red-200'" class="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition-all">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <span class="text-xs font-bold leading-tight">Soy<br>Comercio</span>
+                        </button>
+                        <button type="button" @click="businessType = 'emprendedor'" :class="businessType === 'emprendedor' ? 'border-red-500 bg-red-50 text-red-700 ring-2 ring-red-500/20' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-red-200'" class="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition-all">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            <span class="text-xs font-bold leading-tight">Soy<br>Emprendedor</span>
+                        </button>
+                        <button type="button" @click="businessType = 'servicio'" :class="businessType === 'servicio' ? 'border-red-500 bg-red-50 text-red-700 ring-2 ring-red-500/20' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-red-200'" class="flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition-all">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="text-xs font-bold leading-tight">Ofrezco<br>Servicio</span>
+                        </button>
                     </div>
-                    <button type="button" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2" :class="isBusiness ? 'bg-red-600' : 'bg-gray-300'" role="switch" :aria-checked="isBusiness">
-                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" :class="isBusiness ? 'translate-x-5' : 'translate-x-0'"></span>
-                    </button>
                 </div>
 
                 <!-- Email -->
@@ -121,25 +125,11 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                     </div>
                 </div>
 
-                <!-- Flujo Usuario Común -->
-                <div x-show="!isBusiness" x-collapse>
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        </div>
-                        <input name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="WhatsApp (Ej: +54 9 11 0000 0000)" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3.5 pl-11 pr-4 text-sm text-gray-900 outline-none transition-all focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-500/10">
-                    </div>
-                </div>
-
-                <!-- Botones de Acción Principales -->
+                <!-- Botón de Acción -->
                 <div class="pt-2">
-                    <button type="submit" x-show="!isBusiness" class="w-full rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3.5 px-4 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition-all hover:from-red-700 hover:to-rose-700 hover:shadow-xl hover:shadow-red-600/30 focus:outline-none focus:ring-4 focus:ring-red-600/30 active:scale-[0.98]">
-                        Crear Mi Cuenta
-                    </button>
-                    
-                    <button type="button" x-show="isBusiness" @click="openBusinessFlow()" class="w-full flex items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 px-4 text-sm font-bold text-white shadow-lg shadow-gray-900/20 transition-all hover:bg-black hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-gray-900/30 active:scale-[0.98]" x-cloak>
-                        <span>Completar Perfil del Negocio</span>
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <button type="button" @click="openBusinessFlow()" class="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3.5 px-4 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition-all hover:from-red-700 hover:to-rose-700 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-red-600/30 active:scale-[0.98]">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Continuar registro</span>
                     </button>
                 </div>
             </form>
@@ -148,9 +138,9 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
 
     <!-- Modal Fullscreen de Flujo de Negocio -->
     <template x-teleport="body">
-        <div x-show="isBusiness && modalOpen" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-0 md:p-6">
+        <div x-show="modalOpen" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-0 md:p-6">
             
-            <div x-show="isBusiness && modalOpen" 
+            <div x-show="modalOpen" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-8 md:translate-y-4 md:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 md:scale-100"
@@ -166,7 +156,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900 leading-tight">Perfil de Negocio</h3>
+                            <h3 class="text-lg font-bold text-gray-900 leading-tight" x-text="businessType === 'comercio' ? 'Perfil de Comercio' : (businessType === 'emprendedor' ? 'Perfil de Emprendedor' : 'Perfil de Servicio')">Perfil</h3>
                             <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Paso <span x-text="currentStep"></span> de 4</p>
                         </div>
                     </div>
@@ -191,12 +181,12 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre visible del local</label>
-                            <input :required="isBusiness" form="register-form" name="business_name" type="text" value="<?= htmlspecialchars((string) ($old['business_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: Pizzería Don Carlos" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
+                            <input required form="register-form" name="business_name" type="text" value="<?= htmlspecialchars((string) ($old['business_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: Pizzería Don Carlos" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
                             <?php if (($formErrors['business_name'] ?? null) !== null) : ?><span class="mt-1 block text-xs text-rose-500"><?= htmlspecialchars((string) $formErrors['business_name'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">WhatsApp de contacto</label>
-                            <input :required="isBusiness" form="register-form" name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="+54 9 11 0000 0000" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
+                            <input required form="register-form" name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="+54 9 11 0000 0000" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
                             <?php if (($formErrors['whatsapp'] ?? null) !== null) : ?><span class="mt-1 block text-xs text-rose-500"><?= htmlspecialchars((string) $formErrors['whatsapp'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </div>
                     </div>
@@ -224,11 +214,11 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                             <div class="md:col-span-2 flex gap-4">
                                 <div class="flex-1">
                                     <label class="block text-xs font-semibold text-gray-700 mb-1">Calle</label>
-                                    <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.street" :required="isBusiness" form="register-form" name="street" type="text" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                                    <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.street" required form="register-form" name="street" type="text" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                                 </div>
                                 <div class="w-24 shrink-0">
                                     <label class="block text-xs font-semibold text-gray-700 mb-1">Número</label>
-                                    <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.street_number" :required="isBusiness" form="register-form" name="street_number" type="text" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                                    <input @input.debounce.1000ms="updateMapFromAddress" x-model="addressData.street_number" required form="register-form" name="street_number" type="text" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                                 </div>
                             </div>
                             <div>
@@ -236,7 +226,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                 <select
                                     x-model="addressData.municipality"
                                     @change="onMunicipalityChange"
-                                    :required="isBusiness"
+                                    required
                                     form="register-form"
                                     name="municipality"
                                     class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -252,7 +242,7 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                 <select
                                     x-model="addressData.city"
                                     @change="updateMapFromAddress"
-                                    :required="isBusiness"
+                                    required
                                     form="register-form"
                                     name="city"
                                     class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -264,15 +254,23 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Provincia</label>
-                                <select @change="updateMapFromAddress" x-model="addressData.province" :required="isBusiness" form="register-form" name="province" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                                <select @change="updateMapFromAddress" x-model="addressData.province" required form="register-form" name="province" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                                     <template x-for="province in provinceOptions" :key="province">
                                         <option :value="province" x-text="province"></option>
                                     </template>
                                 </select>
                             </div>
                             
-                            <!-- Código Postal Oculto -->
-                            <input form="register-form" name="postal_code" type="hidden" value="<?= htmlspecialchars((string) ($old['postal_code'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                            <!-- Código Postal visible -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Código Postal</label>
+                                <input form="register-form" name="postal_code" type="text" value="<?= htmlspecialchars((string) ($old['postal_code'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: 1702" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                            </div>
+                            <!-- Entre Calles -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Entre calles <span class="text-gray-400 font-normal">(Opcional)</span></label>
+                                <input form="register-form" name="between_streets" type="text" value="<?= htmlspecialchars((string) ($old['between_streets'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="Ej: entre Av. San Martín y Belgrano" class="block w-full rounded-xl border border-gray-200 bg-white py-2.5 px-3 text-sm text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                            </div>
                             
                             <div class="md:col-span-2 mt-2">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
@@ -357,15 +355,12 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
         </div>
     </template>
     
-    <script>
-        document.querySelector('form').id = 'register-form';
-    </script>
 </section>
 
 <script>
     function registerFlow(config) {
         return {
-            isBusiness: config.role === 'business',
+            businessType: config.businessType || 'comercio',
             modalOpen: Boolean(config.startOpen),
             currentStep: 1,
             lat: Number(config.lat).toFixed(6),
@@ -393,12 +388,6 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 if (!this.provinceOptions.includes(this.addressData.province)) {
                     this.addressData.province = this.provinceOptions[0] || 'Buenos Aires';
                 }
-
-                this.$watch('isBusiness', (val) => {
-                    if (!val) {
-                        this.modalOpen = false;
-                    }
-                });
 
                 this.$watch('modalOpen', (isOpen) => {
                     if (isOpen) {

@@ -15,6 +15,12 @@ $socialButtons = array_values(array_filter([
 
 $whatsappNumber = preg_replace('/\D+/', '', (string) ($business['whatsapp'] ?? ''));
 $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negocio Local'), ENT_QUOTES, 'UTF-8');
+$businessType = (string) ($business['business_type'] ?? 'comercio');
+$typeConfig = match($businessType) {
+    'emprendedor' => ['label' => 'Emprendedor', 'icon' => 'lightbulb', 'color' => 'bg-amber-100 text-amber-700', 'sectionLabel' => 'Productos & Ofertas'],
+    'servicio'    => ['label' => 'Servicio Profesional', 'icon' => 'wrench', 'color' => 'bg-blue-100 text-blue-700', 'sectionLabel' => 'Servicios Disponibles'],
+    default       => ['label' => 'Comercio Local', 'icon' => 'store', 'color' => 'bg-red-100 text-red-700', 'sectionLabel' => 'Promociones Disponibles'],
+};
 ?>
 
 <div class="bg-slate-50 min-h-screen font-sans antialiased text-slate-900">
@@ -49,6 +55,10 @@ $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negoci
                     </h1>
                     
                     <div class="flex flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <?= htmlspecialchars($typeConfig['color'], ENT_QUOTES, 'UTF-8') ?>">
+                            <i data-lucide="<?= htmlspecialchars($typeConfig['icon'], ENT_QUOTES, 'UTF-8') ?>" class="w-3 h-3"></i>
+                            <?= htmlspecialchars($typeConfig['label'], ENT_QUOTES, 'UTF-8') ?>
+                        </span>
                         <?php if ($activeOffers !== []): ?>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
                                 <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
@@ -89,20 +99,28 @@ $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negoci
 
         <section class="px-6 mb-10">
             <div class="bg-slate-900 rounded-[2.5rem] p-2 flex items-center justify-between shadow-xl">
-                <div class="flex items-center gap-4 ml-4 py-3">
-                    <div class="text-red-500">
+                <div class="flex items-center gap-4 ml-4 py-3 min-w-0">
+                    <div class="text-red-500 shrink-0">
                         <i data-lucide="map-pin" class="w-6 h-6"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-[10px] font-black text-red-500 uppercase tracking-[0.2em]">Ubicación</p>
                         <p class="text-sm font-bold text-white truncate max-w-[160px] sm:max-w-[220px]">
                             <?= htmlspecialchars((string) ($business['location'] ?? 'Consultar dirección'), ENT_QUOTES, 'UTF-8') ?>
                         </p>
+                        <?php if (!empty($business['between_streets'])): ?>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-[220px]">
+                                Entre <?= htmlspecialchars((string) $business['between_streets'], ENT_QUOTES, 'UTF-8') ?>
+                            </p>
+                        <?php endif; ?>
+                        <?php if (!empty($business['postal_code'])): ?>
+                            <p class="text-[10px] text-slate-500 mt-0.5">CP: <?= htmlspecialchars((string) $business['postal_code'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode((string)($business['location'] ?? '')) ?>" 
-                   target="_blank" 
-                   class="bg-white text-slate-900 px-6 py-4 rounded-[2rem] font-black text-xs hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest">
+                <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode((string)($business['location'] ?? '')) ?>"
+                   target="_blank"
+                   class="bg-white text-slate-900 px-6 py-4 rounded-[2rem] font-black text-xs hover:bg-red-600 hover:text-white transition-colors uppercase tracking-widest shrink-0">
                     Ir al mapa
                 </a>
             </div>
@@ -110,33 +128,44 @@ $businessName = htmlspecialchars((string) ($business['business_name'] ?? 'Negoci
 
         <section class="px-6 pb-12">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-black text-slate-900 uppercase tracking-tighter">Promociones Disponibles</h2>
+                <h2 class="text-lg font-black text-slate-900 uppercase tracking-tighter"><?= htmlspecialchars($typeConfig['sectionLabel'], ENT_QUOTES, 'UTF-8') ?></h2>
                 <div class="h-px flex-1 bg-slate-100 ml-4"></div>
             </div>
-            
+
             <div class="grid gap-5">
                 <?php foreach ($activeOffers as $offer): ?>
-                    <article class="bg-white border border-slate-100 rounded-[2.2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 group">
-                        <div class="flex justify-between items-start gap-4 mb-4">
-                            <div class="flex-1">
-                                <h3 class="text-xl font-extrabold text-slate-900 leading-tight group-hover:text-red-600 transition-colors">
+                    <article class="bg-white border border-slate-100 rounded-[2.2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+                        <?php if (!empty($offer['image_url'])): ?>
+                            <div class="h-48 w-full overflow-hidden bg-slate-100">
+                                <img src="<?= htmlspecialchars((string) $offer['image_url'], ENT_QUOTES, 'UTF-8') ?>"
+                                     alt="<?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            </div>
+                        <?php else: ?>
+                            <div class="h-20 w-full bg-gradient-to-r from-red-50 to-rose-50 flex items-center justify-center">
+                                <i data-lucide="tag" class="w-8 h-8 text-red-200"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start gap-3 mb-3">
+                                <h3 class="text-lg font-extrabold text-slate-900 leading-tight group-hover:text-red-600 transition-colors flex-1">
                                     <?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>
                                 </h3>
-                                <div class="flex items-center gap-2 mt-2">
-                                    <div class="px-2 py-0.5 bg-red-50 rounded text-red-600">
-                                        <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1"></i>
-                                        <span class="text-[10px] font-bold uppercase"><?= htmlspecialchars((string) $offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></span>
-                                    </div>
+                                <div class="px-2 py-1 bg-red-50 rounded-lg text-red-600 shrink-0">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-0.5"></i>
+                                    <span class="text-[10px] font-bold uppercase"><?= htmlspecialchars((string) $offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
+                            <?php if (!empty($offer['description'])): ?>
+                                <p class="text-slate-500 text-sm mb-4 line-clamp-2"><?= htmlspecialchars((string) $offer['description'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <?php endif; ?>
+                            <a href="https://wa.me/<?= $whatsappNumber ?>?text=<?= urlencode('Hola! Me interesa la oferta: ' . (string)$offer['title']) ?>"
+                               target="_blank"
+                               class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-3.5 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-green-100 transition-all active:scale-95">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                Pedir por WhatsApp
+                            </a>
                         </div>
-                        
-                        <a href="https://wa.me/<?= $whatsappNumber ?>?text=<?= urlencode('Hola! Me interesa la oferta: ' . (string)$offer['title']) ?>" 
-                           target="_blank"
-                           class="w-full bg-red-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-red-100 hover:bg-slate-900 transition-all active:scale-95">
-                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                            SOLICITAR AHORA
-                        </a>
                     </article>
                 <?php endforeach; ?>
 

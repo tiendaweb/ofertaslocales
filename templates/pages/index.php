@@ -130,9 +130,8 @@ declare(strict_types=1);
     <section id="publicar" class="mb-10">
         <div class="bg-gray-900 text-white rounded-3xl overflow-hidden shadow-2xl relative">
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-red-600/20 blur-3xl pointer-events-none"></div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2">
-                <div class="p-8 md:p-12 flex flex-col justify-center">
+            <div class="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex-1">
                     <div class="inline-block bg-red-600/20 text-red-400 font-semibold px-3 py-1 rounded-full text-sm w-max mb-6" data-editable-key="merchant_badge" data-editable-type="text">
                         <?= htmlspecialchars((string) ($labels['merchant_badge'] ?? 'Para Comerciantes'), ENT_QUOTES, 'UTF-8') ?>
                     </div>
@@ -140,77 +139,34 @@ declare(strict_types=1);
                         <?= htmlspecialchars((string) ($labels['merchant_title'] ?? 'Conseguí más clientes hoy mismo'), ENT_QUOTES, 'UTF-8') ?>
                     </h2>
                     <p class="text-gray-300 text-lg mb-8" data-editable-key="merchant_description" data-editable-type="textarea">
-                        <?= htmlspecialchars((string) ($labels['merchant_description'] ?? 'Publicá tu oferta GRATIS. Llega a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.'), ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars((string) ($labels['merchant_description'] ?? 'Publicá tu oferta GRATIS. Llegá a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.'), ENT_QUOTES, 'UTF-8') ?>
                     </p>
-
-                    <ul class="space-y-4 mb-8">
+                    <ul class="space-y-3 mb-8">
                         <?php foreach ($merchantBenefits as $benefit) : ?>
                             <li class="flex items-start gap-3">
-                                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5"></i>
+                                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5 shrink-0"></i>
                                 <span class="text-gray-200"><?= htmlspecialchars($benefit, ENT_QUOTES, 'UTF-8') ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
+                    <a href="/register" class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-8 rounded-2xl transition-colors shadow-lg shadow-red-900/30 text-lg">
+                        <i data-lucide="store" class="w-5 h-5"></i>
+                        Registrar mi negocio gratis
+                    </a>
                 </div>
-
-                <div class="bg-white text-gray-800 p-6 md:p-8 m-4 md:m-8 rounded-2xl">
-                    <div class="flex items-center justify-between gap-3 mb-6">
-                        <h3 class="text-xl font-bold">Crear nueva oferta</h3>
-                        <span class="text-xs bg-red-50 text-red-600 font-semibold px-3 py-1 rounded-full">Paso visual</span>
+                <div class="hidden md:grid grid-cols-1 gap-4 shrink-0 w-64">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+                        <div class="text-4xl font-black text-red-400 mb-1">100%</div>
+                        <div class="text-sm text-gray-400">Gratis siempre</div>
                     </div>
-
-                    <form id="offerForm" class="space-y-4" action="/publicar" method="post" enctype="multipart/form-data">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del negocio</label>
-                                <input required type="text" id="inputBusiness" name="business_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ferretería Juan">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                                <select id="inputCategory" name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"></select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
-                                <span>¿Qué ofreces? (La oferta estrella)</span>
-                                <span id="charCount" class="text-xs text-gray-500">0/40</span>
-                            </label>
-                            <input required type="text" id="inputOffer" name="title" maxlength="40" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all text-red-600 font-medium" placeholder="Ej: 2x1 en Pinturas Alba hoy">
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación (Barrio/Ciudad)</label>
-                                <input required type="text" id="inputLocation" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="Ej: Ciudadela">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Número de WhatsApp</label>
-                                <input required type="tel" id="inputWhatsapp" name="whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all" placeholder="54911...">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto atractiva (Atrae 3x más clicks)</label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative cursor-pointer">
-                                <input type="file" id="inputImage" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                <div id="imagePreviewContainer" class="hidden h-32 w-full rounded-lg overflow-hidden">
-                                    <img id="imagePreview" src="" alt="Vista previa de la imagen seleccionada" class="w-full h-full object-cover">
-                                </div>
-                                <div id="imagePlaceholder" class="flex flex-col items-center justify-center py-4">
-                                    <i data-lucide="camera" class="text-gray-400 mb-2 w-8 h-8"></i>
-                                    <span class="text-sm font-medium text-gray-600">Toca para subir foto</span>
-                                    <span class="text-xs text-gray-400 mt-1">PNG, JPG hasta 5MB</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" id="submitBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md flex justify-center items-center gap-2 mt-4">
-                            <i data-lucide="flame" class="w-5 h-5"></i>
-                            <span id="submitText">🔥 Publicar mi oferta gratis por 24hs</span>
-                        </button>
-                        <p class="text-center text-xs text-gray-500 mt-3">Al publicar aceptas nuestros términos y condiciones y continúas al registro del comercio.</p>
-                    </form>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+                        <div class="text-4xl font-black text-green-400 mb-1">24hs</div>
+                        <div class="text-sm text-gray-400">Para publicar una oferta</div>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
+                        <i data-lucide="message-circle" class="w-8 h-8 text-[#25D366] mx-auto mb-1"></i>
+                        <div class="text-sm text-gray-400">Consultas por WhatsApp</div>
+                    </div>
                 </div>
             </div>
         </div>

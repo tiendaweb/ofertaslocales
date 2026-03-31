@@ -34,6 +34,13 @@ class UpdateSettingsAction extends PageAction
         'icon_192',
         'icon_512',
         'location_catalog_json',
+        'contact_whatsapp',
+        'maintenance_mode',
+        'maintenance_message',
+        'custom_css_frontend',
+        'custom_js_frontend',
+        'custom_css_panel',
+        'custom_js_panel',
     ];
 
     private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
@@ -78,6 +85,9 @@ class UpdateSettingsAction extends PageAction
         }
         if (array_key_exists('display', $payload) && !in_array($payload['display'], self::ALLOWED_PWA_DISPLAY, true)) {
             $payload['display'] = 'standalone';
+        }
+        if (array_key_exists('maintenance_mode', $payload) && !in_array($payload['maintenance_mode'], ['0', '1'], true)) {
+            $payload['maintenance_mode'] = '0';
         }
         if (array_key_exists('theme_color', $payload) && preg_match('/^#[0-9a-fA-F]{6}$/', $payload['theme_color']) !== 1) {
             $payload['theme_color'] = '#dc2626';
