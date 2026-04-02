@@ -35,6 +35,22 @@ After that, open `http://localhost:8080` in your browser.
 
 Run this command in the application directory to run the test suite
 
+## Plantillas activas por ruta
+
+Para evitar regresiones visuales, estas son las plantillas actualmente activas:
+
+| Ruta | Action | Template principal | Parciales/layout |
+| --- | --- | --- | --- |
+| `/` | `HomeAction` | `templates/pages/index.php` | `templates/layout.php`, `templates/partials/header.php`, `templates/partials/footer.php`, `templates/partials/navigation.php` |
+| `/ofertas` | `OffersAction` | `templates/pages/ofertas.php` | `templates/layout.php`, parciales globales |
+| `/negocios` | `BusinessesAction` | `templates/pages/negocios.php` | `templates/layout.php`, parciales globales |
+| `/mapa` | `MapAction` | `templates/pages/mapa.php` | `templates/layout.php`, parciales globales |
+| `/negocios/{id}` | `BusinessDetailAction` | `templates/pages/negocio-detalle.php` | `templates/layout.php`, parciales globales |
+| `/login` | `LoginPageAction` | `templates/pages/auth/login.php` | `templates/layout.php` |
+| `/register` | `RegisterPageAction` | `templates/pages/auth/register.php` | `templates/layout.php` |
+| `/panel` | `BusinessDashboardAction` | `templates/pages/admin/panel.php` | `templates/layout.php` |
+| `/admin` | `AdminDashboardAction` | `templates/pages/admin/admin.php` | `templates/layout.php` |
+
 
 
 

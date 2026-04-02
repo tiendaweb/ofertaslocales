@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 <section class="max-w-6xl mx-auto px-4 py-12">
     <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">Comercios destacados</h2>
-        <p class="text-gray-500">Explora los negocios locales con promociones vigentes.</p>
+        <h2 class="text-2xl font-bold text-gray-900" data-editable-key="businesses_section_title" data-editable-type="text">
+            <?= htmlspecialchars((string) ($labels['businesses_section_title'] ?? 'Comercios destacados'), ENT_QUOTES, 'UTF-8') ?>
+        </h2>
+        <p class="text-gray-500" data-editable-key="businesses_section_description" data-editable-type="textarea">
+            <?= htmlspecialchars((string) ($labels['businesses_section_description'] ?? 'Explora los negocios locales con promociones vigentes.'), ENT_QUOTES, 'UTF-8') ?>
+        </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -108,10 +112,16 @@ declare(strict_types=1);
     <div class="max-w-6xl mx-auto grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
         <div>
             <span class="inline-block py-1 px-3 rounded-full bg-red-500/50 text-sm font-medium mb-4 backdrop-blur-sm border border-red-400/30">
-                🏪 Comercios locales
+                <span data-editable-key="businesses_hero_badge" data-editable-type="text">
+                    <?= htmlspecialchars((string) ($labels['businesses_hero_badge'] ?? '🏪 Comercios locales'), ENT_QUOTES, 'UTF-8') ?>
+                </span>
             </span>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Negocios registrados con ofertas activas.</h1>
-            <p class="text-lg text-red-100 mb-8 max-w-2xl">Cada ficha se construye desde las ofertas vigentes para que la información se mantenga sincronizada con el resto del sitio y el mapa interactivo.</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight" data-editable-key="businesses_hero_title" data-editable-type="textarea">
+                <?= htmlspecialchars((string) ($labels['businesses_hero_title'] ?? 'Negocios registrados con ofertas activas.'), ENT_QUOTES, 'UTF-8') ?>
+            </h1>
+            <p class="text-lg text-red-100 mb-8 max-w-2xl" data-editable-key="businesses_hero_description" data-editable-type="textarea">
+                <?= htmlspecialchars((string) ($labels['businesses_hero_description'] ?? 'Cada ficha se construye desde las ofertas vigentes para que la información se mantenga sincronizada con el resto del sitio y el mapa interactivo.'), ENT_QUOTES, 'UTF-8') ?>
+            </p>
             
             <div class="flex flex-wrap gap-4">
                 <div class="bg-white/10 border border-white/15 rounded-2xl px-5 py-4 min-w-40">
