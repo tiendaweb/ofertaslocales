@@ -110,7 +110,6 @@
     };
 
     const setupOffersListing = () => {
-        const offers = Array.isArray(pageData.offers) ? pageData.offers : [];
         const categories = Array.isArray(pageData.categories) ? pageData.categories : [];
         const filtersContainer = document.getElementById('category-filters');
         const offersContainer = document.getElementById('offers-container');
@@ -128,6 +127,7 @@
             return;
         }
 
+        const cardNodes = Array.from(offersContainer.querySelectorAll('[data-offer-card]'));
         let activeCategory = 'Todas';
 
         const renderCategories = () => {
@@ -143,17 +143,21 @@
         };
 
         const renderOffers = () => {
-            const filteredOffers = activeCategory === 'Todas'
-                ? offers
-                : offers.filter((offer) => offer.category === activeCategory);
+            let visible = 0;
+            cardNodes.forEach((card) => {
+                const cardCategory = card.getAttribute('data-category') || '';
+                const matches = activeCategory === 'Todas' || cardCategory === activeCategory;
+                card.classList.toggle('hidden', !matches);
+                if (matches) {
+                    visible += 1;
+                }
+            });
 
             if (offersCountSummary) {
                 offersCountSummary.textContent = activeCategory === 'Todas'
-                    ? `Mostrando ${filteredOffers.length} oferta${filteredOffers.length === 1 ? '' : 's'} activa${filteredOffers.length === 1 ? '' : 's'}.`
-                    : `Mostrando ${filteredOffers.length} oferta${filteredOffers.length === 1 ? '' : 's'} en ${activeCategory}.`;
+                    ? `Mostrando ${visible} oferta${visible === 1 ? '' : 's'} activa${visible === 1 ? '' : 's'}.`
+                    : `Mostrando ${visible} oferta${visible === 1 ? '' : 's'} en ${activeCategory}.`;
             }
-
-            renderOfferCards(filteredOffers, offersContainer);
         };
 
         filtersContainer.addEventListener('click', (event) => {
@@ -167,19 +171,12 @@
             renderOffers();
         });
 
-        offersContainer.addEventListener('click', (event) => {
-            const resetButton = event.target.closest('[data-reset-category]');
-            if (!resetButton) {
-                return;
-            }
-
-            activeCategory = 'Todas';
-            renderCategories();
-            renderOffers();
-        });
-
         renderCategories();
         renderOffers();
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
     };
 
     const setupHomeMapPreview = () => {
@@ -602,8 +599,12 @@
     };
 
     const updateCountdowns = () => {
-        document.querySelectorAll('[data-expiration]').forEach((node) => {
-            node.textContent = formatRemainingTime(node.getAttribute('data-expiration') || '');
+        document.querySelectorAll('[data-countdown]').forEach((node) => {
+            const target = node.querySelector('span');
+            const expiresAt = node.getAttribute('data-expiration') || '';
+            if (target) {
+                target.textContent = `Restan ${formatRemainingTime(expiresAt)}`;
+            }
         });
     };
 
