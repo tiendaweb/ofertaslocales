@@ -24,7 +24,6 @@ class UpdateSettingsAction extends PageAction
         'merchant_title',
         'merchant_description',
         'footer_tagline',
-        'default_user_publish_mode',
         'app_name',
         'short_name',
         'theme_color',
@@ -43,7 +42,6 @@ class UpdateSettingsAction extends PageAction
         'custom_js_panel',
     ];
 
-    private const ALLOWED_USER_PUBLISH_MODES = ['direct', 'review', 'profile_required'];
     private const ALLOWED_PWA_DISPLAY = ['standalone', 'fullscreen', 'minimal-ui', 'browser'];
 
     public function __construct(
@@ -79,10 +77,6 @@ class UpdateSettingsAction extends PageAction
             $payload['site_logo_url'] = $savedLogo;
         }
 
-        if (array_key_exists('default_user_publish_mode', $payload)
-            && !in_array($payload['default_user_publish_mode'], self::ALLOWED_USER_PUBLISH_MODES, true)) {
-            $payload['default_user_publish_mode'] = 'review';
-        }
         if (array_key_exists('display', $payload) && !in_array($payload['display'], self::ALLOWED_PWA_DISPLAY, true)) {
             $payload['display'] = 'standalone';
         }

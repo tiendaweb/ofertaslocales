@@ -162,15 +162,6 @@ declare(strict_types=1);
                         <input type="text" name="<?= $key ?>" value="<?= htmlspecialchars((string) ($settings[$key] ?? '')) ?>" class="w-full rounded-xl border border-red-100 bg-white px-3 py-2 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
                     </label>
                 <?php endforeach; ?>
-                <div class="rounded-2xl border border-red-100 bg-red-50/50 p-3">
-                    <label class="mb-2 block text-[11px] font-bold uppercase tracking-widest text-red-500">Regla para usuarios (rol user)</label>
-                    <select name="default_user_publish_mode" class="w-full rounded-xl border border-red-100 bg-white p-3 text-sm text-gray-800 focus:border-red-400 focus:outline-none">
-                        <option value="direct" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'direct' ? 'selected' : '' ?>>Publicación inmediata</option>
-                        <option value="review" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'review' ? 'selected' : '' ?>>Publicación bajo revisión</option>
-                        <option value="profile_required" <?= ($settings['default_user_publish_mode'] ?? 'review') === 'profile_required' ? 'selected' : '' ?>>Solo tras completar perfil</option>
-                    </select>
-                    <p class="mt-2 text-xs text-gray-600">Define cómo publican las cuentas generales. Las cuentas negocio/admin mantienen su flujo comercial.</p>
-                </div>
                 <button type="submit" class="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white hover:bg-red-500">Aplicar cambios</button>
             </form>
         </div>

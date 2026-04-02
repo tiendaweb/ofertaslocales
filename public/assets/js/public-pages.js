@@ -180,41 +180,6 @@
         renderOffers();
     };
 
-    const setupOfferForm = () => {
-        const inputOffer = document.getElementById('inputOffer');
-        const charCount = document.getElementById('charCount');
-        const inputImage = document.getElementById('inputImage');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const imagePreview = document.getElementById('imagePreview');
-        const imagePlaceholder = document.getElementById('imagePlaceholder');
-
-        if (inputOffer && charCount) {
-            inputOffer.addEventListener('input', (event) => {
-                charCount.textContent = `${event.target.value.length}/40`;
-            });
-        }
-
-        if (inputImage && imagePreviewContainer && imagePreview && imagePlaceholder) {
-            inputImage.addEventListener('change', (event) => {
-                const [file] = event.target.files || [];
-                if (!file) {
-                    imagePreviewContainer.classList.add('hidden');
-                    imagePlaceholder.classList.remove('hidden');
-                    imagePreview.src = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (loadEvent) => {
-                    imagePreview.src = String(loadEvent.target?.result || '');
-                    imagePreviewContainer.classList.remove('hidden');
-                    imagePlaceholder.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-    };
-
     const setupHomeMapPreview = () => {
         const previewContainer = document.getElementById('home-map-preview');
         const centerMeButton = document.getElementById('home-map-center-me');
@@ -635,7 +600,6 @@
     };
 
     setupOffersListing();
-    setupOfferForm();
     setupHomeMapPreview();
     setupInlineEditMode();
     updateCountdowns();

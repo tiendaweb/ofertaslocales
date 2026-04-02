@@ -69,8 +69,8 @@ $old = is_array($flash['old'] ?? null) ? $flash['old'] : [];
         </form>
 
         <p class="mt-8 text-center text-sm text-gray-500">
-            ¿No tienes cuenta? 
-            <a href="/register" class="font-bold text-red-600 hover:underline">Regístrate gratis</a>
+            ¿Todavía no registraste tu negocio?
+            <a href="/register" class="font-bold text-red-600 hover:underline">Crear cuenta comercial</a>
         </p>
 
     </section>

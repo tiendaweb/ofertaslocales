@@ -270,7 +270,7 @@ class RegisterSubmitAction extends PageAction
 
     private function publishDraftOffer(int $userId, array $account, array $offerDraft): bool
     {
-        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $settings = $this->settingsRepository->findByKeys(['approval_mode']);
         $policy = $this->offerPublishPolicy->resolve($account, $settings);
         if (($policy['can_publish'] ?? false) !== true) {
             return false;

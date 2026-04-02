@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+$homePrimaryCtaHref = ($currentUser ?? null) !== null ? '/panel' : '/register';
+$homePrimaryCtaLabel = ($currentUser ?? null) !== null ? 'Ir a mi panel' : 'Registrar mi negocio';
+
 ?>
 <header class="bg-gradient-to-br from-red-600 to-red-800 text-white pt-16 pb-20 px-4 text-center">
     <div class="max-w-3xl mx-auto">
@@ -15,9 +18,9 @@ declare(strict_types=1);
             <?= htmlspecialchars((string) ($labels['hero_description'] ?? 'Encontrá descuentos reales, contactá directo al vendedor por WhatsApp y asegurá tu precio antes de que el reloj llegue a cero.'), ENT_QUOTES, 'UTF-8') ?>
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="<?= htmlspecialchars((string) ($labels['hero_primary_cta_url'] ?? '/ofertas'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="hero_primary_cta_url" data-editable-attr="href" data-editable-type="url" class="bg-yellow-400 text-yellow-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow-lg flex items-center justify-center gap-2">
+            <a href="<?= htmlspecialchars($homePrimaryCtaHref, ENT_QUOTES, 'UTF-8') ?>" class="bg-yellow-400 text-yellow-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition shadow-lg flex items-center justify-center gap-2">
                 <i data-lucide="search" class="w-5 h-5"></i>
-                <span data-editable-key="hero_primary_cta" data-editable-type="text"><?= htmlspecialchars((string) ($labels['hero_primary_cta'] ?? 'Ver descuentos ahora'), ENT_QUOTES, 'UTF-8') ?></span>
+                <span><?= htmlspecialchars($homePrimaryCtaLabel, ENT_QUOTES, 'UTF-8') ?></span>
             </a>
         </div>
     </div>
@@ -127,48 +130,4 @@ declare(strict_types=1);
         </div>
     </div>
 
-    <section id="publicar" class="mb-10">
-        <div class="bg-gray-900 text-white rounded-3xl overflow-hidden shadow-2xl relative">
-            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-red-600/20 blur-3xl pointer-events-none"></div>
-            <div class="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="flex-1">
-                    <div class="inline-block bg-red-600/20 text-red-400 font-semibold px-3 py-1 rounded-full text-sm w-max mb-6" data-editable-key="merchant_badge" data-editable-type="text">
-                        <?= htmlspecialchars((string) ($labels['merchant_badge'] ?? 'Para Comerciantes'), ENT_QUOTES, 'UTF-8') ?>
-                    </div>
-                    <h2 class="text-3xl md:text-4xl font-bold mb-4 leading-tight" data-editable-key="merchant_title" data-editable-type="textarea">
-                        <?= htmlspecialchars((string) ($labels['merchant_title'] ?? 'Conseguí más clientes hoy mismo'), ENT_QUOTES, 'UTF-8') ?>
-                    </h2>
-                    <p class="text-gray-300 text-lg mb-8" data-editable-key="merchant_description" data-editable-type="textarea">
-                        <?= htmlspecialchars((string) ($labels['merchant_description'] ?? 'Publicá tu oferta GRATIS. Llegá a miles de vecinos en tu zona y empezá a recibir consultas directo en tu WhatsApp.'), ENT_QUOTES, 'UTF-8') ?>
-                    </p>
-                    <ul class="space-y-3 mb-8">
-                        <?php foreach ($merchantBenefits as $benefit) : ?>
-                            <li class="flex items-start gap-3">
-                                <i data-lucide="check-circle" class="text-green-400 mt-0.5 w-5 h-5 shrink-0"></i>
-                                <span class="text-gray-200"><?= htmlspecialchars($benefit, ENT_QUOTES, 'UTF-8') ?></span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <a href="/register" class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-8 rounded-2xl transition-colors shadow-lg shadow-red-900/30 text-lg">
-                        <i data-lucide="store" class="w-5 h-5"></i>
-                        Registrar mi negocio gratis
-                    </a>
-                </div>
-                <div class="hidden md:grid grid-cols-1 gap-4 shrink-0 w-64">
-                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-                        <div class="text-4xl font-black text-red-400 mb-1">100%</div>
-                        <div class="text-sm text-gray-400">Gratis siempre</div>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-                        <div class="text-4xl font-black text-green-400 mb-1">24hs</div>
-                        <div class="text-sm text-gray-400">Para publicar una oferta</div>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-                        <i data-lucide="message-circle" class="w-8 h-8 text-[#25D366] mx-auto mb-1"></i>
-                        <div class="text-sm text-gray-400">Consultas por WhatsApp</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
