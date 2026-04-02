@@ -12,20 +12,27 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class UpdateInlineContentAction extends PageAction
 {
-    private const SETTINGS_KEYS = [
-        'hero_badge',
-        'hero_title',
-        'hero_description',
-        'hero_primary_cta',
-        'hero_primary_cta_url',
-        'merchant_badge',
-        'merchant_title',
-        'merchant_description',
-        'footer_tagline',
-        'footer_whatsapp_url',
-        'footer_link_publish_url',
-        'footer_link_login_url',
-        'footer_link_map_url',
+    private const SETTINGS_FIELDS = [
+        'hero_badge' => 'text',
+        'hero_title' => 'textarea',
+        'hero_description' => 'textarea',
+        'hero_primary_cta' => 'text',
+        'hero_primary_cta_url' => 'url',
+        'merchant_badge' => 'text',
+        'merchant_title' => 'text',
+        'merchant_description' => 'textarea',
+        'offers_section_badge' => 'text',
+        'offers_section_title' => 'text',
+        'businesses_section_title' => 'text',
+        'businesses_section_description' => 'textarea',
+        'businesses_hero_badge' => 'text',
+        'businesses_hero_title' => 'textarea',
+        'businesses_hero_description' => 'textarea',
+        'footer_tagline' => 'text',
+        'footer_whatsapp_url' => 'url',
+        'footer_link_publish_url' => 'url',
+        'footer_link_login_url' => 'url',
+        'footer_link_map_url' => 'url',
     ];
 
     private const SEO_KEYS = [
@@ -58,25 +65,46 @@ class UpdateInlineContentAction extends PageAction
 
         $settingsPayload = [];
         $seoPayload = [];
+        $updated = [];
+        $rejected = [];
 
         foreach ($fields as $key => $value) {
             $normalizedValue = trim((string) $value);
 
-            if (in_array($key, self::SETTINGS_KEYS, true)) {
+            if (isset(self::SETTINGS_FIELDS[$key])) {
+                $validationError = $this->validateByType($normalizedValue, self::SETTINGS_FIELDS[$key]);
+                if ($validationError !== null) {
+                    $rejected[$key] = $validationError;
+                    continue;
+                }
+
                 $settingsPayload[$key] = $normalizedValue;
+                $updated[] = $key;
                 continue;
             }
 
             if (isset(self::SEO_KEYS[$key])) {
+                $validationError = $this->validateByType($normalizedValue, 'url');
+                if ($validationError !== null) {
+                    $rejected[$key] = $validationError;
+                    continue;
+                }
+
                 $seoDefinition = self::SEO_KEYS[$key];
                 $seoPayload[$seoDefinition['page']][$seoDefinition['field']] = $normalizedValue;
+                $updated[] = $key;
+                continue;
             }
+
+            $rejected[$key] = 'Clave no permitida para edición inline.';
         }
 
         if ($settingsPayload === [] && $seoPayload === []) {
             return $this->respondJson($response, [
                 'ok' => false,
                 'message' => 'Las claves enviadas no están permitidas para edición inline.',
+                'updated' => [],
+                'rejected' => $rejected,
             ], 422);
         }
 
@@ -94,10 +122,34 @@ class UpdateInlineContentAction extends PageAction
         }
 
         return $this->respondJson($response, [
-            'ok' => true,
-            'message' => 'Cambios guardados correctamente.',
-            'updated' => array_keys($fields),
+            'ok' => $rejected === [],
+            'message' => $rejected === []
+                ? 'Cambios guardados correctamente.'
+                : 'Se guardaron cambios parciales. Revisá los campos rechazados.',
+            'updated' => array_values(array_unique($updated)),
+            'rejected' => $rejected,
         ]);
+    }
+
+    private function validateByType(string $value, string $type): ?string
+    {
+        if ($value === '') {
+            return 'El valor no puede estar vacío.';
+        }
+
+        if ($type !== 'url') {
+            return null;
+        }
+
+        if (str_starts_with($value, '/')) {
+            return null;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_URL) === false) {
+            return 'La URL no es válida.';
+        }
+
+        return null;
     }
 
     private function respondJson(Response $response, array $payload, int $status = 200): Response

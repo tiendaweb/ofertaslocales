@@ -10,10 +10,12 @@ $totalOffers = isset($totalOffers) ? (int) $totalOffers : count($offers);
 <section id="ofertas" class="mx-auto max-w-6xl px-4 py-16">
     <div class="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div class="flex flex-wrap items-end gap-x-5 gap-y-3">
-            <p class="text-sm font-semibold uppercase tracking-[0.28em] text-red-500">Descuentos activos</p>
-            <h2 class="flex items-center gap-2 text-2xl font-bold md:text-3xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.28em] text-red-500" data-editable-key="offers_section_badge" data-editable-type="text">
+                <?= htmlspecialchars((string) ($labels['offers_section_badge'] ?? 'Descuentos activos'), ENT_QUOTES, 'UTF-8') ?>
+            </p>
+            <h2 class="flex items-center gap-2 text-2xl font-bold md:text-3xl" data-editable-key="offers_section_title" data-editable-type="text">
                 <i data-lucide="zap" class="h-6 w-6 text-yellow-500"></i>
-                Ofertas de Hoy
+                <?= htmlspecialchars((string) ($labels['offers_section_title'] ?? 'Ofertas de Hoy'), ENT_QUOTES, 'UTF-8') ?>
             </h2>
             <p id="offers-count-summary" class="text-sm font-medium text-gray-500 xl:pb-1">
                 Mostrando <?= $totalOffers ?> oferta<?= $totalOffers === 1 ? '' : 's' ?> activa<?= $totalOffers === 1 ? '' : 's' ?>.

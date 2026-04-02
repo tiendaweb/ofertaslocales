@@ -64,6 +64,39 @@ class SettingsIntegrationTest extends TestCase
         self::assertStringNotContainsString('.modo-prueba-seguro', $publicHtml);
     }
 
+    public function testInlineContentPersistsAfterReload(): void
+    {
+        $this->setAdminSession();
+
+        $app = $this->getAppInstance();
+        $inlineRequest = $this->createRequest('POST', '/admin/inline-content')
+            ->withHeader('Content-Type', 'application/json')
+            ->withParsedBody([
+                'fields' => [
+                    'hero_title' => 'Ofertas inline persistentes',
+                    'offers_section_title' => 'Ofertas actualizadas por admin',
+                ],
+            ]);
+        $inlineResponse = $app->handle($inlineRequest);
+
+        self::assertSame(200, $inlineResponse->getStatusCode());
+        $payload = json_decode((string) $inlineResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertTrue($payload['ok']);
+        self::assertSame(
+            ['hero_title', 'offers_section_title'],
+            $payload['updated']
+        );
+        self::assertSame([], $payload['rejected']);
+
+        $homeResponse = $app->handle($this->createRequest('GET', '/'));
+        $homeHtml = (string) $homeResponse->getBody();
+        self::assertStringContainsString('Ofertas inline persistentes', $homeHtml);
+
+        $offersResponse = $app->handle($this->createRequest('GET', '/ofertas'));
+        $offersHtml = (string) $offersResponse->getBody();
+        self::assertStringContainsString('Ofertas actualizadas por admin', $offersHtml);
+    }
+
     private function setAdminSession(): void
     {
         $this->setSession([

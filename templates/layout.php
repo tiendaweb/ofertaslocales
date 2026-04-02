@@ -29,21 +29,7 @@ if (isset($manifest['icons']) && is_array($manifest['icons'])) {
         }
     }
 }
-$runtimeSettings = [];
-$runtimeDbPath = dirname(__DIR__) . '/database/app.sqlite';
-if (is_file($runtimeDbPath)) {
-    try {
-        $runtimePdo = new PDO('sqlite:' . $runtimeDbPath);
-        $runtimeStmt = $runtimePdo->query('SELECT key, value FROM settings WHERE key IN (\'custom_css_frontend\', \'custom_js_frontend\', \'custom_css_panel\', \'custom_js_panel\', \'safe_mode\')');
-        if ($runtimeStmt !== false) {
-            foreach ($runtimeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $runtimeSettings[(string) $row['key']] = (string) $row['value'];
-            }
-        }
-    } catch (Throwable) {
-        // ignore DB errors silently
-    }
-}
+$runtimeSettings = is_array($runtimeSettings ?? null) ? $runtimeSettings : [];
 $customCssFrontend = trim((string) ($runtimeSettings['custom_css_frontend'] ?? ''));
 $customJsFrontend  = trim((string) ($runtimeSettings['custom_js_frontend'] ?? ''));
 $customCssPanel    = trim((string) ($runtimeSettings['custom_css_panel'] ?? ''));
@@ -164,6 +150,10 @@ $assetNonce = base64_encode(random_bytes(16));
                 endpoint: '/admin/inline-content',
             };
         </script>
+        <script src="/assets/js/public-pages/catalog.js"></script>
+        <script src="/assets/js/public-pages/map-preview.js"></script>
+        <script src="/assets/js/public-pages/inline.js"></script>
+        <script src="/assets/js/public-pages/home.js"></script>
         <script src="/assets/js/public-pages.js"></script>
     <?php endif; ?>
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\View;
 
+use App\Application\Support\RuntimeViewSettingsStore;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -37,6 +38,7 @@ class PhpTemplateRenderer implements TemplateRendererInterface
         extract($data + [
             'contentTemplate' => $contentTemplate,
             'currentYear' => (int) date('Y'),
+            'runtimeSettings' => RuntimeViewSettingsStore::all(),
         ], EXTR_SKIP);
 
         ob_start();
