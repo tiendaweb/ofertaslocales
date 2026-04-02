@@ -199,7 +199,8 @@ $businessLon = $businessProfile['address_lon'] ?? null;
                 <label class="mb-2 flex items-center gap-2 text-sm font-bold text-gray-700" for="panel-offer-whatsapp">
                     <i data-lucide="message-circle" class="h-4 w-4 text-gray-400"></i> WhatsApp
                 </label>
-                <input id="panel-offer-whatsapp" name="whatsapp" required value="<?= htmlspecialchars($defaultWhatsapp, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="54911...">
+                <input id="panel-offer-whatsapp" name="whatsapp" required value="<?= htmlspecialchars($defaultWhatsapp, ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?>" placeholder="54911XXXXXXXX">
+                <p class="mt-1 text-[11px] text-gray-500">Solo dígitos en formato internacional. Ejemplo: 54911XXXXXXXX.</p>
             </div>
             
             <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4" x-show="step === 0 || step === 5">
@@ -309,7 +310,7 @@ $businessLon = $businessProfile['address_lon'] ?? null;
                                         </div>
                                         <div>
                                             <label class="mb-1 block text-xs font-bold text-gray-500">WhatsApp</label>
-                                            <input name="whatsapp" value="<?= htmlspecialchars((string) $offer['whatsapp'], ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" required>
+                                            <input name="whatsapp" value="<?= htmlspecialchars((string) $offer['whatsapp'], ENT_QUOTES, 'UTF-8') ?>" class="<?= $inputClass ?> py-2" placeholder="54911XXXXXXXX" required>
                                         </div>
                                         <div>
                                             <label class="mb-1 block text-xs font-bold text-gray-500">Ubicación</label>

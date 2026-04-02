@@ -6,6 +6,7 @@ namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
 use App\Application\Settings\SettingsInterface;
+use App\Application\Support\Whatsapp;
 use App\Domain\User\AccountRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -17,7 +18,8 @@ class UpdateBusinessProfileAction extends PageAction
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly AccountRepository $accountRepository,
-        private readonly SettingsInterface $settings
+        private readonly SettingsInterface $settings,
+        private readonly Whatsapp $whatsappHelper
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -46,6 +48,7 @@ class UpdateBusinessProfileAction extends PageAction
         $province = trim((string) ($data['province'] ?? ''));
         $addressLat = trim((string) ($data['address_lat'] ?? ''));
         $addressLon = trim((string) ($data['address_lon'] ?? ''));
+        $normalizedWhatsapp = $this->whatsappHelper->normalize($whatsapp);
 
         $socialUrlMap = [
             'instagram_url' => ['label' => 'Instagram', 'value' => trim((string) ($data['instagram_url'] ?? ''))],
@@ -55,6 +58,7 @@ class UpdateBusinessProfileAction extends PageAction
             'logo_url' => ['label' => 'logo', 'value' => trim((string) ($data['logo_url'] ?? ''))],
             'cover_url' => ['label' => 'portada', 'value' => trim((string) ($data['cover_url'] ?? ''))],
         ];
+        $errors = [];
         $uploadedFiles = $request->getUploadedFiles();
         $logoUpload = $uploadedFiles['logo_image'] ?? null;
         if ($logoUpload instanceof UploadedFileInterface && $logoUpload->getError() !== UPLOAD_ERR_NO_FILE) {
@@ -76,13 +80,14 @@ class UpdateBusinessProfileAction extends PageAction
             }
         }
 
-        $errors = [];
         if ($businessName === '') {
             $errors['business_name'] = 'El nombre del negocio es obligatorio.';
         }
 
-        if ($whatsapp === '') {
-            $errors['whatsapp'] = 'El WhatsApp del negocio es obligatorio.';
+        if ($normalizedWhatsapp === '') {
+            $errors['whatsapp'] = 'El WhatsApp del negocio es obligatorio y debe tener formato internacional (ej: 54911XXXXXXXX).';
+        } elseif (!$this->whatsappHelper->isValid($normalizedWhatsapp)) {
+            $errors['whatsapp'] = 'Ingresa un WhatsApp válido en formato internacional (ej: 54911XXXXXXXX).';
         }
 
         if ($bio !== '' && mb_strlen($bio) > 280) {
@@ -101,11 +106,11 @@ class UpdateBusinessProfileAction extends PageAction
             }
         }
 
-        if ($addressLat === '' || !is_numeric($addressLat)) {
+        if ($addressLat === '' || !is_numeric($addressLat) || !$this->isLatitudeInRange((float) $addressLat)) {
             $errors['address_lat'] = 'Selecciona en el mapa una latitud válida.';
         }
 
-        if ($addressLon === '' || !is_numeric($addressLon)) {
+        if ($addressLon === '' || !is_numeric($addressLon) || !$this->isLongitudeInRange((float) $addressLon)) {
             $errors['address_lon'] = 'Selecciona en el mapa una longitud válida.';
         }
 
@@ -122,7 +127,7 @@ class UpdateBusinessProfileAction extends PageAction
 
         $old = [
             'business_name' => $businessName,
-            'whatsapp' => $whatsapp,
+            'whatsapp' => $normalizedWhatsapp,
             'bio' => $bio,
             'street' => $street,
             'street_number' => $streetNumber,
@@ -149,7 +154,7 @@ class UpdateBusinessProfileAction extends PageAction
 
         $updated = $this->accountRepository->update($id, [
             'business_name' => $businessName,
-            'whatsapp' => $whatsapp,
+            'whatsapp' => $normalizedWhatsapp,
             'bio' => $bio !== '' ? $bio : null,
             'street' => $street,
             'street_number' => $streetNumber,
@@ -247,5 +252,15 @@ class UpdateBusinessProfileAction extends PageAction
         }
 
         return ['path' => '/uploads/' . $filename];
+    }
+
+    private function isLatitudeInRange(float $latitude): bool
+    {
+        return $latitude >= -90 && $latitude <= 90;
+    }
+
+    private function isLongitudeInRange(float $longitude): bool
+    {
+        return $longitude >= -180 && $longitude <= 180;
     }
 }

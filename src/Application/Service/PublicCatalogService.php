@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Service;
 
+use App\Application\Support\Whatsapp;
 use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\PublicOfferRepository;
 use DateTimeImmutable;
@@ -12,7 +13,8 @@ class PublicCatalogService
 {
     public function __construct(
         private readonly PublicOfferRepository $publicOfferRepository,
-        private readonly CategoryRepository $categoryRepository
+        private readonly CategoryRepository $categoryRepository,
+        private readonly Whatsapp $whatsappHelper
     ) {
     }
 
@@ -55,6 +57,7 @@ class PublicCatalogService
     private function normalizeOffer(array $offer): array
     {
         $expiresAt = new DateTimeImmutable((string) $offer['expires_at']);
+        $normalizedWhatsapp = $this->whatsappHelper->normalize((string) $offer['whatsapp']);
 
         return [
             'id' => (int) $offer['id'],
@@ -64,8 +67,11 @@ class PublicCatalogService
             'title' => (string) $offer['title'],
             'description' => (string) $offer['description'],
             'image_url' => (string) ($offer['image_url'] ?: 'https://placehold.co/900x600/f3f4f6/1f2937?text=Oferta'),
-            'whatsapp' => (string) $offer['whatsapp'],
+            'whatsapp' => $normalizedWhatsapp,
+            'whatsapp_url' => $this->whatsappHelper->buildUrl($normalizedWhatsapp),
             'location' => (string) $offer['location'],
+            'postal_code' => $offer['postal_code'] !== null ? (string) $offer['postal_code'] : null,
+            'between_streets' => $offer['between_streets'] !== null ? (string) $offer['between_streets'] : null,
             'lat' => $offer['lat'] !== null ? (float) $offer['lat'] : null,
             'lon' => $offer['lon'] !== null ? (float) $offer['lon'] : null,
             'expires_at' => $expiresAt->format(DATE_ATOM),
@@ -104,7 +110,10 @@ class PublicCatalogService
                     'id' => $businessId,
                     'business_name' => $offer['business_name'],
                     'whatsapp' => $offer['whatsapp'],
+                    'whatsapp_url' => $offer['whatsapp_url'],
                     'location' => $offer['location'],
+                    'postal_code' => $offer['postal_code'],
+                    'between_streets' => $offer['between_streets'],
                     'category' => $offer['category'],
                     'active_offers' => 0,
                     'next_expiration' => $offer['expires_at'],
@@ -173,7 +182,10 @@ class PublicCatalogService
                     'description' => $offer['description'],
                     'image_url' => $offer['image_url'],
                     'whatsapp' => $offer['whatsapp'],
+                    'whatsapp_url' => $offer['whatsapp_url'],
                     'location' => $offer['location'],
+                    'postal_code' => $offer['postal_code'],
+                    'between_streets' => $offer['between_streets'],
                     'lat' => $offer['lat'],
                     'lon' => $offer['lon'],
                     'expires_at' => $offer['expires_at'],

@@ -7,6 +7,7 @@ namespace App\Application\Actions\Auth;
 use App\Application\Actions\PageAction;
 use App\Application\Auth\AuthService;
 use App\Application\Service\OfferPublishPolicy;
+use App\Application\Support\Whatsapp;
 use App\Domain\User\AccountRepository;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Site\SettingsRepository;
@@ -23,7 +24,8 @@ class RegisterSubmitAction extends PageAction
         private readonly AuthService $authService,
         private readonly OfferRepository $offerRepository,
         private readonly SettingsRepository $settingsRepository,
-        private readonly OfferPublishPolicy $offerPublishPolicy
+        private readonly OfferPublishPolicy $offerPublishPolicy,
+        private readonly Whatsapp $whatsappHelper
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -74,8 +76,11 @@ class RegisterSubmitAction extends PageAction
             $errors['business_name'] = 'El nombre del local es obligatorio para registrar un negocio.';
         }
 
-        if ($whatsapp === '') {
-            $errors['whatsapp'] = 'El WhatsApp es obligatorio para registrar un negocio.';
+        $normalizedWhatsapp = $this->whatsappHelper->normalize($whatsapp);
+        if ($normalizedWhatsapp === '') {
+            $errors['whatsapp'] = 'El WhatsApp es obligatorio y debe tener formato internacional (ej: 54911XXXXXXXX).';
+        } elseif (!$this->whatsappHelper->isValid($normalizedWhatsapp)) {
+            $errors['whatsapp'] = 'Ingresa un WhatsApp válido en formato internacional (ej: 54911XXXXXXXX).';
         }
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -108,11 +113,11 @@ class RegisterSubmitAction extends PageAction
             }
         }
 
-        if ($addressLat === '' || !is_numeric($addressLat)) {
+        if ($addressLat === '' || !is_numeric($addressLat) || !$this->isLatitudeInRange((float) $addressLat)) {
             $errors['address_lat'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
         }
 
-        if ($addressLon === '' || !is_numeric($addressLon)) {
+        if ($addressLon === '' || !is_numeric($addressLon) || !$this->isLongitudeInRange((float) $addressLon)) {
             $errors['address_lon'] = 'Selecciona en el mapa la ubicación exacta del negocio.';
         }
 
@@ -180,7 +185,7 @@ class RegisterSubmitAction extends PageAction
                 'role' => $role,
                 'business_type' => $businessType,
                 'business_name' => $businessName !== '' ? $businessName : null,
-                'whatsapp' => $whatsapp,
+                'whatsapp' => $normalizedWhatsapp,
                 'street' => $street !== '' ? $street : null,
                 'street_number' => $streetNumber !== '' ? $streetNumber : null,
                 'postal_code' => $postalCode !== '' ? $postalCode : null,
@@ -290,5 +295,15 @@ class RegisterSubmitAction extends PageAction
         ]);
 
         return true;
+    }
+
+    private function isLatitudeInRange(float $latitude): bool
+    {
+        return $latitude >= -90 && $latitude <= 90;
+    }
+
+    private function isLongitudeInRange(float $longitude): bool
+    {
+        return $longitude >= -180 && $longitude <= 180;
     }
 }

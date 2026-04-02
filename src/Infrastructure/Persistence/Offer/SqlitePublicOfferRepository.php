@@ -19,7 +19,8 @@ class SqlitePublicOfferRepository implements PublicOfferRepository
             "SELECT offers.id, offers.user_id, offers.category, offers.title, offers.description, offers.image_url,
                     offers.whatsapp, offers.location, offers.lat, offers.lon, offers.status, offers.created_at,
                     offers.expires_at, users.business_name, users.bio, users.instagram_url, users.facebook_url,
-                    users.tiktok_url, users.website_url, users.logo_url, users.cover_url
+                    users.tiktok_url, users.website_url, users.logo_url, users.cover_url,
+                    users.postal_code, users.between_streets
              FROM offers
              INNER JOIN users ON users.id = offers.user_id
              WHERE offers.status = 'active'
@@ -36,7 +37,8 @@ class SqlitePublicOfferRepository implements PublicOfferRepository
             "SELECT offers.id, offers.user_id, offers.category, offers.title, offers.description, offers.image_url,
                     offers.whatsapp, offers.location, offers.lat, offers.lon, offers.created_at, offers.expires_at,
                     users.business_name, users.bio, users.instagram_url, users.facebook_url, users.tiktok_url,
-                    users.website_url, users.logo_url, users.cover_url
+                    users.website_url, users.logo_url, users.cover_url,
+                    users.postal_code, users.between_streets
              FROM offers
              INNER JOIN users ON users.id = offers.user_id
              WHERE offers.status = 'active'

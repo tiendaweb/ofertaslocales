@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
+use App\Application\Support\Whatsapp;
 use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -16,7 +17,8 @@ class UpdateBusinessOfferAction extends PageAction
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
         private readonly OfferRepository $offerRepository,
-        private readonly CategoryRepository $categoryRepository
+        private readonly CategoryRepository $categoryRepository,
+        private readonly Whatsapp $whatsappHelper
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -52,6 +54,7 @@ class UpdateBusinessOfferAction extends PageAction
             'whatsapp' => trim((string) ($data['whatsapp'] ?? '')),
             'location' => trim((string) ($data['location'] ?? '')),
         ];
+        $payload['whatsapp'] = $this->whatsappHelper->normalize($payload['whatsapp']);
 
         foreach (['title', 'description', 'category', 'whatsapp'] as $requiredField) {
             if ($payload[$requiredField] === '') {
@@ -59,6 +62,12 @@ class UpdateBusinessOfferAction extends PageAction
 
                 return $this->redirect($response, '/panel');
             }
+        }
+
+        if (!$this->whatsappHelper->isValid($payload['whatsapp'])) {
+            $this->flash('error', 'Ingresa un WhatsApp válido en formato internacional (ej: 54911XXXXXXXX).');
+
+            return $this->redirect($response, '/panel');
         }
 
         if (!$this->categoryRepository->isApproved($payload['category'])) {

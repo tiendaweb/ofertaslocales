@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Admin;
 
 use App\Application\Actions\PageAction;
+use App\Application\Support\Whatsapp;
 use App\Domain\Offer\OfferRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -14,7 +15,8 @@ class UpdateAdminOfferAction extends PageAction
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \App\Infrastructure\View\TemplateRendererInterface $renderer,
-        private readonly OfferRepository $offerRepository
+        private readonly OfferRepository $offerRepository,
+        private readonly Whatsapp $whatsappHelper
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -36,6 +38,7 @@ class UpdateAdminOfferAction extends PageAction
             'whatsapp' => trim((string) ($data['whatsapp'] ?? '')),
             'location' => trim((string) ($data['location'] ?? '')),
         ];
+        $payload['whatsapp'] = $this->whatsappHelper->normalize($payload['whatsapp']);
 
         foreach (['category', 'title', 'description', 'whatsapp', 'location'] as $field) {
             if ($payload[$field] === '') {
@@ -43,6 +46,12 @@ class UpdateAdminOfferAction extends PageAction
 
                 return $this->redirect($response, '/admin');
             }
+        }
+
+        if (!$this->whatsappHelper->isValid($payload['whatsapp'])) {
+            $this->flash('error', 'El WhatsApp debe estar normalizado con formato internacional (ej: 54911XXXXXXXX).');
+
+            return $this->redirect($response, '/admin');
         }
 
         $updated = $this->offerRepository->updateByAdmin($offerId, $payload);

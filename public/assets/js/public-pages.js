@@ -27,7 +27,9 @@
             `Hola! Vi su oferta de '${offer.title}' en OfertasLocales. Sigue disponible?`
         );
 
-        return `https://wa.me/${offer.whatsapp}?text=${message}`;
+        const baseUrl = offer.whatsapp_url || '';
+
+        return `${baseUrl}?text=${message}`;
     };
 
     const renderOfferCards = (offers, container) => {
@@ -237,7 +239,13 @@
             modalImage.alt = offer.title || 'Oferta seleccionada';
             modalCategory.textContent = offer.category || '';
             modalDescription.textContent = offer.description || 'Sin descripción adicional.';
-            modalLocation.textContent = offer.location || 'Ubicación no especificada';
+            const extraAddress = [
+                offer.between_streets ? `Entre calles: ${offer.between_streets}` : '',
+                offer.postal_code ? `CP ${offer.postal_code}` : '',
+            ].filter(Boolean).join(' · ');
+            modalLocation.textContent = extraAddress
+                ? `${offer.location || 'Ubicación no especificada'} · ${extraAddress}`
+                : (offer.location || 'Ubicación no especificada');
             modalWhatsapp.href = buildWhatsAppLink(offer);
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');

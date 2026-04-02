@@ -6,7 +6,7 @@ $mapOffers = $mapOffers ?? [];
 $coverageLabel = $coverageLabel ?? 'Tu zona';
 
 ?>
-<div class="flex flex-col h-screen bg-gray-50 overflow-hidden border-b border-gray-200 shadow-2xl">
+<div class="flex min-h-[100dvh] flex-col bg-gray-50 overflow-hidden border-b border-gray-200 shadow-2xl">
     <header class="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 shrink-0 flex justify-between items-center shadow-md z-20">
         <div>
             <h1 class="font-black text-xl tracking-tight">OFERTAS CERCA</h1>
@@ -68,7 +68,7 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
                     <p id="map-location-feedback" class="min-h-5 mt-2 text-xs text-gray-500"></p>
                 </div>
 
-                <div class="relative h-[calc(100vh-10rem)] md:h-[70vh]">
+                <div class="relative h-[calc(100dvh-11.5rem)] md:h-[calc(100dvh-12.5rem)] lg:h-[calc(100dvh-9rem)]">
                     <div id="offers-map" class="absolute inset-0 bg-gray-200"></div>
 
                     <div class="hidden md:block absolute bottom-5 left-5 max-w-sm bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-white/20 z-20">
@@ -82,12 +82,12 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
                 </div>
             </article>
 
-            <button type="button" id="mobile-offers-toggle" class="md:hidden absolute right-4 bottom-28 z-40 inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl">
+            <button type="button" id="mobile-offers-toggle" aria-controls="map-mobile-sheet" aria-expanded="false" class="md:hidden absolute right-4 bottom-24 z-40 inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl">
                 <i data-lucide="list" class="w-4 h-4"></i>
                 Ofertas
             </button>
 
-            <aside id="map-mobile-sheet" class="w-full bg-white border border-gray-200 rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col overflow-hidden fixed md:static inset-x-0 bottom-0 z-30 max-h-[64vh] md:max-h-none transition-transform duration-300 translate-y-[78%] md:translate-y-0">
+            <aside id="map-mobile-sheet" aria-expanded="false" class="map-mobile-sheet map-mobile-sheet--collapsed w-full bg-white border border-gray-200 rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col overflow-hidden fixed md:static inset-x-0 bottom-0 z-30 max-h-[70dvh] md:max-h-none transition-transform duration-300">
                 <div class="md:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3"></div>
 
                 <div class="px-5 py-4 flex items-center justify-between border-b border-gray-100">
@@ -126,6 +126,15 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
                                     <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i>
                                     <span class="truncate"><?= htmlspecialchars($offer['location'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </p>
+                                <?php if (!empty($offer['between_streets']) || !empty($offer['postal_code'])) : ?>
+                                    <p class="flex items-center gap-1.5">
+                                        <i data-lucide="map" class="w-3.5 h-3.5 text-gray-400"></i>
+                                        <span class="truncate">
+                                            <?= !empty($offer['between_streets']) ? 'Entre calles: ' . htmlspecialchars((string) $offer['between_streets'], ENT_QUOTES, 'UTF-8') : '' ?>
+                                            <?= !empty($offer['postal_code']) ? ' · CP ' . htmlspecialchars((string) $offer['postal_code'], ENT_QUOTES, 'UTF-8') : '' ?>
+                                        </span>
+                                    </p>
+                                <?php endif; ?>
                                 <p class="flex items-center gap-1.5">
                                     <i data-lucide="clock-3" class="w-3.5 h-3.5 text-yellow-500"></i>
                                     <span><?= htmlspecialchars($offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></span>
@@ -264,19 +273,25 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
         border-radius: 10px;
     }
 
+    .map-mobile-sheet--collapsed {
+        transform: translateY(82%);
+    }
+
+    .map-mobile-sheet--expanded {
+        transform: translateY(0);
+    }
+
+@media (min-width: 768px) {
+        .map-mobile-sheet,
+        .map-mobile-sheet--collapsed,
+        .map-mobile-sheet--expanded {
+            transform: translateY(0);
+        }
+    }
+
     @media (max-width: 768px) {
         #map-offers-list {
             max-height: 50vh;
         }
     }
 </style>
-<script>
-    (() => {
-        const sheet = document.getElementById('map-mobile-sheet');
-        const toggleButton = document.getElementById('mobile-offers-toggle');
-        if (!sheet || !toggleButton) return;
-        toggleButton.addEventListener('click', () => {
-            sheet.classList.toggle('translate-y-[78%]');
-        });
-    })();
-</script>

@@ -6,6 +6,7 @@ namespace App\Application\Actions\Business;
 
 use App\Application\Actions\PageAction;
 use App\Application\Service\OfferPublishPolicy;
+use App\Application\Support\Whatsapp;
 use App\Application\Settings\SettingsInterface;
 use App\Domain\Category\CategoryRepository;
 use App\Domain\Offer\OfferRepository;
@@ -25,7 +26,8 @@ class CreateOfferAction extends PageAction
         private readonly SettingsInterface $settings,
         private readonly OfferPublishPolicy $offerPublishPolicy,
         private readonly CategoryRepository $categoryRepository,
-        private readonly AccountRepository $accountRepository
+        private readonly AccountRepository $accountRepository,
+        private readonly Whatsapp $whatsappHelper
     ) {
         parent::__construct($logger, $renderer);
     }
@@ -44,6 +46,8 @@ class CreateOfferAction extends PageAction
             'whatsapp' => trim((string) ($data['whatsapp'] ?? ($user['whatsapp'] ?? ''))),
             'expires_at' => gmdate('Y-m-d\TH:i', strtotime('+24 hours')),
         ];
+        $normalizedWhatsapp = $this->whatsappHelper->normalize($payload['whatsapp']);
+        $payload['whatsapp'] = $normalizedWhatsapp;
 
         foreach (
             [
@@ -56,6 +60,10 @@ class CreateOfferAction extends PageAction
             if ($payload[$field] === '') {
                 $errors[$field] = sprintf('La %s es obligatoria.', $label);
             }
+        }
+
+        if ($normalizedWhatsapp !== '' && !$this->whatsappHelper->isValid($normalizedWhatsapp)) {
+            $errors['whatsapp'] = 'Ingresa un WhatsApp válido en formato internacional (ej: 54911XXXXXXXX).';
         }
 
         $expiresAt = date_create($payload['expires_at']);
@@ -149,11 +157,15 @@ class CreateOfferAction extends PageAction
     {
         $street = trim((string) ($profile['street'] ?? ''));
         $streetNumber = trim((string) ($profile['street_number'] ?? ''));
+        $betweenStreets = trim((string) ($profile['between_streets'] ?? ''));
+        $postalCode = trim((string) ($profile['postal_code'] ?? ''));
         $city = trim((string) ($profile['city'] ?? ''));
         $province = trim((string) ($profile['province'] ?? ''));
 
         $segments = array_filter([
             trim($street . ' ' . $streetNumber),
+            $betweenStreets !== '' ? 'Entre calles: ' . $betweenStreets : '',
+            $postalCode !== '' ? 'CP ' . $postalCode : '',
             $city,
             $province,
         ], static fn (string $segment): bool => $segment !== '');
