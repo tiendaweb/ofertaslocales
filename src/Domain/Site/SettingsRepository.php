@@ -10,5 +10,7 @@ interface SettingsRepository
 
     public function findByKeys(array $keys): array;
 
-    public function updateMany(array $settings): void;
+    public function updateMany(array $settings, array $auditContext = []): void;
+
+    public function findAuditLogs(array $keys, int $limit = 50): array;
 }

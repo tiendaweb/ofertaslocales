@@ -116,16 +116,8 @@
 
     const modal = document.getElementById('map-offer-modal');
     const closeButton = document.getElementById('map-modal-close');
-    const modalTitle = document.getElementById('map-modal-title');
-    const modalImage = document.getElementById('map-modal-image');
-    const modalBusiness = document.getElementById('map-modal-business');
-    const modalOffer = document.getElementById('map-modal-offer');
-    const modalCategory = document.getElementById('map-modal-category');
-    const modalDescription = document.getElementById('map-modal-description');
-    const modalLocation = document.querySelector('#map-modal-location span');
-    const modalExpiration = document.querySelector('#map-modal-expiration span');
-    const modalCountdown = document.querySelector('#map-modal-countdown span');
-    const modalWhatsapp = document.getElementById('map-modal-whatsapp');
+    const modalCardContainer = document.getElementById('map-modal-card-container');
+    const modalCardTemplate = document.getElementById('map-offer-card-template');
 
     let activeOffer = null;
     let userLocation = null;
@@ -171,11 +163,16 @@
     };
 
     const refreshModalCountdown = () => {
-        if (!activeOffer || !modalCountdown) {
+        if (!activeOffer || !modalCardContainer) {
             return;
         }
 
-        modalCountdown.textContent = `Restan ${formatRemainingTime(activeOffer.expires_at)}`;
+        const countdownLabel = modalCardContainer.querySelector('[data-countdown] span');
+        if (!countdownLabel) {
+            return;
+        }
+
+        countdownLabel.textContent = `Restan ${formatRemainingTime(activeOffer.expires_at)}`;
     };
 
     const refreshSidebarCountdowns = () => {
@@ -192,26 +189,31 @@
     };
 
     const openModal = (offer) => {
-        if (!modal) {
+        if (!modal || !modalCardTemplate || !modalCardContainer) {
             return;
         }
 
         activeOffer = offer;
-        modalTitle.textContent = offer.title;
-        modalImage.src = offer.image_url;
-        modalImage.alt = offer.title;
-        modalBusiness.textContent = offer.business_name;
-        modalOffer.textContent = offer.title;
-        modalCategory.textContent = offer.category;
-        modalDescription.textContent = offer.description;
-        const extraAddress = [
-            offer.between_streets ? `Entre calles: ${offer.between_streets}` : '',
-            offer.postal_code ? `CP ${offer.postal_code}` : '',
-        ].filter(Boolean).join(' · ');
-        modalLocation.textContent = extraAddress ? `${offer.location} · ${extraAddress}` : offer.location;
-        modalExpiration.textContent = offer.expires_label;
+        const placeholders = {
+            '__BUSINESS__': offer.business_name || 'Negocio local',
+            '__TITLE__': offer.title || 'Oferta disponible',
+            '__CATEGORY__': offer.category || 'General',
+            '__DESCRIPTION__': offer.description || '',
+            '__IMAGE__': offer.image_url || '',
+            '__LOCATION__': offer.location || '',
+            '__EXPIRES_LABEL__': offer.expires_label || '',
+            '__EXPIRES_AT__': offer.expires_at || '',
+            '__BADGE__': offer.badge || 'Oferta',
+            '__WHATSAPP_URL__': offer.whatsapp_url || '#',
+        };
+
+        let html = modalCardTemplate.innerHTML;
+        Object.entries(placeholders).forEach(([token, value]) => {
+            html = html.replaceAll(token, escapeHtml(value));
+        });
+
+        modalCardContainer.innerHTML = html;
         refreshModalCountdown();
-        modalWhatsapp.href = `${offer.whatsapp_url}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasLocales. Sigue disponible?`)}`;
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
 
@@ -428,11 +430,11 @@
 
         const marker = window.L.marker([lat, lon], { icon: redMarkerIcon, riseOnHover: true }).addTo(map);
         marker.bindTooltip(`
-            <div class="map-offer-tooltip">
-                <img src="${escapeHtml(offer.image_url)}" alt="${escapeHtml(offer.title)}" class="map-offer-tooltip__image">
-                <p class="map-offer-tooltip__business">${escapeHtml(offer.business_name)}</p>
-                <p class="map-offer-tooltip__title">${escapeHtml(offer.title)}</p>
-                <p class="map-offer-tooltip__location">${escapeHtml(offer.location)}</p>
+            <div class="w-44 rounded-xl border border-red-100 bg-white p-2 shadow-lg">
+                <img src="${escapeHtml(offer.image_url)}" alt="${escapeHtml(offer.title)}" class="mb-2 h-20 w-full rounded-lg object-cover">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">${escapeHtml(offer.category)}</p>
+                <p class="truncate text-xs font-black text-gray-900">${escapeHtml(offer.business_name)}</p>
+                <p class="line-clamp-2 text-sm font-bold text-red-600">${escapeHtml(offer.title)}</p>
             </div>
         `, {
             direction: 'top',

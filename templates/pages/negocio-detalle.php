@@ -134,45 +134,17 @@ $typeConfig = match($businessType) {
 
             <div class="grid gap-5">
                 <?php foreach ($activeOffers as $offer): ?>
-                    <article class="bg-white border border-slate-100 rounded-[2.2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
-                        <?php if (!empty($offer['image_url'])): ?>
-                            <div class="h-48 w-full overflow-hidden bg-slate-100">
-                                <img src="<?= htmlspecialchars((string) $offer['image_url'], ENT_QUOTES, 'UTF-8') ?>"
-                                     alt="<?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            </div>
-                        <?php else: ?>
-                            <div class="h-20 w-full bg-gradient-to-r from-red-50 to-rose-50 flex items-center justify-center">
-                                <i data-lucide="tag" class="w-8 h-8 text-red-200"></i>
-                            </div>
-                        <?php endif; ?>
-                        <div class="p-5">
-                            <div class="flex justify-between items-start gap-3 mb-3">
-                                <h3 class="text-lg font-extrabold text-slate-900 leading-tight group-hover:text-red-600 transition-colors flex-1">
-                                    <?= htmlspecialchars((string) $offer['title'], ENT_QUOTES, 'UTF-8') ?>
-                                </h3>
-                                <div class="px-2 py-1 bg-red-50 rounded-lg text-red-600 shrink-0">
-                                    <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-0.5"></i>
-                                    <span class="text-[10px] font-bold uppercase"><?= htmlspecialchars((string) $offer['expires_label'], ENT_QUOTES, 'UTF-8') ?></span>
-                                </div>
-                            </div>
-                            <?php if (!empty($offer['description'])): ?>
-                                <p class="text-slate-500 text-sm mb-4 line-clamp-2"><?= htmlspecialchars((string) $offer['description'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                            <a href="https://wa.me/<?= $whatsappNumber ?>?text=<?= urlencode('Hola! Me interesa la oferta: ' . (string)$offer['title']) ?>"
-                               target="_blank"
-                               class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black py-3.5 rounded-2xl flex items-center justify-center gap-2.5 shadow-md shadow-green-100 transition-all active:scale-95">
-                                <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                Pedir por WhatsApp
-                            </a>
-                        </div>
-                    </article>
+                    <?php
+                    $context = 'business-detail';
+                    $whatsappCta = 'Pedir por WhatsApp';
+                    include __DIR__ . '/../partials/offer-card.php';
+                    ?>
                 <?php endforeach; ?>
 
                 <?php if ($activeOffers === []): ?>
-                    <div class="text-center py-12 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                        <i data-lucide="tag" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
-                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">No hay ofertas publicadas</p>
+                    <div class="rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+                        <i data-lucide="tag" class="mx-auto mb-3 h-10 w-10 text-slate-300"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-500">No hay ofertas publicadas</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -186,7 +158,3 @@ $typeConfig = match($businessType) {
     </a>
 </div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>
-    lucide.createIcons();
-</script>

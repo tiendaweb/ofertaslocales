@@ -516,6 +516,25 @@ declare(strict_types=1);
                     </div>
                 </div>
 
+                <div class="border-b border-gray-100 pb-6" x-data="{ safeMode: '<?= htmlspecialchars((string) ($settings['safe_mode'] ?? '0'), ENT_QUOTES, 'UTF-8') ?>' === '1' }">
+                    <h4 class="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-700">
+                        <i data-lucide="shield" class="h-4 w-4 text-emerald-600"></i> Modo seguro de assets
+                    </h4>
+                    <div class="flex items-center gap-3 mb-2">
+                        <button type="button" @click="safeMode = !safeMode" :class="safeMode ? 'bg-emerald-600' : 'bg-gray-300'" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" role="switch">
+                            <span :class="safeMode ? 'translate-x-5' : 'translate-x-0'" class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200"></span>
+                        </button>
+                        <input type="hidden" name="safe_mode" :value="safeMode ? '1' : '0'">
+                        <span class="text-sm font-semibold" :class="safeMode ? 'text-emerald-700' : 'text-gray-500'" x-text="safeMode ? 'Modo seguro activo (bloquea CSS/JS personalizados)' : 'Modo seguro desactivado'">Modo seguro desactivado</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Cuando está activo, el layout ignora temporalmente <code>custom_css_*</code> y <code>custom_js_*</code>.</p>
+                </div>
+
+                <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    <p class="font-semibold">Advertencia de seguridad</p>
+                    <p>Guardar código personalizado puede ejecutar scripts en navegador. Validá el origen antes de publicarlo.</p>
+                </div>
+
                 <!-- CSS y JS Personalizado - Frontend -->
                 <div class="border-b border-gray-100 pb-6">
                     <h4 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -547,6 +566,24 @@ declare(strict_types=1);
                             <label class="block text-xs font-semibold text-gray-600 mb-1.5">JS personalizado del panel</label>
                             <textarea name="custom_js_panel" rows="6" placeholder="console.log('Panel');" class="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-y"><?= htmlspecialchars((string) ($settings['custom_js_panel'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
                         </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                    <h4 class="mb-3 text-sm font-bold uppercase tracking-widest text-gray-700">Auditoría reciente de ajustes críticos</h4>
+                    <div class="space-y-2 text-sm">
+                        <?php foreach (($settingsAuditLogs ?? []) as $log) : ?>
+                            <div class="rounded-xl border border-gray-200 bg-white px-3 py-2">
+                                <p class="font-semibold text-gray-800">
+                                    <?= htmlspecialchars((string) ($log['setting_key'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                    <span class="font-normal text-gray-500">· <?= htmlspecialchars((string) ($log['changed_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                                </p>
+                                <p class="text-xs text-gray-500">Por: <?= htmlspecialchars((string) (($log['changed_by_email'] ?? '') !== '' ? $log['changed_by_email'] : 'sistema'), ENT_QUOTES, 'UTF-8') ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (($settingsAuditLogs ?? []) === []) : ?>
+                            <p class="text-xs text-gray-500">Sin cambios auditados todavía.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
 

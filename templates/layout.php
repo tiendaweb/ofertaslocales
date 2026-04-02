@@ -34,7 +34,7 @@ $runtimeDbPath = dirname(__DIR__) . '/database/app.sqlite';
 if (is_file($runtimeDbPath)) {
     try {
         $runtimePdo = new PDO('sqlite:' . $runtimeDbPath);
-        $runtimeStmt = $runtimePdo->query('SELECT key, value FROM settings WHERE key IN (\'custom_css_frontend\', \'custom_js_frontend\', \'custom_css_panel\', \'custom_js_panel\')');
+        $runtimeStmt = $runtimePdo->query('SELECT key, value FROM settings WHERE key IN (\'custom_css_frontend\', \'custom_js_frontend\', \'custom_css_panel\', \'custom_js_panel\', \'safe_mode\')');
         if ($runtimeStmt !== false) {
             foreach ($runtimeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                 $runtimeSettings[(string) $row['key']] = (string) $row['value'];
@@ -48,6 +48,8 @@ $customCssFrontend = trim((string) ($runtimeSettings['custom_css_frontend'] ?? '
 $customJsFrontend  = trim((string) ($runtimeSettings['custom_js_frontend'] ?? ''));
 $customCssPanel    = trim((string) ($runtimeSettings['custom_css_panel'] ?? ''));
 $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
+$safeModeEnabled = (($runtimeSettings['safe_mode'] ?? '0') === '1');
+$assetNonce = base64_encode(random_bytes(16));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -80,7 +82,7 @@ $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
             crossorigin=""
         >
     <?php endif; ?>
-    <style>
+    <style nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>">
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .leaflet-popup-content-wrapper { border-radius: 1rem; }
@@ -91,9 +93,9 @@ $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
         .neon-ring { box-shadow: 0 0 24px rgba(59, 130, 246, 0.18); }
         .chip { border: 1px solid rgba(96, 165, 250, 0.25); background: rgba(30, 41, 59, 0.7); }
         <?php endif; ?>
-        <?php if ($isPublicRoute && $customCssFrontend !== '') : ?>
+        <?php if (!$safeModeEnabled && $isPublicRoute && $customCssFrontend !== '') : ?>
         <?= $customCssFrontend ?>
-        <?php elseif (!$isPublicRoute && $customCssPanel !== '') : ?>
+        <?php elseif (!$safeModeEnabled && !$isPublicRoute && $customCssPanel !== '') : ?>
         <?= $customCssPanel ?>
         <?php endif; ?>
     </style>
@@ -156,7 +158,7 @@ $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
     <?php endif; ?>
 
     <?php if ($isPublicRoute) : ?>
-        <script>
+        <script nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>">
             window.inlineEditConfig = {
                 isAdmin: <?= (($currentUser['role'] ?? '') === 'admin') ? 'true' : 'false' ?>,
                 endpoint: '/admin/inline-content',
@@ -169,7 +171,7 @@ $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
         <script src="/assets/js/map-page.js"></script>
     <?php endif; ?>
 
-    <script>
+    <script nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>">
         window.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) {
                 window.lucide.createIcons();
@@ -184,10 +186,10 @@ $customJsPanel     = trim((string) ($runtimeSettings['custom_js_panel'] ?? ''));
             });
         }
     </script>
-    <?php if ($isPublicRoute && $customJsFrontend !== '') : ?>
-        <script><?= $customJsFrontend ?></script>
-    <?php elseif (!$isPublicRoute && $customJsPanel !== '') : ?>
-        <script><?= $customJsPanel ?></script>
+    <?php if (!$safeModeEnabled && $isPublicRoute && $customJsFrontend !== '') : ?>
+        <script nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>"><?= $customJsFrontend ?></script>
+    <?php elseif (!$safeModeEnabled && !$isPublicRoute && $customJsPanel !== '') : ?>
+        <script nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>"><?= $customJsPanel ?></script>
     <?php endif; ?>
 </body>
 </html>
