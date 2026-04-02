@@ -31,7 +31,7 @@ class RequireOfferPublishPermissionMiddleware implements MiddlewareInterface
             return (new SlimResponse())->withHeader('Location', '/login')->withStatus(302);
         }
 
-        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $settings = $this->settingsRepository->findByKeys(['approval_mode']);
         $policy = $this->offerPublishPolicy->resolve($user, $settings);
 
         if (($policy['can_publish'] ?? false) === true) {

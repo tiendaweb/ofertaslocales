@@ -45,8 +45,8 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
         </div>
         <div class="relative z-10 text-white">
             <p class="text-xs uppercase tracking-[0.3em] text-red-100 mb-2 font-semibold">Registro</p>
-            <h2 class="text-3xl font-bold mb-2">Crear cuenta</h2>
-            <p class="text-red-100 text-sm">Únete para publicar y gestionar tus ofertas</p>
+            <h2 class="text-3xl font-bold mb-2">Crear cuenta comercial</h2>
+            <p class="text-red-100 text-sm">Sumá tu negocio para publicar y gestionar tus ofertas</p>
         </div>
     </div>
 

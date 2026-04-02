@@ -113,7 +113,7 @@ class CreateOfferAction extends PageAction
             return $this->redirect($response, '/panel');
         }
 
-        $settings = $this->settingsRepository->findByKeys(['approval_mode', 'default_user_publish_mode']);
+        $settings = $this->settingsRepository->findByKeys(['approval_mode']);
         $policy = $this->offerPublishPolicy->resolve($user, $settings);
 
         if (($policy['can_publish'] ?? false) !== true) {
