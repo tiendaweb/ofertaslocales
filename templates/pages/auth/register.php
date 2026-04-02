@@ -186,7 +186,8 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">WhatsApp de contacto</label>
-                            <input required form="register-form" name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="+54 9 11 0000 0000" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
+                            <input required form="register-form" name="whatsapp" type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="54911XXXXXXXX" class="block w-full rounded-2xl border border-gray-200 bg-white py-3 px-4 text-gray-900 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 shadow-sm">
+                            <p class="mt-1 text-[11px] text-gray-500">Solo dígitos en formato internacional. Ejemplo: 54911XXXXXXXX.</p>
                             <?php if (($formErrors['whatsapp'] ?? null) !== null) : ?><span class="mt-1 block text-xs text-rose-500"><?= htmlspecialchars((string) $formErrors['whatsapp'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
                         </div>
                     </div>
@@ -278,6 +279,20 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                                     Pin en el mapa (Se mueve automáticamente al escribir)
                                 </label>
                                 <div id="register-address-map" x-ref="mapContainer" class="h-48 md:h-64 rounded-2xl border-2 border-gray-200 overflow-hidden shadow-inner z-0"></div>
+                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                    <button type="button" @click="confirmCoordinates()" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700">Confirmar ubicación exacta</button>
+                                    <span class="text-xs text-gray-500" x-text="coordinatesConfirmed ? 'Ubicación confirmada.' : 'Arrastra el pin y confirma para guardar lat/lon.'"></span>
+                                </div>
+                                <template x-if="geocodeSuggestions.length > 1">
+                                    <div class="mt-3 rounded-xl border border-gray-200 bg-white p-3">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2">Encontramos varias ubicaciones. Elegí la correcta:</p>
+                                        <div class="space-y-2 max-h-40 overflow-y-auto">
+                                            <template x-for="(option, index) in geocodeSuggestions" :key="option.place_id">
+                                                <button type="button" @click="selectSuggestion(index)" class="w-full rounded-lg border border-gray-100 px-2 py-1.5 text-left text-xs text-gray-700 hover:border-red-200 hover:bg-red-50" x-text="option.display_name"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                                 <input x-model="lat" form="register-form" type="hidden" name="address_lat">
                                 <input x-model="lon" form="register-form" type="hidden" name="address_lon">
                             </div>
@@ -367,6 +382,8 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
             lon: Number(config.lon).toFixed(6),
             map: null,
             marker: null,
+            geocodeSuggestions: [],
+            coordinatesConfirmed: <?= (($old['address_lat'] ?? '') !== '' && ($old['address_lon'] ?? '') !== '') ? 'true' : 'false' ?>,
             provinceOptions: Array.isArray(config.locationCatalog?.provinces) ? config.locationCatalog.provinces : ['Buenos Aires'],
             neighborhoodsByMunicipality: (config.locationCatalog && typeof config.locationCatalog.municipalities === 'object') ? config.locationCatalog.municipalities : {'Tres de Febrero': ['Ciudadela']},
             municipalityOptions: [],
@@ -433,24 +450,52 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                 const query = `${street} ${street_number}, ${city}, ${municipality}, ${province}, Argentina`;
                 
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                    const endpoint = new URL('https://nominatim.openstreetmap.org/search');
+                    endpoint.searchParams.set('format', 'jsonv2');
+                    endpoint.searchParams.set('q', query);
+                    endpoint.searchParams.set('countrycodes', 'ar');
+                    endpoint.searchParams.set('limit', '5');
+                    endpoint.searchParams.set('addressdetails', '1');
+                    endpoint.searchParams.set('accept-language', 'es');
+                    const response = await fetch(endpoint.toString());
                     const data = await response.json();
 
                     if (data && data.length > 0) {
-                        const newLat = parseFloat(data[0].lat);
-                        const newLon = parseFloat(data[0].lon);
-                        
-                        this.lat = newLat.toFixed(6);
-                        this.lon = newLon.toFixed(6);
+                        const prioritized = [...data].sort((left, right) => {
+                            const leftAddress = left.address || {};
+                            const rightAddress = right.address || {};
+                            const leftScore = Number(Boolean(leftAddress.city || leftAddress.municipality || leftAddress.state));
+                            const rightScore = Number(Boolean(rightAddress.city || rightAddress.municipality || rightAddress.state));
 
-                        if (this.map && this.marker) {
-                            this.marker.setLatLng([newLat, newLon]);
-                            this.map.flyTo([newLat, newLon], 16);
-                        }
+                            return rightScore - leftScore;
+                        });
+
+                        this.geocodeSuggestions = prioritized;
+                        this.selectSuggestion(0);
                     }
                 } catch (error) {
                     console.error("Error al geocodificar:", error);
                 }
+            },
+            selectSuggestion(index) {
+                const option = this.geocodeSuggestions[index];
+                if (!option) {
+                    return;
+                }
+
+                const newLat = parseFloat(option.lat);
+                const newLon = parseFloat(option.lon);
+                this.lat = newLat.toFixed(6);
+                this.lon = newLon.toFixed(6);
+                this.coordinatesConfirmed = false;
+
+                if (this.map && this.marker) {
+                    this.marker.setLatLng([newLat, newLon]);
+                    this.map.flyTo([newLat, newLon], 16);
+                }
+            },
+            confirmCoordinates() {
+                this.coordinatesConfirmed = true;
             },
             initMap() {
                 if (!window.L) return;
@@ -482,12 +527,14 @@ $defaultLon = is_numeric($old['address_lon'] ?? null) ? (float) $old['address_lo
                     const position = this.marker.getLatLng();
                     this.lat = Number(position.lat).toFixed(6);
                     this.lon = Number(position.lng).toFixed(6);
+                    this.coordinatesConfirmed = false;
                 });
 
                 this.map.on('click', (event) => {
                     this.marker.setLatLng(event.latlng);
                     this.lat = Number(event.latlng.lat).toFixed(6);
                     this.lon = Number(event.latlng.lng).toFixed(6);
+                    this.coordinatesConfirmed = false;
                 });
 
                 setTimeout(() => this.map.invalidateSize(), 200);

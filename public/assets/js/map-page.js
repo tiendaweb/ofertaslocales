@@ -16,6 +16,8 @@
     const clearSearchButton = document.getElementById('map-clear-search');
     const locationFeedback = document.getElementById('map-location-feedback');
     const mapOffersList = document.getElementById('map-offers-list');
+    const mobileSheet = document.getElementById('map-mobile-sheet');
+    const mobileOffersToggle = document.getElementById('mobile-offers-toggle');
     const offerTriggers = Array.from(document.querySelectorAll('[data-map-offer-trigger]'));
     const escapeHtml = (value) => String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -98,6 +100,7 @@
 
     const defaultCoordinates = pageData.defaultCenter || [-34.636, -58.536];
     const map = window.L.map(mapContainer).setView(defaultCoordinates, 13);
+    map.getContainer().setAttribute('tabindex', '-1');
     const redMarkerIcon = window.L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -131,6 +134,26 @@
     let isLocatingUser = false;
     const markersByOfferId = new Map();
     const bounds = [];
+    let mobileSheetState = 'collapsed';
+
+    const setMobileSheetState = (nextState) => {
+        if (!mobileSheet) {
+            return;
+        }
+
+        mobileSheetState = nextState === 'expanded' ? 'expanded' : 'collapsed';
+        mobileSheet.classList.toggle('map-mobile-sheet--expanded', mobileSheetState === 'expanded');
+        mobileSheet.classList.toggle('map-mobile-sheet--collapsed', mobileSheetState === 'collapsed');
+        mobileSheet.setAttribute('aria-expanded', mobileSheetState === 'expanded' ? 'true' : 'false');
+
+        if (mobileOffersToggle) {
+            mobileOffersToggle.setAttribute('aria-expanded', mobileSheetState === 'expanded' ? 'true' : 'false');
+        }
+
+        if (mobileSheetState === 'collapsed') {
+            map.getContainer().focus({ preventScroll: true });
+        }
+    };
 
     const focusOfferOnMap = (offerId, openDetails = true) => {
         const markerEntry = markersByOfferId.get(Number(offerId));
@@ -181,10 +204,14 @@
         modalOffer.textContent = offer.title;
         modalCategory.textContent = offer.category;
         modalDescription.textContent = offer.description;
-        modalLocation.textContent = offer.location;
+        const extraAddress = [
+            offer.between_streets ? `Entre calles: ${offer.between_streets}` : '',
+            offer.postal_code ? `CP ${offer.postal_code}` : '',
+        ].filter(Boolean).join(' · ');
+        modalLocation.textContent = extraAddress ? `${offer.location} · ${extraAddress}` : offer.location;
         modalExpiration.textContent = offer.expires_label;
         refreshModalCountdown();
-        modalWhatsapp.href = `https://wa.me/${offer.whatsapp}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasLocales. Sigue disponible?`)}`;
+        modalWhatsapp.href = `${offer.whatsapp_url}?text=${encodeURIComponent(`Hola! Vi su oferta de '${offer.title}' en el mapa de OfertasLocales. Sigue disponible?`)}`;
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
 
@@ -427,6 +454,9 @@
         trigger.addEventListener('click', () => {
             const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
             focusOfferOnMap(offerId, true);
+            if (window.innerWidth < 768) {
+                setMobileSheetState('collapsed');
+            }
         });
         trigger.addEventListener('mouseenter', () => {
             const offerId = Number(trigger.getAttribute('data-map-offer-trigger'));
@@ -542,12 +572,24 @@
 
     refreshSidebarCountdowns();
     updateActionStates();
+    setMobileSheetState(window.innerWidth >= 768 ? 'expanded' : 'collapsed');
     map.invalidateSize();
     window.setTimeout(() => map.invalidateSize(), 200);
     if (selectedOfferId > 0) {
         window.setTimeout(() => focusOfferOnMap(selectedOfferId, true), 260);
     }
     window.addEventListener('resize', () => map.invalidateSize());
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            setMobileSheetState('expanded');
+        } else if (mobileSheetState !== 'collapsed') {
+            setMobileSheetState('collapsed');
+        }
+    });
+
+    mobileOffersToggle?.addEventListener('click', () => {
+        setMobileSheetState(mobileSheetState === 'expanded' ? 'collapsed' : 'expanded');
+    });
 
     window.setInterval(refreshAllCountdowns, 1000);
 })();

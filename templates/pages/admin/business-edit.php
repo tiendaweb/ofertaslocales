@@ -32,7 +32,8 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
         </label>
         <label class="block md:col-span-2">
             <span class="block text-sm text-gray-700 mb-2">WhatsApp</span>
-            <input name="whatsapp" required type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20">
+            <input name="whatsapp" required type="text" value="<?= htmlspecialchars((string) ($old['whatsapp'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="54911XXXXXXXX" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition-all focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-600/20">
+            <p class="mt-1 text-[11px] text-gray-500">Solo dígitos en formato internacional. Ejemplo: 54911XXXXXXXX.</p>
             <?php if (($formErrors['whatsapp'] ?? null) !== null) : ?><span class="mt-2 block text-sm text-rose-600"><?= htmlspecialchars((string) $formErrors['whatsapp'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
         </label>
 
@@ -63,6 +64,10 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
         <div class="md:col-span-2">
             <p class="block text-sm text-gray-700 mb-2">Ubicación exacta en el mapa (arrastra el marcador)</p>
             <div id="business-address-map" class="h-72 rounded-2xl border border-gray-200 overflow-hidden"></div>
+            <div class="mt-2 flex items-center gap-2">
+                <button type="button" id="business-confirm-location" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700">Confirmar ubicación exacta</button>
+                <span id="business-location-confirmed" class="text-xs text-gray-500">Arrastra el pin y confirma para guardar lat/lon.</span>
+            </div>
             <input id="business-address-lat" type="hidden" name="address_lat" value="<?= htmlspecialchars((string) ($old['address_lat'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
             <input id="business-address-lon" type="hidden" name="address_lon" value="<?= htmlspecialchars((string) ($old['address_lon'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
             <p class="mt-2 text-xs text-gray-500">Latitud: <span id="business-address-lat-text"><?= htmlspecialchars((string) ($old['address_lat'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span> · Longitud: <span id="business-address-lon-text"><?= htmlspecialchars((string) ($old['address_lon'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span></p>
@@ -91,12 +96,15 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
         const lonText = document.getElementById('business-address-lon-text');
         const municipalitySelect = document.getElementById('business-municipality-select');
         const citySelect = document.getElementById('business-city-select');
+        const confirmLocationButton = document.getElementById('business-confirm-location');
+        const confirmLocationText = document.getElementById('business-location-confirmed');
         const neighborhoodsByMunicipality = <?= json_encode($municipalities, JSON_UNESCAPED_UNICODE) ?>;
 
         if (!mapElement || !latInput || !lonInput || !latText || !lonText) {
             return;
         }
         const addressLineInput = document.getElementById('business-address-line');
+        let locationConfirmed = false;
         const streetHiddenInput = document.getElementById('business-street-hidden');
         const streetNumberHiddenInput = document.getElementById('business-street-number-hidden');
         const syncAddressFields = () => {
@@ -158,6 +166,9 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
             lonInput.value = formattedLon;
             latText.textContent = formattedLat;
             lonText.textContent = formattedLon;
+            if (confirmLocationText && !locationConfirmed) {
+                confirmLocationText.textContent = 'Arrastra el pin y confirma para guardar lat/lon.';
+            }
         };
 
         syncCoordinateFields(centerLat, centerLon);
@@ -165,11 +176,72 @@ $municipalities = is_array($locationCatalog['municipalities'] ?? null) ? $locati
         marker.on('dragend', () => {
             const position = marker.getLatLng();
             syncCoordinateFields(position.lat, position.lng);
+            locationConfirmed = false;
         });
 
         map.on('click', (event) => {
             marker.setLatLng(event.latlng);
             syncCoordinateFields(event.latlng.lat, event.latlng.lng);
+            locationConfirmed = false;
+        });
+
+        const geocodeAddress = async () => {
+            if (!addressLineInput || !municipalitySelect || !citySelect) {
+                return;
+            }
+
+            const query = `${addressLineInput.value}, ${citySelect.value}, ${municipalitySelect.value}, Argentina`;
+            const endpoint = new URL('https://nominatim.openstreetmap.org/search');
+            endpoint.searchParams.set('format', 'jsonv2');
+            endpoint.searchParams.set('q', query);
+            endpoint.searchParams.set('countrycodes', 'ar');
+            endpoint.searchParams.set('limit', '5');
+            endpoint.searchParams.set('addressdetails', '1');
+            endpoint.searchParams.set('accept-language', 'es');
+
+            const response = await fetch(endpoint.toString());
+            const results = await response.json();
+            if (!Array.isArray(results) || results.length === 0) {
+                return;
+            }
+
+            const prioritized = [...results].sort((left, right) => {
+                const leftAddress = left.address || {};
+                const rightAddress = right.address || {};
+                const leftScore = Number(Boolean(leftAddress.city || leftAddress.municipality || leftAddress.state));
+                const rightScore = Number(Boolean(rightAddress.city || rightAddress.municipality || rightAddress.state));
+
+                return rightScore - leftScore;
+            });
+
+            const first = prioritized[0];
+            const lat = Number.parseFloat(first.lat);
+            const lon = Number.parseFloat(first.lon);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+                return;
+            }
+
+            marker.setLatLng([lat, lon]);
+            map.flyTo([lat, lon], 16);
+            syncCoordinateFields(lat, lon);
+            locationConfirmed = false;
+        };
+
+        addressLineInput?.addEventListener('blur', () => {
+            void geocodeAddress();
+        });
+        municipalitySelect?.addEventListener('change', () => {
+            void geocodeAddress();
+        });
+        citySelect?.addEventListener('change', () => {
+            void geocodeAddress();
+        });
+
+        confirmLocationButton?.addEventListener('click', () => {
+            locationConfirmed = true;
+            if (confirmLocationText) {
+                confirmLocationText.textContent = 'Ubicación confirmada.';
+            }
         });
 
         window.setTimeout(() => map.invalidateSize(), 180);
