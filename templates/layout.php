@@ -62,6 +62,9 @@ $assetNonce = base64_encode(random_bytes(16));
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/assets/css/transitions.css">
     <?php if (in_array(($currentRoute ?? ''), ['admin', 'panel'], true)) : ?>
+        <link rel="stylesheet" href="/assets/css/admin-dashboard.css">
+    <?php endif; ?>
+    <?php if (in_array(($currentRoute ?? ''), ['admin', 'panel'], true)) : ?>
         <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js"></script>
     <?php endif; ?>
     <?php if (in_array(($currentRoute ?? ''), ['inicio', 'mapa', 'registro', 'panel'], true)) : ?>

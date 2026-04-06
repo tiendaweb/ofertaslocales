@@ -46,79 +46,103 @@ $businessLat = $businessProfile['address_lat'] ?? null;
 $businessLon = $businessProfile['address_lon'] ?? null;
 ?>
 
-<section class="max-w-7xl mx-auto space-y-8 text-black">
-    <?php if (($currentUser['role'] ?? null) === 'business' && isset($currentUser['id'])) : ?>
-        <article class="rounded-3xl border border-red-100 bg-white p-4 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+<section class="max-w-7xl mx-auto space-y-6 text-black pb-28">
+    <!-- Header moderno con gradiente -->
+    <div class="sticky top-0 z-10 -mx-4 px-4 py-6 backdrop-blur-xl bg-gradient-to-r from-red-50/95 to-white/95 border-b border-red-100/50">
+        <div class="max-w-7xl mx-auto">
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-red-500">Perfil público</p>
-                    <p class="text-sm text-gray-600">Gestiona tus ofertas y revisa cómo ve tu negocio la audiencia.</p>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white">
+                            <i data-lucide="layout-grid" class="h-5 w-5"></i>
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-red-600">Mi Negocio</p>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-gray-900">Panel de Control</h1>
+                    <p class="mt-1 text-sm text-gray-600">Crea, edita y gestiona tus ofertas</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/30">
+                <div class="flex flex-col gap-2 md:flex-row">
+                    <a href="/negocios/<?= (int) $currentUser['id'] ?>" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-white px-4 py-3 text-sm font-bold text-red-700 transition hover:shadow-md hover:border-red-300">
                         <i data-lucide="store" class="h-4 w-4"></i>
-                        Mi Negocio
+                        Ver Público
                     </a>
-                    <a href="/panel/negocio/editar" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gray-500/20">
+                    <a href="/panel/negocio/editar" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-3 text-sm font-bold text-white transition hover:shadow-lg hover:from-gray-800 hover:to-gray-700">
                         <i data-lucide="pencil" class="h-4 w-4"></i>
-                        Editar Negocio
+                        Editar Perfil
                     </a>
                 </div>
             </div>
-        </article>
-    <?php endif; ?>
-    
-    <article class="rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 md:p-8">
-        <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        </div>
+    </div>
+
+    <!-- KPI Cards mejoradas -->
+    <div class="grid gap-4 md:grid-cols-3">
+        <div class="group rounded-3xl border border-emerald-100/50 bg-gradient-to-br from-white to-emerald-50/30 p-6 transition hover:shadow-lg hover:border-emerald-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Ofertas Activas</p>
+                    <p class="text-4xl font-black text-emerald-700"><?= $kpis['active'] ?></p>
+                    <p class="text-xs text-emerald-600 mt-2">visibles en la plataforma</p>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 group-hover:scale-110 transition">
+                    <i data-lucide="check-circle-2" class="h-7 w-7"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="group rounded-3xl border border-amber-100/50 bg-gradient-to-br from-white to-amber-50/30 p-6 transition hover:shadow-lg hover:border-amber-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Pendientes de Aprobación</p>
+                    <p class="text-4xl font-black text-amber-700"><?= $kpis['pending'] ?></p>
+                    <p class="text-xs text-amber-600 mt-2">esperando revisión</p>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600 group-hover:scale-110 transition">
+                    <i data-lucide="clock-2" class="h-7 w-7"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="group rounded-3xl border border-slate-100/50 bg-gradient-to-br from-white to-slate-50/30 p-6 transition hover:shadow-lg hover:border-slate-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-600 mb-1">Ofertas Vencidas</p>
+                    <p class="text-4xl font-black text-slate-700"><?= $kpis['expired'] ?></p>
+                    <p class="text-xs text-slate-600 mt-2">sin disponibilidad</p>
+                </div>
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 text-slate-600 group-hover:scale-110 transition">
+                    <i data-lucide="calendar-x" class="h-7 w-7"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total ofertas badge -->
+    <div class="rounded-2xl border border-red-100/50 bg-gradient-to-r from-red-50/50 to-rose-50/50 px-6 py-4 flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-600 text-white">
+            <i data-lucide="layers" class="h-5 w-5"></i>
+        </div>
+        <div>
+            <p class="text-sm font-bold text-gray-900">Total de ofertas registradas</p>
+            <p class="text-xs text-gray-600 mt-0.5"><?= count($offers) ?> ofertas en tu historial</p>
+        </div>
+    </div>
+
+    <article class="rounded-3xl border border-red-100/50 bg-gradient-to-br from-white to-red-50/30 p-6 md:p-8 shadow-lg hover:shadow-xl transition">
+        <div class="mb-8 flex items-start justify-between">
             <div>
-                <p class="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-500">
-                    <i data-lucide="bar-chart-2" class="h-4 w-4"></i> Mi panel
-                </p>
-                <h2 class="text-3xl font-extrabold tracking-tight text-black">Resumen de ofertas</h2>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white">
+                        <i data-lucide="plus-circle" class="h-5 w-5"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-red-600">Nueva Publicación</p>
+                </div>
+                <h2 class="text-3xl font-extrabold tracking-tight text-black">Crear Oferta</h2>
+                <p class="mt-2 text-sm text-gray-600">Publica una nueva oferta en 5 pasos simples</p>
             </div>
-            <span class="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-bold text-red-600">
-                <i data-lucide="layers" class="h-4 w-4"></i> <?= count($offers) ?> registradas
-            </span>
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-3">
-            <div class="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 transition hover:shadow-md">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <i data-lucide="check-circle" class="h-6 w-6"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Activas</p>
-                    <p class="text-3xl font-black text-black"><?= $kpis['active'] ?></p>
-                </div>
+            <div class="hidden md:flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-100 to-rose-100 text-red-600">
+                <i data-lucide="zap" class="h-8 w-8"></i>
             </div>
-            <div class="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 transition hover:shadow-md">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-600">
-                    <i data-lucide="clock" class="h-6 w-6"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Pendientes</p>
-                    <p class="text-3xl font-black text-black"><?= $kpis['pending'] ?></p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 transition hover:shadow-md">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                    <i data-lucide="archive-x" class="h-6 w-6"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500">Vencidas</p>
-                    <p class="text-3xl font-black text-black"><?= $kpis['expired'] ?></p>
-                </div>
-            </div>
-        </div>
-    </article>
-
-    <article class="rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 md:p-8">
-        <div class="mb-8">
-            <p class="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-500">
-                <i data-lucide="plus-square" class="h-4 w-4"></i> Publicar
-            </p>
-            <h2 class="text-3xl font-extrabold tracking-tight text-black">Crear nueva oferta</h2>
-            <p class="mt-2 text-sm text-gray-500">Carga una oferta rápidamente usando la dirección registrada en tu negocio.</p>
         </div>
 
         <?php if ($formErrors !== []) : ?>
@@ -236,12 +260,21 @@ $businessLon = $businessProfile['address_lon'] ?? null;
         </form>
     </article>
 
-    <article class="rounded-3xl bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 md:p-8">
-        <div class="mb-6">
-            <p class="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-red-500">
-                <i data-lucide="settings-2" class="h-4 w-4"></i> Gestión
-            </p>
-            <h3 class="text-3xl font-extrabold tracking-tight text-black">Lista de ofertas</h3>
+    <article class="rounded-3xl border border-gray-100/50 bg-gradient-to-br from-white to-gray-50/30 p-6 md:p-8 shadow-lg hover:shadow-xl transition">
+        <div class="mb-8 flex items-start justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+                        <i data-lucide="list" class="h-5 w-5"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-600">Gestor de Ofertas</p>
+                </div>
+                <h3 class="text-3xl font-extrabold tracking-tight text-black">Mis Publicaciones</h3>
+                <p class="mt-2 text-sm text-gray-600">Visualiza, edita o elimina tus ofertas activas</p>
+            </div>
+            <div class="hidden md:flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 text-gray-600">
+                <i data-lucide="book-open" class="h-8 w-8"></i>
+            </div>
         </div>
 
         <div class="space-y-4">

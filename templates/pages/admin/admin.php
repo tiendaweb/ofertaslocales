@@ -3,51 +3,63 @@
 declare(strict_types=1);
 ?>
 <?php $activeTab = in_array(($activeTab ?? 'moderacion'), ['moderacion', 'textos', 'logo', 'aplicacion', 'categorias', 'seo', 'usuarios', 'ajustes'], true) ? $activeTab : 'moderacion'; ?>
-<section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-5 pb-28">
-    <div class="rounded-[2.2rem] border border-red-100 bg-white/95 p-4 shadow-[0_24px_80px_rgba(239,68,68,0.12)] md:p-6">
-        <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-[0.3em] text-red-500">Panel administrador</p>
-                <h2 class="mt-2 text-3xl font-black text-gray-900">Control de OfertasLocales</h2>
-                <p class="mt-1 text-sm text-gray-600">Todo tu flujo de revisión y configuración en una sola vista.</p>
-            </div>
-            <div class="grid grid-cols-2 gap-2 md:w-auto">
-                <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-red-500">Pendientes</p>
-                    <p class="text-2xl font-black text-red-700"><?= (int) $pendingOffers ?></p>
+<section x-data="{ tab: '<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>' }" class="space-y-6 pb-28">
+    <!-- Header moderno -->
+    <div class="sticky top-0 z-10 backdrop-blur-xl bg-gradient-to-r from-red-50/95 to-white/95 border-b border-red-100/50 px-0">
+        <div class="rounded-b-3xl border-b border-red-100 bg-gradient-to-br from-white via-red-50/50 to-white p-6 md:p-8 shadow-lg shadow-red-500/5">
+            <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white">
+                            <i data-lucide="shield-check" class="h-5 w-5"></i>
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-[0.3em] text-red-600">Panel de Control</p>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black bg-gradient-to-r from-red-600 to-rose-700 bg-clip-text text-transparent">OfertasLocales</h1>
+                    <p class="mt-2 text-sm text-gray-600">Administra ofertas, configuración y usuarios desde aquí</p>
                 </div>
-                <div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Negocios</p>
-                    <p class="text-2xl font-black text-gray-800"><?= (int) $businessCount ?></p>
+                <div class="grid grid-cols-2 gap-3 md:w-auto">
+                    <div class="group rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 transition hover:shadow-lg">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-600">Activos</p>
+                        <p class="text-3xl font-black text-emerald-700 mt-1"><?= (int) $businessCount ?></p>
+                        <p class="text-xs text-emerald-600 mt-1">Negocios</p>
+                    </div>
+                    <div class="group rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-4 transition hover:shadow-lg">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-orange-600">Pendientes</p>
+                        <p class="text-3xl font-black text-orange-700 mt-1"><?= (int) $pendingOffers ?></p>
+                        <p class="text-xs text-orange-600 mt-1">por revisar</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-8">
-            <?php foreach ([
-                'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check'],
-                'textos' => ['label' => 'Textos', 'icon' => 'type'],
-                'logo' => ['label' => 'Logo', 'icon' => 'image'],
-                'aplicacion' => ['label' => 'Aplicación', 'icon' => 'smartphone'],
-                'categorias' => ['label' => 'Categorías', 'icon' => 'tags'],
-                'seo' => ['label' => 'SEO', 'icon' => 'search'],
-                'usuarios' => ['label' => 'Usuarios', 'icon' => 'users'],
-                'ajustes' => ['label' => 'Ajustes', 'icon' => 'settings'],
-            ] as $tabKey => $tabItem) : ?>
-                <button
-                    type="button"
-                    @click="tab = '<?= $tabKey ?>'"
-                    :class="tab === '<?= $tabKey ?>' ? 'border-red-500 bg-red-600 text-white shadow-lg shadow-red-500/20' : 'border-red-100 bg-white text-gray-600 hover:border-red-300 hover:text-red-600'"
-                    class="flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold transition"
-                >
-                    <i data-lucide="<?= htmlspecialchars($tabItem['icon'], ENT_QUOTES, 'UTF-8') ?>" class="h-4 w-4"></i>
-                    <span><?= htmlspecialchars($tabItem['label'], ENT_QUOTES, 'UTF-8') ?></span>
-                </button>
-            <?php endforeach; ?>
+            <!-- Tabs mejorados -->
+            <div class="mt-6 grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-8">
+                <?php foreach ([
+                    'moderacion' => ['label' => 'Moderación', 'icon' => 'shield-check', 'color' => 'red'],
+                    'textos' => ['label' => 'Textos', 'icon' => 'type', 'color' => 'blue'],
+                    'logo' => ['label' => 'Logo', 'icon' => 'image', 'color' => 'purple'],
+                    'aplicacion' => ['label' => 'App', 'icon' => 'smartphone', 'color' => 'cyan'],
+                    'categorias' => ['label' => 'Categorías', 'icon' => 'tags', 'color' => 'green'],
+                    'seo' => ['label' => 'SEO', 'icon' => 'search', 'color' => 'yellow'],
+                    'usuarios' => ['label' => 'Usuarios', 'icon' => 'users', 'color' => 'pink'],
+                    'ajustes' => ['label' => 'Ajustes', 'icon' => 'settings', 'color' => 'slate'],
+                ] as $tabKey => $tabItem) : ?>
+                    <button
+                        type="button"
+                        @click="tab = '<?= $tabKey ?>'"
+                        :class="tab === '<?= $tabKey ?>' ? 'ring-2 ring-offset-2 ring-red-600 scale-105' : 'hover:scale-102'"
+                        class="group relative flex flex-col items-center gap-1.5 rounded-2xl border px-2.5 py-3 transition-all duration-200"
+                        :class="tab === '<?= $tabKey ?>' ? 'border-red-600 bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-500/30' : 'border-red-100 bg-white text-gray-700 hover:border-red-300'"
+                    >
+                        <i data-lucide="<?= htmlspecialchars($tabItem['icon'], ENT_QUOTES, 'UTF-8') ?>" class="h-4 w-4"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-widest"><?= htmlspecialchars($tabItem['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </button>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 
-    <div x-show="tab === 'moderacion'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+    <div x-show="tab === 'moderacion'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
         <div class="rounded-[2rem] border border-red-100 bg-white p-6 shadow-sm">
             <h3 class="mb-5 text-xl font-black text-gray-900">Ofertas para revisar</h3>
             <div class="grid gap-4">
