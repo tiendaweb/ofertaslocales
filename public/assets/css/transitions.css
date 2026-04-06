@@ -1,0 +1,220 @@
+/* ========================================
+   Transitions System - Fade + Slide Effects
+   ======================================== */
+
+/* Page transition container */
+main {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fade + Slide In (page entry) */
+@keyframes fadeSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade + Slide Out (page exit) */
+@keyframes fadeSlideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+/* Fade + Slide Left (section change) */
+@keyframes fadeSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale + Fade (modal/dialog entry) */
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scale + Fade (modal/dialog exit) */
+@keyframes fadeScaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Pure fade (tab changes, overlays) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   Transition Classes
+   ======================================== */
+
+/* Page entry animation */
+body.page-transition main {
+  animation: fadeSlideInRight 0.35s cubic-bezier(0.32, 0.72, 0.3, 1) forwards;
+}
+
+/* Page exit animation (when leaving) */
+body.page-exit main {
+  animation: fadeSlideOutLeft 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Navigation transition */
+.nav-transition {
+  animation: fadeSlideInLeft 0.3s cubic-bezier(0.32, 0.72, 0.3, 1) forwards;
+}
+
+/* Modal/Dialog transitions */
+[role="dialog"],
+.modal,
+[data-modal] {
+  animation: fadeScaleIn 0.25s cubic-bezier(0.32, 0.72, 0.3, 1) forwards;
+}
+
+[role="dialog"].modal-exit,
+.modal.modal-exit,
+[data-modal].modal-exit {
+  animation: fadeScaleOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Tab content transitions */
+[role="tabpanel"],
+.tab-content {
+  animation: fadeIn 0.2s ease-in-out forwards;
+}
+
+.tab-content.hidden {
+  animation: fadeOut 0.15s ease-in-out forwards;
+}
+
+/* Card list staggered animation */
+.card-list-item {
+  animation: fadeSlideInRight 0.4s cubic-bezier(0.32, 0.72, 0.3, 1) forwards;
+}
+
+.card-list-item:nth-child(1) { animation-delay: 0.05s; }
+.card-list-item:nth-child(2) { animation-delay: 0.1s; }
+.card-list-item:nth-child(3) { animation-delay: 0.15s; }
+.card-list-item:nth-child(4) { animation-delay: 0.2s; }
+.card-list-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent transition on load */
+* {
+  transition-duration: 0s;
+}
+
+body.transitions-enabled * {
+  transition-duration: inherit;
+}
+
+/* Performance optimization: use will-change sparingly */
+.page-transition-root {
+  will-change: opacity, transform;
+}
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ========================================
+   Responsive Transitions
+   ======================================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   Utility Classes for Manual Transitions
+   ======================================== */
+
+.transition-fade {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.transition-slide {
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0.3, 1);
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0.3, 1);
+}
+
+.transition-colors {
+  transition: background-color, color, border-color 0.2s ease-in-out;
+}
+
+/* ========================================
+   Stagger Animation
+   ======================================== */
+
+.stagger-children > * {
+  animation: fadeSlideInRight 0.4s cubic-bezier(0.32, 0.72, 0.3, 1) backwards;
+}
+
+.stagger-children > :nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > :nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > :nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > :nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > :nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > :nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > :nth-child(n+7) { animation-delay: 0.35s; }

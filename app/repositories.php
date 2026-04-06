@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Domain\Business\BusinessDirectoryRepository;
+use App\Domain\BusinessTemplate\BusinessTemplateRepository;
 use App\Domain\Category\CategoryRepository;
+use App\Domain\LegalPage\LegalPageRepository;
 use App\Domain\Offer\OfferRepository;
 use App\Domain\Offer\PublicOfferRepository;
 use App\Domain\Site\SeoRepository;
@@ -11,7 +13,9 @@ use App\Domain\Site\SettingsRepository;
 use App\Domain\User\AccountRepository;
 use App\Domain\User\UserRepository;
 use App\Infrastructure\Persistence\Business\SqliteBusinessDirectoryRepository;
+use App\Infrastructure\Persistence\BusinessTemplate\SqliteBusinessTemplateRepository;
 use App\Infrastructure\Persistence\Category\SqliteCategoryRepository;
+use App\Infrastructure\Persistence\LegalPage\SqliteLegalPageRepository;
 use App\Infrastructure\Persistence\Offer\SqliteOfferRepository;
 use App\Infrastructure\Persistence\Offer\SqlitePublicOfferRepository;
 use App\Infrastructure\Persistence\Site\SqliteSeoRepository;
@@ -25,10 +29,12 @@ return function (ContainerBuilder $containerBuilder) {
         OfferRepository::class => \DI\autowire(SqliteOfferRepository::class),
         PublicOfferRepository::class => \DI\autowire(SqlitePublicOfferRepository::class),
         BusinessDirectoryRepository::class => \DI\autowire(SqliteBusinessDirectoryRepository::class),
+        BusinessTemplateRepository::class => \DI\autowire(SqliteBusinessTemplateRepository::class),
         CategoryRepository::class => \DI\autowire(SqliteCategoryRepository::class),
         SettingsRepository::class => \DI\autowire(SqliteSettingsRepository::class),
         SeoRepository::class => \DI\autowire(SqliteSeoRepository::class),
         AccountRepository::class => \DI\autowire(SqliteAccountRepository::class),
         UserRepository::class => \DI\autowire(InMemoryUserRepository::class),
+        LegalPageRepository::class => \DI\autowire(SqliteLegalPageRepository::class),
     ]);
 };
