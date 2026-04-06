@@ -24,7 +24,7 @@ $currentUser = $currentUser ?? null;
                 <p>© <?= htmlspecialchars((string) $currentYear, ENT_QUOTES, 'UTF-8') ?> Ofertas Locales | Generador de clientes locales</p>
                 <p class="mt-1" data-editable-key="footer_tagline" data-editable-type="text"><?= htmlspecialchars((string) ($labels['footer_tagline'] ?? 'Hecho con ❤️ para potenciar negocios de barrio.'), ENT_QUOTES, 'UTF-8') ?></p>
             </div>
-            <div class="flex gap-4 text-sm">
+            <div class="flex gap-4 text-sm flex-wrap justify-center md:justify-end">
                 <a href="<?= htmlspecialchars((string) ($labels['footer_link_publish_url'] ?? '/register'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_publish_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Publicar</a>
                 <?php if ($currentUser === null) : ?>
                     <a href="<?= htmlspecialchars((string) ($labels['footer_link_login_url'] ?? '/login'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_login_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Ingresar</a>
@@ -32,6 +32,10 @@ $currentUser = $currentUser ?? null;
                     <a href="<?= (($currentUser['role'] ?? '') === 'admin') ? '/admin' : '/panel' ?>" class="hover:text-white transition">Mi panel</a>
                 <?php endif; ?>
                 <a href="<?= htmlspecialchars((string) ($labels['footer_link_map_url'] ?? '/mapa'), ENT_QUOTES, 'UTF-8') ?>" data-editable-key="footer_link_map_url" data-editable-attr="href" data-editable-type="url" class="hover:text-white transition">Mapa</a>
+                <span class="text-gray-600">|</span>
+                <a href="/terms" class="hover:text-white transition">Términos</a>
+                <a href="/privacy" class="hover:text-white transition">Privacidad</a>
+                <a href="/cookies" class="hover:text-white transition">Cookies</a>
             </div>
         </div>
     </footer>

@@ -60,6 +60,10 @@ $assetNonce = base64_encode(random_bytes(16));
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/assets/css/transitions.css">
+    <?php if (in_array(($currentRoute ?? ''), ['admin', 'panel'], true)) : ?>
+        <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js"></script>
+    <?php endif; ?>
     <?php if (in_array(($currentRoute ?? ''), ['inicio', 'mapa', 'registro', 'panel'], true)) : ?>
         <link
             rel="stylesheet"
@@ -150,6 +154,7 @@ $assetNonce = base64_encode(random_bytes(16));
                 endpoint: '/admin/inline-content',
             };
         </script>
+        <script src="/assets/js/transitions.js"></script>
         <script src="/assets/js/public-pages/catalog.js"></script>
         <script src="/assets/js/public-pages/map-preview.js"></script>
         <script src="/assets/js/public-pages/inline.js"></script>
@@ -159,6 +164,7 @@ $assetNonce = base64_encode(random_bytes(16));
 
     <?php if (($currentRoute ?? '') === 'mapa') : ?>
         <script src="/assets/js/map-page.js"></script>
+        <script src="/assets/js/map-layers.js"></script>
     <?php endif; ?>
 
     <script nonce="<?= htmlspecialchars($assetNonce, ENT_QUOTES, 'UTF-8') ?>">

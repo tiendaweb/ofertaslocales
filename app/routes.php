@@ -39,6 +39,8 @@ use App\Application\Actions\Public\BusinessDetailAction;
 use App\Application\Actions\Public\HomeAction;
 use App\Application\Actions\Public\MapAction;
 use App\Application\Actions\Public\OffersAction;
+use App\Application\Actions\Public\ViewLegalPageAction;
+use App\Application\Actions\Admin\UpdateLegalPageAction;
 use App\Application\Actions\User\ListUsersAction;
 use App\Application\Actions\User\ViewUserAction;
 use App\Application\Middleware\Auth\RequireAdminMiddleware;
@@ -60,6 +62,7 @@ return function (App $app) {
     $app->get('/negocios', BusinessesAction::class)->setName('negocios');
     $app->get('/negocios/{id:[0-9]+}', BusinessDetailAction::class)->setName('negocios.detalle');
     $app->get('/mapa', MapAction::class)->setName('mapa');
+    $app->get('/{pageKey:terms|privacy|cookies}', ViewLegalPageAction::class)->setName('legal.page');
     $app->get('/login', LoginPageAction::class)->setName('login');
     $app->post('/login', LoginSubmitAction::class);
     $app->get('/register', RegisterPageAction::class)->setName('registro');
@@ -95,6 +98,7 @@ return function (App $app) {
         $group->post('/settings', UpdateSettingsAction::class)->setName('admin.settings');
         $group->post('/seo/{page_name}', UpdateSeoAction::class)->setName('admin.seo');
         $group->post('/inline-content', UpdateInlineContentAction::class)->setName('admin.inline-content');
+        $group->post('/legal-pages/{page_key}', UpdateLegalPageAction::class)->setName('admin.legal-pages.update');
         $group->group('/users', function (Group $usersGroup) {
             $usersGroup->get('', ListAdminUsersAction::class)->setName('admin.users.index');
             $usersGroup->post('', CreateAdminUserAction::class)->setName('admin.users.create');

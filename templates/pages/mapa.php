@@ -15,7 +15,7 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
     </header>
 
     <main class="flex-1 relative overflow-hidden p-0 md:p-4">
-        <div class="h-full grid gap-0 md:gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
+        <div class="h-full grid gap-0 md:gap-4 md:grid-cols-[1fr_1.2fr] lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
             <article class="relative bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
                 <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 bg-white/90 backdrop-blur-md relative z-30">
                     <div class="grid gap-2 md:grid-cols-[1fr_auto]">
@@ -26,7 +26,7 @@ $coverageLabel = $coverageLabel ?? 'Tu zona';
                             placeholder="Buscar ubicación (ej: Palermo, CABA)"
                             class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-300"
                         >
-                        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
                             <button
                                 type="button"
                                 id="map-location-search-button"

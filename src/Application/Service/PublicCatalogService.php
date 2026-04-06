@@ -25,6 +25,7 @@ class PublicCatalogService
         $categories = $this->extractCategories($offers);
         $businesses = $this->buildBusinesses($offers);
         $mapOffers = $this->buildMapOffers($offers);
+        $mapBusinesses = $this->buildMapBusinesses($businesses);
 
         $visibleOffers = $selectedBusinessId === null
             ? $offers
@@ -43,6 +44,7 @@ class PublicCatalogService
             'categories' => $categories,
             'businesses' => $businesses,
             'mapOffers' => $mapOffers,
+            'mapBusinesses' => $mapBusinesses,
             'selectedBusiness' => $selectedBusiness,
             'selectedBusinessId' => $selectedBusinessId,
             'defaultCenter' => $this->resolveDefaultCenter($mapOffers),
@@ -213,6 +215,37 @@ class PublicCatalogService
         }
 
         return [(float) $mapOffers[0]['lat'], (float) $mapOffers[0]['lon']];
+    }
+
+    private function buildMapBusinesses(array $businesses): array
+    {
+        return array_values(array_filter(
+            array_map(function (array $business): ?array {
+                // Only include businesses with valid coordinates from first offer location
+                if (!$business['active_offers']) {
+                    return null;
+                }
+
+                // Get first publication as reference for coordinates
+                $firstPublication = $business['active_publications'][0] ?? null;
+
+                return [
+                    'id' => $business['id'],
+                    'name' => $business['business_name'],
+                    'category' => $business['category'],
+                    'location' => $business['location'],
+                    'logo_url' => $business['logo_url'],
+                    'offers_count' => $business['active_offers'],
+                    'whatsapp' => $business['whatsapp'],
+                    'whatsapp_url' => $business['whatsapp_url'],
+                    'bio' => $business['bio'],
+                    'instagram_url' => $business['instagram_url'],
+                    'facebook_url' => $business['facebook_url'],
+                    'tiktok_url' => $business['tiktok_url'],
+                    'website_url' => $business['website_url'],
+                ];
+            }, $businesses)
+        ));
     }
 
     private function resolveBadge(string $category, DateTimeImmutable $expiresAt): string

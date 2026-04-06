@@ -103,8 +103,8 @@ $homePrimaryCtaLabel = ($currentUser ?? null) !== null ? 'Ir a mi panel' : 'Regi
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-                <div class="p-5 md:p-6 grid gap-6 md:grid-cols-[220px,1fr]">
-                    <div class="rounded-2xl overflow-hidden bg-gray-100 h-44 md:h-full">
+                <div class="p-4 sm:p-5 md:p-6 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-1 md:grid-cols-[220px,1fr]">
+                    <div class="rounded-2xl overflow-hidden bg-gray-100 h-40 sm:h-44 md:h-full md:min-h-[220px]">
                         <img id="home-map-modal-image" src="" alt="Oferta seleccionada" class="w-full h-full object-cover">
                     </div>
                     <div>
@@ -114,14 +114,16 @@ $homePrimaryCtaLabel = ($currentUser ?? null) !== null ? 'Ir a mi panel' : 'Regi
                             <i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i>
                             <span></span>
                         </p>
-                        <div class="flex flex-wrap gap-3">
-                            <a id="home-map-modal-whatsapp" href="#" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm">
+                        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                            <a id="home-map-modal-whatsapp" href="#" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors shadow-sm text-sm sm:text-base flex-1 sm:flex-none">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                Pedir por WhatsApp
+                                <span class="hidden sm:inline">Pedir por WhatsApp</span>
+                                <span class="sm:hidden">WhatsApp</span>
                             </a>
-                            <a href="/mapa" class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm">
+                            <a href="/mapa" class="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors shadow-sm text-sm sm:text-base flex-1 sm:flex-none">
                                 <i data-lucide="map" class="w-4 h-4"></i>
-                                Ir al mapa completo
+                                <span class="hidden sm:inline">Ir al mapa completo</span>
+                                <span class="sm:hidden">Ver mapa</span>
                             </a>
                         </div>
                     </div>

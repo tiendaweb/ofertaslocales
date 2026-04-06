@@ -27,6 +27,7 @@ class MapAction extends PageAction
     {
         $catalog = $this->publicCatalogService->buildCatalog();
         $mapOffers = $catalog['mapOffers'];
+        $mapBusinesses = $catalog['mapBusinesses'] ?? [];
         $queryParams = $request->getQueryParams();
         $selectedOfferId = isset($queryParams['oferta']) && ctype_digit((string) $queryParams['oferta'])
             ? (int) $queryParams['oferta']
@@ -63,11 +64,14 @@ class MapAction extends PageAction
             'currentRoute' => 'mapa',
             'labels' => $labels,
             'mapOffers' => $mapOffers,
+            'mapBusinesses' => $mapBusinesses,
             'coverageLabel' => count($mapOffers) > 0 ? 'Zona activa' : 'Sin datos',
             'pageData' => [
                 'mapOffers' => $mapOffers,
+                'mapBusinesses' => $mapBusinesses,
                 'defaultCenter' => $catalog['defaultCenter'],
                 'selectedOfferId' => $selectedOfferId,
+                'layers' => ['offers', 'businesses'],
             ],
         ]);
     }
